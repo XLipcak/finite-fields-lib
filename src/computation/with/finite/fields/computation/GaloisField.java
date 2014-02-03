@@ -25,13 +25,13 @@ public class GaloisField implements GaloisFieldArithmetic{
     private short fieldSize;
     
     public GaloisField(){
-        reducingPolynomial = 115;
+        reducingPolynomial = 41;
         fieldSize = countFieldSize();
     }
 
     @Override
     public long add(long element1, long element2) {
-        //prvky sem musia patrit, potom...
+        isInField(element1, element2);
         return element1 ^ element2;
     }
 
@@ -42,6 +42,8 @@ public class GaloisField implements GaloisFieldArithmetic{
 
     @Override
     public long multiply(long element1, long element2) {
+        isInField(element1, element2);
+        
         long result = 0;
         long carry;
         
@@ -64,16 +66,36 @@ public class GaloisField implements GaloisFieldArithmetic{
 
     @Override
     public long divide(long element1, long element2) {
+        isInField(element1, element2);
         return (multiply(element1, invert(element2)));
     }
 
     @Override
     public long invert(long element) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        isInField(element);
+        
+        long x = binaryPowers[fieldSize] - 2L;
+        long result = element;
+        int counter = 0;
+        while(x != 1){
+            
+            if((x % 2) == 0){
+                x /= 2;
+                result = multiply(result, result);
+            }
+            else{
+                x -= 1;
+                result = multiply(result, element);
+            }
+        }
+        
+        return result;
     }
+    
 
     @Override
     public long power(long element, long exponent) {
+        isInField(element);
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -83,6 +105,7 @@ public class GaloisField implements GaloisFieldArithmetic{
 
     public void setReducingPolynomial(long reducingPolynomial) {
         this.reducingPolynomial = reducingPolynomial;
+        fieldSize = countFieldSize();
     }
 
     public short getFieldSize(){
@@ -100,6 +123,24 @@ public class GaloisField implements GaloisFieldArithmetic{
         }
         
         return result;
+    }
+    
+    private void isInField(long element){
+        
+        if(element >= binaryPowers[fieldSize]){
+            throw new IllegalArgumentException("Values for this reducing polynomial must be in [0, " + 
+                    (binaryPowers[fieldSize] - 1) + "].");
+        }
+        
+    }
+    
+    private void isInField(long element1, long element2){
+        
+        if((element1 >= binaryPowers[fieldSize]) || (element2 >= binaryPowers[fieldSize])){
+            throw new IllegalArgumentException("Values for this reducing polynomial must be in [0, " + 
+                    (binaryPowers[fieldSize] - 1) + "].");
+        }
+        
     }
     
 }

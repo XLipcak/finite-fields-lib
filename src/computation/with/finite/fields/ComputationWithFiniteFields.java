@@ -16,8 +16,13 @@ public class ComputationWithFiniteFields {
      */
     public static void main(String[] args) {
         GaloisField gf = new GaloisField();
-        long result = gf.add(2, 9);
+        //long addResult = gf.subtract(47,64);
+        long result = gf.multiply(15,22);
         
+      //  long inverse = gf.invert(44);
+        
+        
+       // System.out.println(gf.getFieldSize());
         System.out.println(result);
     }
 }
