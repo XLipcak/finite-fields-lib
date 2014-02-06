@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package computation.with.finite.fields.interfaces;
+package computation.with.finite.fields.library.interfaces;
 
 /**
  *
@@ -15,4 +15,5 @@ public interface GaloisFieldArithmetic {
     long divide(long element1, long element2);
     long invert(long element);
     long power(long element, long exponent);
+    int compare(long element1, long element2);
 }
