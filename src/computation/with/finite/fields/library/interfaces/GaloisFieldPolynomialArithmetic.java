@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  *
- * @author Jakub
+ * @author Jakub Lipcak, Masaryk University
  */
 public interface GaloisFieldPolynomialArithmetic {
     

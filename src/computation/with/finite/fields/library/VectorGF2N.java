@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  *
- * @author Jakub
+ * @author Jakub Lipcak, Masaryk University
  */
 public class VectorGF2N implements GaloisFieldVectorArithmetic{
 

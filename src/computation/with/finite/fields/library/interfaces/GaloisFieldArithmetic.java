@@ -6,7 +6,7 @@ package computation.with.finite.fields.library.interfaces;
 
 /**
  *
- * @author Jakub
+ * @author Jakub Lipcak, Masaryk University
  */
 public interface GaloisFieldArithmetic {
     long add(long element1, long element2);

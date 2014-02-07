@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  *
- * @author Jakub
+ * @author Jakub Lipcak, Masaryk University
  */
 public interface GaloisFieldMatrixArithmetic {
     List<List<Long>> add(List<List<Long>> matrix1, List<List<Long>> matrix2);

@@ -8,11 +8,11 @@ import computation.with.finite.fields.library.interfaces.GaloisFieldArithmetic;
 
 /**
  *
- * @author Jakub
+ * @author Jakub Lipcak, Masaryk University
  */
 public class GF2N implements GaloisFieldArithmetic {
 
-    private static final long[] binaryPowers = {1L, 2L, 4L, 8L, 16L, 32L, 64L, 128L, 256L, 512L, 1024L, 2048L,
+    private static final long[] BINARY_POWERS = {1L, 2L, 4L, 8L, 16L, 32L, 64L, 128L, 256L, 512L, 1024L, 2048L,
         4096L, 8192L, 16384L, 32768L, 65536L, 131072L, 262144L, 524288L, 1048576L, 2097152L, 4194304L, 8388608L,
         16777216L, 33554432L, 67108864L, 134217728L, 268435456L, 536870912L, 1073741824L, 2147483648L,
         4294967296L, 8589934592L, 17179869184L, 34359738368L, 68719476736L, 137438953472L, 274877906944L,
@@ -21,6 +21,7 @@ public class GF2N implements GaloisFieldArithmetic {
         2251799813685248L, 4503599627370496L, 9007199254740992L, 18014398509481984L, 36028797018963968L,
         72057594037927936L, 144115188075855872L, 288230376151711744L, 576460752303423488L, 1152921504606846976L,
         2305843009213693952L, 4611686018427387904L, 9223372036854775807L};
+    
     private long reducingPolynomial;
     private short fieldSize;
 
@@ -53,11 +54,11 @@ public class GF2N implements GaloisFieldArithmetic {
 
             for (int x = 0; x < actualElement2Size; x++) {
                 actualResult <<= 1;
-                if (actualResult > (binaryPowers[fieldSize] - 1)) {
+                if (actualResult > (BINARY_POWERS[fieldSize] - 1)) {
                     actualResult ^= reducingPolynomial;
                 }
             }
-            element2Actual ^= binaryPowers[countBinarySize(element2Actual)];
+            element2Actual ^= BINARY_POWERS[countBinarySize(element2Actual)];
             result ^= actualResult;
         }
 
@@ -71,7 +72,7 @@ public class GF2N implements GaloisFieldArithmetic {
 
     @Override
     public long invert(long element) {
-        return power(element, binaryPowers[fieldSize] - 2);
+        return power(element, BINARY_POWERS[fieldSize] - 2);
     }
 
     @Override
@@ -125,17 +126,17 @@ public class GF2N implements GaloisFieldArithmetic {
 
     private void isInField(long element) {
 
-        if (element >= binaryPowers[fieldSize]) {
+        if (element >= BINARY_POWERS[fieldSize]) {
             throw new IllegalArgumentException("Values for this reducing polynomial must be in [0, "
-                    + (binaryPowers[fieldSize] - 1) + "].");
+                    + (BINARY_POWERS[fieldSize] - 1) + "].");
         }
     }
 
     private void isInField(long element1, long element2) {
 
-        if ((element1 >= binaryPowers[fieldSize]) || (element2 >= binaryPowers[fieldSize])) {
+        if ((element1 >= BINARY_POWERS[fieldSize]) || (element2 >= BINARY_POWERS[fieldSize])) {
             throw new IllegalArgumentException("Values for this reducing polynomial must be in [0, "
-                    + (binaryPowers[fieldSize] - 1) + "].");
+                    + (BINARY_POWERS[fieldSize] - 1) + "].");
         }
     }
 }
