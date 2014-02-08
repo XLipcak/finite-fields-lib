@@ -19,6 +19,8 @@ public interface GaloisFieldPolynomialArithmetic {
     ArrayList<Long> subtract(List<Long> polynomial1, List<Long> polynomial2);
     ArrayList<Long> multiply(List<Long> polynomial1, List<Long> polynomial2);
     ArrayList<Long> divide(List<Long> polynomial1, List<Long> polynomial2);
+    ArrayList<Long> divide(List<Long> polynomial1, List<Long> polynomial2, List<Long> remainder);
+    
     //result = a^{-1} % f
     ArrayList<Long> invert(List<Long> polynomial, List<Long> moduloPolynomial);
     ArrayList<Long> power(List<Long> polynomial, long exponent);

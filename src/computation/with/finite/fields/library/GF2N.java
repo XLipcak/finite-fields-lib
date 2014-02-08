@@ -38,6 +38,7 @@ public class GF2N implements GaloisFieldArithmetic {
 
     @Override
     public long subtract(long element1, long element2) {
+        isInField(element1, element2);
         return add(element1, element2);
     }
 
@@ -67,14 +68,26 @@ public class GF2N implements GaloisFieldArithmetic {
 
     @Override
     public long divide(long element1, long element2) {
+        isInField(element1, element2);
+        if (element2 == 0){
+            throw new IllegalArgumentException("Division by zero.");
+        }
         return (multiply(element1, invert(element2)));
     }
 
     @Override
     public long invert(long element) {
+        isInField(element);
+        if(fieldSize == 1){
+            if(element == 1){
+                return 1;
+            }
+            throw new IllegalArgumentException("Cannot compute inversion of zero!");
+        }
         return power(element, BINARY_POWERS[fieldSize] - 2);
     }
 
+    //Square-and-multiply to compute power
     @Override
     public long power(long element, long exponent) {
         isInField(element);
