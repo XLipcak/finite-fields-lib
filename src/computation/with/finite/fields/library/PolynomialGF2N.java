@@ -145,7 +145,24 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
 
     @Override
     public ArrayList<Long> invert(List<Long> polynomial, List<Long> moduloPolynomial) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        isValid(polynomial, polynomial);
+
+        if ((polynomial.size() >= moduloPolynomial.size()) || (moduloPolynomial.size() == 1)) {
+            throw new IllegalArgumentException("Cannot compute inverse for this args.");
+        }
+
+        ArrayList<Long> gcd;
+        ArrayList<Long> result = new ArrayList<>();
+        ArrayList<Long> temp = new ArrayList<>();
+
+        gcd = xgcd(moduloPolynomial, polynomial, temp, result);
+
+        if (gcd.size() != 1) {
+            throw new IllegalArgumentException("Cannot compute inverse for this args.");
+        }
+
+        return result;
     }
 
     @Override
@@ -173,11 +190,12 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         ArrayList<Long> numerator = new ArrayList<>();
         ArrayList<Long> denumerator = new ArrayList<>();
 
-
+        //prepare division
         numerator.addAll(polynomial1);
         denumerator.addAll(polynomial2);
         remainder.addAll(polynomial2);
 
+        //find greatest greatest common divisor, last positive remainder
         while (!((remainder.size() == 1) && (remainder.get(0) == 0))) {
             result = remainder;
             remainder = new ArrayList<>();
@@ -185,6 +203,79 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             numerator = denumerator;
             denumerator = remainder;
         }
+
+        return result;
+
+    }
+
+    // result = gcd(polynomial1, polynomial2) = a*polynomial1 + b*polynomial2
+    public ArrayList<Long> xgcd(List<Long> polynomial1, List<Long> polynomial2, List<Long> a, List<Long> b) {
+
+        isValid(polynomial1, polynomial2);
+
+        ArrayList<Long> result = new ArrayList<>();
+        ArrayList<Long> remainder = new ArrayList<>();
+        ArrayList<Long> numerator = new ArrayList<>();
+        ArrayList<Long> denumerator = new ArrayList<>();
+
+
+        ArrayList<Long> temp = new ArrayList<>();
+        ArrayList<ArrayList<Long>> resultList = new ArrayList<>();
+        ArrayList<ArrayList<Long>> bezoutIdentity = new ArrayList<>();
+
+        //prepare division
+        numerator.addAll(polynomial1);
+        denumerator.addAll(polynomial2);
+        remainder.addAll(polynomial2);
+
+        //find greatest greatest common divisor, last positive remainder
+        while (!((remainder.size() == 1) && (remainder.get(0) == 0))) {
+            result = remainder;
+            remainder = new ArrayList<>();
+            temp = divide(numerator, denumerator, remainder);
+
+            //resultList is used to find Bezout's Identity
+            resultList.add(numerator);
+            resultList.add(denumerator);
+            resultList.add(temp);
+
+            numerator = denumerator;
+            denumerator = remainder;
+        }
+
+
+
+        resultList.remove(resultList.size() - 1);
+        resultList.remove(resultList.size() - 1);
+        resultList.remove(resultList.size() - 1);
+
+        temp.clear();
+        temp.add(1l);
+        bezoutIdentity.add(temp);
+        bezoutIdentity.add(resultList.get(resultList.size() - 3));
+        bezoutIdentity.add(resultList.get(resultList.size() - 2));
+        bezoutIdentity.add(resultList.get(resultList.size() - 1));
+
+
+        //find Bezout's identity from resultList data counted in Euclidean algorithm
+        while (resultList.size() != 3) {
+            resultList.remove(resultList.size() - 1);
+            resultList.remove(resultList.size() - 1);
+            resultList.remove(resultList.size() - 1);
+
+            temp = bezoutIdentity.get(0);
+            bezoutIdentity.set(0, bezoutIdentity.get(3));
+            bezoutIdentity.set(1, resultList.get(resultList.size() - 3));
+            bezoutIdentity.set(2, resultList.get(resultList.size() - 2));
+            bezoutIdentity.set(3, add(temp, multiply(bezoutIdentity.get(3), resultList.get(resultList.size() - 1))));
+        }
+        
+        System.out.println("Test:  " + add(multiply(bezoutIdentity.get(0), bezoutIdentity.get(1)),
+                multiply(bezoutIdentity.get(2), bezoutIdentity.get(3))));
+        
+        //save Bezout's coefficients and return gcd
+        a.addAll(bezoutIdentity.get(0));
+        b.addAll(bezoutIdentity.get(3));
 
         return result;
 
