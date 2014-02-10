@@ -24,7 +24,7 @@ public class ComputationWithFiniteFields {
          long difference1 = lEndTime - lStartTime;*/
         long a = 9;
         long b = 64;
-        GF2N gf = new GF2N(11);//32771...4194307l
+        GF2N gf = new GF2N(32771);//32771...4194307l
         PolynomialGF2N poly = new PolynomialGF2N(gf);
         Random rn = new Random();
         
@@ -36,11 +36,11 @@ public class ComputationWithFiniteFields {
         ArrayList<Long> gcd = new ArrayList<>();
         ArrayList<Long> result = new ArrayList<>();
         
-        for (int n = 0; n < 9; n++) {
-            polynomial1.add((long) (rn.nextInt(8)));
+        for (int n = 0; n < 421; n++) {
+            polynomial1.add((long) (rn.nextInt(30000)));
         }
-        for (int n = 0; n < 3; n++) {
-            polynomial2.add((long) (rn.nextInt(8)));
+        for (int n = 0; n < 123; n++) {
+            polynomial2.add((long) (rn.nextInt(30000)));
         }
 
 

@@ -82,6 +82,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         return result;
     }
 
+    
     @Override
     public ArrayList<Long> divide(List<Long> polynomial1, List<Long> polynomial2) {
         isValid(polynomial1, polynomial2);
@@ -89,6 +90,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         return divide(polynomial1, polynomial2, remainder);
     }
 
+    //polynomial1/polynomial2 = result + remainder
     @Override
     public ArrayList<Long> divide(List<Long> polynomial1, List<Long> polynomial2, List<Long> remainder) {
 
@@ -143,9 +145,10 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         return result;
     }
 
+    
     @Override
     public ArrayList<Long> invert(List<Long> polynomial, List<Long> moduloPolynomial) {
-        
+
         isValid(polynomial, polynomial);
 
         if ((polynomial.size() >= moduloPolynomial.size()) || (moduloPolynomial.size() == 1)) {
@@ -209,6 +212,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
     }
 
     // result = gcd(polynomial1, polynomial2) = a*polynomial1 + b*polynomial2
+    @Override
     public ArrayList<Long> xgcd(List<Long> polynomial1, List<Long> polynomial2, List<Long> a, List<Long> b) {
 
         isValid(polynomial1, polynomial2);
@@ -269,10 +273,11 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             bezoutIdentity.set(2, resultList.get(resultList.size() - 2));
             bezoutIdentity.set(3, add(temp, multiply(bezoutIdentity.get(3), resultList.get(resultList.size() - 1))));
         }
-        
+
+        //test control output to be deleted...
         System.out.println("Test:  " + add(multiply(bezoutIdentity.get(0), bezoutIdentity.get(1)),
                 multiply(bezoutIdentity.get(2), bezoutIdentity.get(3))));
-        
+
         //save Bezout's coefficients and return gcd
         a.addAll(bezoutIdentity.get(0));
         b.addAll(bezoutIdentity.get(3));

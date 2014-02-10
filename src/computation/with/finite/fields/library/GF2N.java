@@ -39,7 +39,7 @@ public class GF2N implements GaloisFieldArithmetic {
     @Override
     public long subtract(long element1, long element2) {
         isInField(element1, element2);
-        return add(element1, element2);
+        return element1 ^ element2;
     }
 
     @Override
@@ -139,7 +139,7 @@ public class GF2N implements GaloisFieldArithmetic {
 
     private void isInField(long element) {
 
-        if (element >= BINARY_POWERS[fieldSize]) {
+        if ( (element >= BINARY_POWERS[fieldSize]) || (element < 0) ) {
             throw new IllegalArgumentException("Values for this reducing polynomial must be in [0, "
                     + (BINARY_POWERS[fieldSize] - 1) + "].");
         }
@@ -147,7 +147,7 @@ public class GF2N implements GaloisFieldArithmetic {
 
     private void isInField(long element1, long element2) {
 
-        if ((element1 >= BINARY_POWERS[fieldSize]) || (element2 >= BINARY_POWERS[fieldSize])) {
+        if ((element1 >= BINARY_POWERS[fieldSize]) || (element2 >= BINARY_POWERS[fieldSize]) || (element1 < 0) || (element2 < 0)) {
             throw new IllegalArgumentException("Values for this reducing polynomial must be in [0, "
                     + (BINARY_POWERS[fieldSize] - 1) + "].");
         }
