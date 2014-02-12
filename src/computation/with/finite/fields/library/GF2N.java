@@ -78,12 +78,17 @@ public class GF2N implements GaloisFieldArithmetic {
     @Override
     public long invert(long element) {
         isInField(element);
+        
+        if(element == 0){
+            throw new IllegalArgumentException("Cannot compute inversion of zero!");
+        }
+        
         if(fieldSize == 1){
             if(element == 1){
                 return 1;
             }
-            throw new IllegalArgumentException("Cannot compute inversion of zero!");
         }
+        
         return power(element, BINARY_POWERS[fieldSize] - 2);
     }
 
@@ -91,6 +96,15 @@ public class GF2N implements GaloisFieldArithmetic {
     @Override
     public long power(long element, long exponent) {
         isInField(element);
+        
+        //overit este tie 2 podmienky ci je to good pristup
+        if(exponent < 0){
+            throw new IllegalArgumentException("Cannot compute power with negative exponent!");
+        }
+        
+        if(exponent == 0){
+            return 1l;
+        }
 
         long result = 1;
         long a = element;
