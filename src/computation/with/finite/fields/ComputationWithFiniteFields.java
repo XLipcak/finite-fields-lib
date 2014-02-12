@@ -6,6 +6,7 @@ package computation.with.finite.fields;
 
 import computation.with.finite.fields.library.GF2N;
 import computation.with.finite.fields.library.PolynomialGF2N;
+import computation.with.finite.fields.library.VectorGF2N;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -24,23 +25,23 @@ public class ComputationWithFiniteFields {
          long difference1 = lEndTime - lStartTime;*/
         long a = 9;
         long b = 64;
-        GF2N gf = new GF2N(32771);//32771...4194307l
+        GF2N gf = new GF2N(11l);//32771...4194307l
         PolynomialGF2N poly = new PolynomialGF2N(gf);
         Random rn = new Random();
-        
+
         ArrayList<Long> polynomial1 = new ArrayList<>();
         ArrayList<Long> polynomial2 = new ArrayList<>();
         ArrayList<Long> remainder = new ArrayList<>();
-        
+
         ArrayList<Long> inverse = new ArrayList<>();
         ArrayList<Long> gcd = new ArrayList<>();
         ArrayList<Long> result = new ArrayList<>();
-        
+
         for (int n = 0; n < 421; n++) {
-            polynomial1.add((long) (rn.nextInt(30000)));
+            polynomial1.add((long) (rn.nextInt(8)));
         }
         for (int n = 0; n < 123; n++) {
-            polynomial2.add((long) (rn.nextInt(30000)));
+            polynomial2.add((long) (rn.nextInt(8)));
         }
 
 
@@ -54,20 +55,37 @@ public class ComputationWithFiniteFields {
         System.out.println("Remainder: " + remainder);
         System.out.println("Gcd: " + poly.gcd(polynomial1, polynomial2));
         System.out.println("Poly2 / Gcd1 " + poly.divide(polynomial2, poly.gcd(polynomial1, polynomial2), remainder) + " + " + remainder);
-        
-        
+
+
         gcd = poly.gcd(polynomial1, polynomial2);
         inverse = poly.invert(polynomial2, polynomial1);
         inverse = poly.divide(inverse, gcd);
-        
-        result = poly.divide(poly.multiply(inverse, polynomial2),  polynomial1);
 
-        
+        result = poly.divide(poly.multiply(inverse, polynomial2), polynomial1);
+
+
         System.out.println("Inverse of poly2 % poly1" + inverse);
-        System.out.println("poly2*inverse / poly1: " + poly.divide(poly.multiply(inverse, polynomial2), 
+        System.out.println("poly2*inverse / poly1: " + poly.divide(poly.multiply(inverse, polynomial2),
                 polynomial1, remainder) + " + remainder: " + remainder);
         System.out.println("Result: " + result);
-       // poly.xgcd(polynomial2, polynomial1, gcd, gcd);
+        System.out.println("________________________");
+
+        VectorGF2N vect = new VectorGF2N(gf);
+        ArrayList<Long> vector1 = new ArrayList<>();
+        ArrayList<Long> vector2 = new ArrayList<>();
+
+        for (int n = 0; n < 9; n++) {
+            vector1.add((long) (rn.nextInt(8)));
+        }
+        for (int n = 0; n < 9; n++) {
+            vector2.add((long) (rn.nextInt(8)));
+        }
         
+        System.out.println("Vector1: " + vector1);
+        System.out.println("Vector2: " + vector2);
+        System.out.println("Vector1 + Vector2: " + vect.add(vector1, vector2));
+        System.out.println("Vector1 - Vector2: " + vect.subtract(vector1, vector2));
+        System.out.println("Vector1 * 3: " + vect.multiply(vector1, 3l));
+
     }
 }
