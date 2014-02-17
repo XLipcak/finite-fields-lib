@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package computation.with.finite.fields.library;
+package muni.fi.gf2n.classes;
 
-import computation.with.finite.fields.library.interfaces.GaloisFieldArithmetic;
+import muni.fi.gf2n.interfaces.GaloisFieldArithmetic;
 
 /**
  *
@@ -26,6 +26,11 @@ public class GF2N implements GaloisFieldArithmetic {
     private short fieldSize;
 
     public GF2N(long reducingPolynomial) {
+        
+        if(reducingPolynomial <= 0){
+            throw new IllegalArgumentException("Reducing polynomial must be represented by positive number.");
+        }
+        
         this.reducingPolynomial = reducingPolynomial;
         fieldSize = countBinarySize(reducingPolynomial);
     }
@@ -131,6 +136,11 @@ public class GF2N implements GaloisFieldArithmetic {
     }
 
     public void setReducingPolynomial(long reducingPolynomial) {
+        
+        if(reducingPolynomial <= 0){
+            throw new IllegalArgumentException("Reducing polynomial must be represented by positive number.");
+        }
+        
         this.reducingPolynomial = reducingPolynomial;
         fieldSize = countBinarySize(reducingPolynomial);
     }

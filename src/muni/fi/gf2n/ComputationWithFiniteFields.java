@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package computation.with.finite.fields;
+package muni.fi.gf2n;
 
-import computation.with.finite.fields.library.GF2N;
-import computation.with.finite.fields.library.PolynomialGF2N;
-import computation.with.finite.fields.library.VectorGF2N;
+import muni.fi.gf2n.classes.GF2N;
+import muni.fi.gf2n.classes.PolynomialGF2N;
+import muni.fi.gf2n.classes.VectorGF2N;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -86,6 +86,10 @@ public class ComputationWithFiniteFields {
         System.out.println("Vector1 + Vector2: " + vect.add(vector1, vector2));
         System.out.println("Vector1 - Vector2: " + vect.subtract(vector1, vector2));
         System.out.println("Vector1 * 3: " + vect.multiply(vector1, 3l));
+        
+       
+        GF2N gal = new GF2N(10197);
+        System.out.println(gal.multiply(53 , 47));
 
     }
 }

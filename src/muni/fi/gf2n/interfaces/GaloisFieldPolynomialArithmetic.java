@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package computation.with.finite.fields.library.interfaces;
+package muni.fi.gf2n.interfaces;
 
 import java.util.ArrayList;
 import java.util.List;

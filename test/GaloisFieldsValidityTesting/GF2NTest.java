@@ -4,7 +4,7 @@ package GaloisFieldsValidityTesting;
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-import computation.with.finite.fields.library.GF2N;
+import muni.fi.gf2n.classes.GF2N;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -34,7 +34,7 @@ public class GF2NTest {
         long value1 = 1234567;
         long value2 = gf.add(value1, 0l);
         assertEquals("x + 0 must be x", value1, value2);
-        
+
         value2 = gf.add(value1, value1);
         assertEquals("x + x must be 0", 0l, value2);
 
@@ -172,6 +172,9 @@ public class GF2NTest {
         //basic test
         long value = gf.invert(1l);
         assertEquals("1^(-1) must be 1", 1l, value);
+        
+        value = gf.invert(gf.invert(142536l));
+        assertEquals("(x^-1)^-1 must be x for positive x", 142536l, value);
 
         try {
             gf.invert(7654321l);
@@ -208,7 +211,7 @@ public class GF2NTest {
 
         value = gf.power(0l, 7777l);
         assertEquals("0 powered to anything must be 0", 0l, value);
-        
+
         value = gf.power(12345l, 0l);
         assertEquals("x^0 must be 1 for positive x", 1l, value);
 
@@ -238,5 +241,29 @@ public class GF2NTest {
 
         //TO BE DONE, computing with big GFs and with limit numbers for this fields
     }
+
+    @Test
+    public void testDivideAndMultiply() {
+        
+        long value1 = gf.multiply(112233l, 12345l);
+        long value2 = gf.divide(value1, 12345l);
+        assertEquals("(x * y) / y must be x", 112233l, value2);
+        
+        value1 = gf.divide(9541l, 67322l);
+        value2 = gf.multiply(value1, 67322l);
+        assertEquals("(x / y) * y must be x", 9541l, value2);
+        //test more values
+    }
+    
+    @Test
+    public void testMultiplyInverse() {
+        
+        long value1 = gf.invert(93425l);
+        long value2 = gf.multiply(93425l, value1);
+        assertEquals("x * x^-1 must be 1 for positive x", 1l, value2);
+        //test more values
+    }
+    
     //TO BE DONE, interaction testing of this methods, e.g. a*a^-1 = 1...
+
 }

@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package computation.with.finite.fields.library;
+package muni.fi.gf2n.classes;
 
-import computation.with.finite.fields.library.interfaces.GaloisFieldVectorArithmetic;
+import muni.fi.gf2n.interfaces.GaloisFieldVectorArithmetic;
 import java.util.ArrayList;
 import java.util.List;
 
