@@ -23,7 +23,7 @@ public interface GaloisFieldMatrixArithmetic {
     long[][] multiply(long[][] matrix, long scalarValue);
     
     //matrix*vector
-    long[][] multiplyByVector(long[][] matrix, List<Long> vector);
+    long[][] multiply(long[][] matrix, long[] vector);
     
     long[][] inverse(long[][] matrix);
     long[][] power(long[][] matrix, long exponent);
