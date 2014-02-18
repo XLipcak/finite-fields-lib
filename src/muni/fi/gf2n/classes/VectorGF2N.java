@@ -25,68 +25,59 @@ public class VectorGF2N implements GaloisFieldVectorArithmetic {
     }
 
     @Override
-    public ArrayList<Long> add(List<Long> vector1, List<Long> vector2) {
-
+    public long[] add(long[] vector1, long[] vector2) {
         isValid(vector1, vector2);
 
-        if (vector1.size() != vector2.size()) {
-            throw new IllegalArgumentException("Vectors must have the same length.");
-        }
+        long[] result = new long[vector1.length];
 
-        ArrayList<Long> result = new ArrayList<>();
-
-        for (int x = 0; x < vector1.size(); x++) {
-            long value = galoisField.add(vector1.get(x), vector2.get(x));
-            result.add(value);
+        for (int x = 0; x < vector1.length; x++) {
+            long value = galoisField.add(vector1[x], vector2[x]);
+            result[x] = value;
         }
 
         return result;
     }
 
     @Override
-    public ArrayList<Long> subtract(List<Long> vector1, List<Long> vector2) {
+    public long[] subtract(long[] vector1, long[] vector2) {
         isValid(vector1, vector2);
         return add(vector1, vector2);
     }
 
     @Override
-    public ArrayList<Long> multiply(List<Long> vector, long scalarValue) {
-
+    public long[] multiply(long[] vector, long scalarValue) {
         isValid(vector);
 
-        ArrayList<Long> result = new ArrayList<>();
+        long[] result = new long[vector.length];
 
-        for (int x = 0; x < vector.size(); x++) {
-            long value = galoisField.multiply(vector.get(x), scalarValue);
-            result.add(value);
+        for (int x = 0; x < vector.length; x++) {
+            long value = galoisField.multiply(vector[x], scalarValue);
+            result[x] = value;
         }
 
         return result;
     }
 
     @Override
-    public ArrayList<Long> transpose(List<Long> vector) {
+    public int compare(long[] vector1, long[] vector2) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Override
-    public int compare(List<Long> vector1, List<Long> vector2) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    private void isValid(long[] vect1, long[] vect2) {
 
-    private void isValid(List<Long> vect1, List<Long> vect2) {
-
-        if (vect1.isEmpty() || vect2.isEmpty()) {
+        if (vect1.length == 0 || vect2.length == 0) {
             throw new IllegalArgumentException("Vector argument is empty.");
         }
 
+        if (vect1.length != vect2.length) {
+            throw new IllegalArgumentException("Operation cannot be performed with vectors of different length.");
+        }
     }
 
-    private void isValid(List<Long> vect) {
+    private void isValid(long[] vect) {
 
-        if (vect.isEmpty()) {
+        if (vect.length == 0) {
             throw new IllegalArgumentException("Vector argument is empty.");
         }
-
     }
 }

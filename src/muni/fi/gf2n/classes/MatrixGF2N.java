@@ -25,131 +25,126 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     @Override
-    public ArrayList<ArrayList<Long>> add(List<List<Long>> matrix1, List<List<Long>> matrix2) {
+    public long[][] add(long[][] matrix1, long[][] matrix2) {
         isValid(matrix1, matrix2);
 
-        ArrayList<ArrayList<Long>> result = new ArrayList<>();
-        for (int row = 0; row < matrix1.size(); row++) {
+        long[][] result = new long[matrix1.length][matrix1[0].length];
+        for (int row = 0; row < matrix1.length; row++) {
 
-            ArrayList<Long> resultRow = new ArrayList<>();
-            for (int col = 0; col < matrix1.get(0).size(); col++) {
-                resultRow.add(galoisField.add(matrix1.get(row).get(col), matrix2.get(row).get(col)));
+            for (int col = 0; col < matrix1[0].length; col++) {
+                result[row][col] = galoisField.add(matrix1[row][col], matrix2[row][col]);
             }
-            result.add(resultRow);
         }
 
         return result;
     }
 
     @Override
-    public ArrayList<ArrayList<Long>> subtract(List<List<Long>> matrix1, List<List<Long>> matrix2) {
+    public long[][] subtract(long[][] matrix1, long[][] matrix2) {
         isValid(matrix1, matrix2);
         return add(matrix1, matrix2);
     }
 
     @Override
-    public ArrayList<ArrayList<Long>> transpose(List<List<Long>> matrix) {
+    public long[][] transpose(long[][] matrix) {
         isValid(matrix);
 
-        ArrayList<ArrayList<Long>> result = new ArrayList<>();
-        for (int col = 0; col < matrix.size(); col++) {
+        long[][] result = new long[matrix[0].length][matrix.length];
+        for (int col = 0; col < matrix.length; col++) {
 
-            ArrayList<Long> resultRow = new ArrayList<>();
-            for (int row = 0; row < matrix.get(0).size(); row++) {
-                resultRow.add(matrix.get(row).get(col));
+            for (int row = 0; row < matrix[0].length; row++) {
+                result[row][col] = matrix[col][row];
             }
-            result.add(resultRow);
         }
         return result;
     }
 
     @Override
-    public ArrayList<ArrayList<Long>> multiply(List<List<Long>> matrix1, List<List<Long>> matrix2) {
+    public long[][] multiply(long[][] matrix1, long[][] matrix2) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ArrayList<ArrayList<Long>> multiply(List<List<Long>> matrix, long scalarValue) {
+    public long[][] multiply(long[][] matrix, long scalarValue) {
         isValid(matrix);
 
-        ArrayList<ArrayList<Long>> result = new ArrayList<>();
-        for (int row = 0; row < matrix.size(); row++) {
+        long[][] result = new long[matrix.length][matrix[0].length];
+        for (int row = 0; row < matrix.length; row++) {
 
-            ArrayList<Long> resultRow = new ArrayList<>();
-            for (int col = 0; col < matrix.get(0).size(); col++) {
-                resultRow.add(galoisField.multiply(matrix.get(row).get(col), scalarValue));
+            for (int col = 0; col < matrix[0].length; col++) {
+                result[row][col] = galoisField.multiply(matrix[row][col], scalarValue);
             }
-            result.add(resultRow);
         }
 
         return result;
     }
 
     @Override
-    public ArrayList<ArrayList<Long>> multiplyByVector(List<List<Long>> matrix, List<Long> vector) {
+    public long[][] multiplyByVector(long[][] matrix, List<Long> vector) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ArrayList<ArrayList<Long>> inverse(List<List<Long>> matrix) {
+    public long[][] inverse(long[][] matrix) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ArrayList<ArrayList<Long>> power(List<List<Long>> matrix, long exponent) {
+    public long[][] power(long[][] matrix, long exponent) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public long determinant(List<List<Long>> matrix) {
+    public long determinant(long[][] matrix) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public long rank(List<List<Long>> matrix) {
+    public long rank(long[][] matrix) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ArrayList<ArrayList<Long>> gauss(List<List<Long>> matrix) {
+    public long[][] gauss(long[][] matrix) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ArrayList<Long> solveLinearEquationsSystem(List<List<Long>> equationMatrix, List<Long> results) {
+    public long[] solveLinearEquationsSystem(long[][] equationMatrix, long[] results) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ArrayList<Long> image(List<List<Long>> matrix) {
+    public long[] image(long[][] matrix) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public ArrayList<Long> kernel(List<List<Long>> matrix) {
+    public long[] kernel(long[][] matrix) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public int compare(List<List<Long>> matrix1, List<List<Long>> matrix2) {
+    public int compare(long[][] matrix1, long[][] matrix2) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private void isValid(List<List<Long>> matrix1, List<List<Long>> matrix2) {
+    private void isValid(long[][] matrix1, long[][] matrix2) {
 
-        if (matrix1.isEmpty() || matrix2.isEmpty()) {
+        if (matrix1.length == 0 || matrix2.length == 0) {
             throw new IllegalArgumentException("Matrix argument is empty.");
         }
 
         try {
-            int length = matrix1.get(0).size();
+            int length = matrix1[0].length;
             if (length == 0) {
                 throw new IllegalArgumentException("Argument matrix has empty row.");
             }
 
-            for (int position = 0; position < matrix1.size(); position++) {
-                if ((matrix1.get(position).size() != length) || (matrix2.get(position).size() != length)) {
-                    throw new IndexOutOfBoundsException("Thrown to be catched.");
+            for (int position = 0; position < matrix1.length; position++) {
+                if ((matrix1[position].length != length) || (matrix2[position].length != length)) {
+                    throw new IllegalArgumentException("Argument matrices have different dimensions or rows with "
+                            + "different lengths, operation cannot be performed.");
                 }
             }
 
@@ -161,19 +156,19 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     }
 
-    private void isValid(List<List<Long>> matrix) {
+    private void isValid(long[][] matrix) {
 
-        if (matrix.isEmpty()) {
+        if (matrix.length == 0) {
             throw new IllegalArgumentException("Matrix argument is empty.");
         }
 
-        int length = matrix.get(0).size();
+        int length = matrix[0].length;
         if (length == 0) {
             throw new IllegalArgumentException("Argument matrix has empty row.");
         }
 
-        for (int position = 1; position < matrix.size(); position++) {
-            if ((matrix.get(position).size() != length)) {
+        for (int position = 1; position < matrix.length; position++) {
+            if ((matrix[position].length != length)) {
                 throw new IllegalArgumentException("Argument matrices have different dimensions or rows with "
                         + "different lengths, operation cannot be performed.");
             }

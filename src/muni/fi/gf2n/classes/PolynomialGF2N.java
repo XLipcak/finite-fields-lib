@@ -6,6 +6,7 @@ package muni.fi.gf2n.classes;
 
 import muni.fi.gf2n.interfaces.GaloisFieldPolynomialArithmetic;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,237 +26,164 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
     }
 
     @Override
-    public ArrayList<Long> add(List<Long> polynomial1, List<Long> polynomial2) {
-
+    public long[] add(long[] polynomial1, long[] polynomial2) {
         isValid(polynomial1, polynomial2);
 
-        int length = Math.max(polynomial1.size(), polynomial2.size());
-        ArrayList<Long> result = new ArrayList<>();
+        int length = Math.max(polynomial1.length, polynomial2.length);
+        long[] result = new long[length];
 
         for (int x = 0; x < length; x++) {
             try {
-                long value = galoisField.add(polynomial1.get(x), polynomial2.get(x));
-                result.add(value);
+                long value = galoisField.add(polynomial1[x], polynomial2[x]);
+                result[x] = value;
             } catch (IndexOutOfBoundsException ex) {
-                if (x >= polynomial1.size()) {
-                    result.add(polynomial2.get(x));
+                if (x >= polynomial1.length) {
+                    result[x] = polynomial2[x];
                 } else {
-                    result.add(polynomial1.get(x));
+                    result[x] = polynomial1[x];
                 }
             }
         }
 
-        clearZeroValuesFromPolynomial(result);
-        return result;
+        return clearZeroValuesFromPolynomial(result);
     }
 
     @Override
-    public ArrayList<Long> subtract(List<Long> polynomial1, List<Long> polynomial2) {
+    public long[] subtract(long[] polynomial1, long[] polynomial2) {
         isValid(polynomial1, polynomial2);
         return add(polynomial1, polynomial2);
     }
 
     //Karatsuba would be faster
     @Override
-    public ArrayList<Long> multiply(List<Long> polynomial1, List<Long> polynomial2) {
-
+    public long[] multiply(long[] polynomial1, long[] polynomial2) {
         isValid(polynomial1, polynomial2);
 
-        ArrayList<Long> result = new ArrayList<>();
+        long[] result = new long[polynomial1.length + polynomial2.length - 1];
 
-        for (int x = 0; x < (polynomial1.size() + polynomial2.size() - 1); x++) {
-            result.add(0L);
-        }
-
-
-        for (int x = 0; x < polynomial2.size(); x++) {
-            for (int y = 0; y < polynomial1.size(); y++) {
-                if (polynomial1.get(y) != 0) {
+        for (int x = 0; x < polynomial2.length; x++) {
+            for (int y = 0; y < polynomial1.length; y++) {
+                if (polynomial1[y] != 0) {
                     int index = y + x;
-                    long multiplyResult = galoisField.multiply(polynomial1.get(y), polynomial2.get(x));
-                    long originalValue = result.get(index);
-                    result.set(index, galoisField.add(originalValue, multiplyResult));
+                    long multiplyResult = galoisField.multiply(polynomial1[y], polynomial2[x]);
+                    long originalValue = result[index];
+                    result[index] = galoisField.add(originalValue, multiplyResult);
                 }
             }
         }
 
-        return result;
+        return clearZeroValuesFromPolynomial(result);
     }
 
-    
     @Override
-    public ArrayList<Long> divide(List<Long> polynomial1, List<Long> polynomial2) {
+    public long[] divide(long[] polynomial1, long[] polynomial2) {
         isValid(polynomial1, polynomial2);
-        ArrayList<Long> remainder = new ArrayList<>();
+        long[] remainder = new long[Math.max(polynomial1.length, polynomial2.length)];
         return divide(polynomial1, polynomial2, remainder);
     }
 
-    //polynomial1/polynomial2 = result + remainder
+    //remainder length control?
     @Override
-    public ArrayList<Long> divide(List<Long> polynomial1, List<Long> polynomial2, List<Long> remainder) {
-
+    public long[] divide(long[] polynomial1, long[] polynomial2, long[] remainder) {
         isValid(polynomial1, polynomial2);
 
-        ArrayList<Long> result = new ArrayList<>();
-        ArrayList<Long> rem = new ArrayList<>();
-        ArrayList<Long> numerator = new ArrayList<>();
-        ArrayList<Long> mulResult;
+        long[] result;
+        long[] rem;
 
-        numerator.addAll(polynomial1);
-
-        //prepare result and remainder
-        for (int x = 0; x < (polynomial1.size() - polynomial2.size()) + 1; x++) {
-            result.add(0L);
-            rem.add(0L);
+        //prepare arrays of good length
+        if (polynomial1.length >= polynomial2.length) {
+            result = new long[polynomial1.length - polynomial2.length + 1];
+            rem = new long[polynomial1.length - polynomial2.length + 1];
+        } else {
+            result = new long[1];
+            rem = new long[polynomial1.length];
         }
 
-        while ((numerator.size() >= polynomial2.size())) {
+        long[] numerator = polynomial1;
+        long[] mulResult = new long[polynomial1.length];
+
+        while ((numerator.length >= polynomial2.length)) {
 
             //divide
-            long value = galoisField.divide(numerator.get(numerator.size() - 1), polynomial2.get(polynomial2.size() - 1));
-            result.set((numerator.size() - polynomial2.size()), value);
+            long value = galoisField.divide(numerator[numerator.length - 1], polynomial2[polynomial2.length - 1]);
+            result[numerator.length - polynomial2.length] = value;
 
             //subtract divided part from numerator
-            rem.set(numerator.size() - polynomial2.size(), value);
+            rem[numerator.length - polynomial2.length] = value;
             mulResult = multiply(polynomial2, rem);
             numerator = subtract(numerator, mulResult);
 
             //set remainder to correct length necessary for next divison
-            while ((numerator.size() - polynomial2.size() + 1) < rem.size()) {
-                if (rem.isEmpty()) {
+            while ((numerator.length - polynomial2.length + 1) < rem.length) {
+                if (rem.length == 0) {
                     break;
-                }
-                if (rem.size() > 0) {
-                    rem.remove(rem.size() - 1);
+                } else {
+                    long[] newRem = new long[rem.length - 1];
+                    System.arraycopy(rem, 0, newRem, 0, rem.length - 1);
+                    rem = newRem;
                 }
             }
         }
 
-        //set remainder
-        remainder.clear();
-        remainder.addAll(numerator);
-        if (remainder.isEmpty()) {
-            remainder.add(0L);
-        }
-
-        if (result.isEmpty()) {
-            result.add(0L);
-        }
+        //copy remainder of division to remainder attribute of this method
+        System.arraycopy(numerator, 0, remainder, 0, numerator.length);
 
         return result;
     }
 
-    
+    //to repair computing with short polynomials
     @Override
-    public ArrayList<Long> invert(List<Long> polynomial, List<Long> moduloPolynomial) {
-
-        isValid(polynomial, polynomial);
-
-        if ((polynomial.size() >= moduloPolynomial.size()) || (moduloPolynomial.size() == 1)) {
-            throw new IllegalArgumentException("Cannot compute inverse for this args.");
-        }
-
-        ArrayList<Long> gcd;
-        ArrayList<Long> result = new ArrayList<>();
-        ArrayList<Long> temp = new ArrayList<>();
-
-        gcd = xgcd(moduloPolynomial, polynomial, temp, result);
-
-        if (gcd.size() != 1) {
-            throw new IllegalArgumentException("Cannot compute inverse for this args.");
-        }
-
-        return result;
-    }
-
-    @Override
-    public ArrayList<Long> power(List<Long> polynomial, long exponent) {
-
-        isValid(polynomial);
-
-        ArrayList<Long> result = new ArrayList<>();
-        result.addAll(polynomial);
-
-        for (int x = 1; x < exponent; x++) {
-            result = multiply(result, polynomial);
-        }
-        return result;
-    }
-
-    //Euclidean algorithm
-    @Override
-    public ArrayList<Long> gcd(List<Long> polynomial1, List<Long> polynomial2) {
-
+    public long[] xgcd(long[] polynomial1, long[] polynomial2, long[] a, long[] b) {
         isValid(polynomial1, polynomial2);
 
-        ArrayList<Long> result = new ArrayList<>();
-        ArrayList<Long> remainder = new ArrayList<>();
-        ArrayList<Long> numerator = new ArrayList<>();
-        ArrayList<Long> denumerator = new ArrayList<>();
-
-        //prepare division
-        numerator.addAll(polynomial1);
-        denumerator.addAll(polynomial2);
-        remainder.addAll(polynomial2);
-
-        //find greatest greatest common divisor, last positive remainder
-        while (!((remainder.size() == 1) && (remainder.get(0) == 0))) {
-            result = remainder;
-            remainder = new ArrayList<>();
-            divide(numerator, denumerator, remainder);
-            numerator = denumerator;
-            denumerator = remainder;
+        if (polynomial2.length > polynomial1.length) {
+            //swap
+            long[] swapArray = polynomial1;
+            polynomial1 = polynomial2;
+            polynomial2 = swapArray;
+            swapArray = a;
+            a = b;
+            b = swapArray;
         }
 
-        return result;
+        //prepare for division
+        long[] result = new long[polynomial2.length];
+        long[] remainder = polynomial2;
+        long[] numerator = polynomial1;
+        long[] denumerator = polynomial2;
 
-    }
+        //prepare to find Bezout's identity
+        long[] temp;
+        ArrayList<long[]> resultList = new ArrayList<>();
+        ArrayList<long[]> bezoutIdentity = new ArrayList<>();
 
-    // result = gcd(polynomial1, polynomial2) = a*polynomial1 + b*polynomial2
-    @Override
-    public ArrayList<Long> xgcd(List<Long> polynomial1, List<Long> polynomial2, List<Long> a, List<Long> b) {
-
-        isValid(polynomial1, polynomial2);
-
-        ArrayList<Long> result = new ArrayList<>();
-        ArrayList<Long> remainder = new ArrayList<>();
-        ArrayList<Long> numerator = new ArrayList<>();
-        ArrayList<Long> denumerator = new ArrayList<>();
-
-
-        ArrayList<Long> temp = new ArrayList<>();
-        ArrayList<ArrayList<Long>> resultList = new ArrayList<>();
-        ArrayList<ArrayList<Long>> bezoutIdentity = new ArrayList<>();
-
-        //prepare division
-        numerator.addAll(polynomial1);
-        denumerator.addAll(polynomial2);
-        remainder.addAll(polynomial2);
 
         //find greatest greatest common divisor, last positive remainder
-        while (!((remainder.size() == 1) && (remainder.get(0) == 0))) {
+        while (!(remainder.length == 0)) {
             result = remainder;
-            remainder = new ArrayList<>();
+            remainder = new long[Math.max(numerator.length, denumerator.length)];
             temp = divide(numerator, denumerator, remainder);
 
-            //resultList is used to find Bezout's Identity
+            //resultList data neccessary to find Bezout's identity
             resultList.add(numerator);
             resultList.add(denumerator);
             resultList.add(temp);
 
+            remainder = clearZeroValuesFromPolynomial(remainder);
             numerator = denumerator;
             denumerator = remainder;
         }
 
+        //overit este tuto podmienku
+        if (resultList.size() > 3) {
+            resultList.remove(resultList.size() - 1);
+            resultList.remove(resultList.size() - 1);
+            resultList.remove(resultList.size() - 1);
+        }
 
 
-        resultList.remove(resultList.size() - 1);
-        resultList.remove(resultList.size() - 1);
-        resultList.remove(resultList.size() - 1);
-
-        temp.clear();
-        temp.add(1l);
-        bezoutIdentity.add(temp);
+        long[] value = {1l};
+        bezoutIdentity.add(value);
         bezoutIdentity.add(resultList.get(resultList.size() - 3));
         bezoutIdentity.add(resultList.get(resultList.size() - 2));
         bezoutIdentity.add(resultList.get(resultList.size() - 1));
@@ -275,46 +203,118 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         }
 
         //test control output to be deleted...
-        System.out.println("Test:  " + add(multiply(bezoutIdentity.get(0), bezoutIdentity.get(1)),
-                multiply(bezoutIdentity.get(2), bezoutIdentity.get(3))));
+        System.out.println("Test:  " + Arrays.toString(add(multiply(bezoutIdentity.get(0), bezoutIdentity.get(1)),
+                multiply(bezoutIdentity.get(2), bezoutIdentity.get(3)))));
 
         //save Bezout's coefficients and return gcd
-        a.addAll(bezoutIdentity.get(0));
-        b.addAll(bezoutIdentity.get(3));
+        System.arraycopy(bezoutIdentity.get(0), 0, a, 0, bezoutIdentity.get(0).length);
+        System.arraycopy(bezoutIdentity.get(3), 0, b, 0, bezoutIdentity.get(3).length);
 
         return result;
 
     }
 
     @Override
-    public int compare(List<Long> polynomial1, List<Long> polynomial2) {
+    public long[] gcd(long[] polynomial1, long[] polynomial2) {
+        isValid(polynomial1, polynomial2);
+
+        long[] result = new long[polynomial2.length];
+        long[] remainder = polynomial2;
+        long[] numerator = polynomial1;
+        long[] denumerator = polynomial2;
+
+
+        //find greatest greatest common divisor, last positive remainder
+        while (!(remainder.length == 0)) {
+            result = remainder;
+            remainder = new long[Math.max(numerator.length, denumerator.length)];
+            divide(numerator, denumerator, remainder);
+            remainder = clearZeroValuesFromPolynomial(remainder);
+            numerator = denumerator;
+            denumerator = remainder;
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public long[] invert(long[] polynomial, long[] moduloPolynomial) {
+        isValid(polynomial, polynomial);
+
+        if ((polynomial.length >= moduloPolynomial.length) || (moduloPolynomial.length == 1)) {
+            throw new IllegalArgumentException("Cannot compute inverse for this args.");
+        }
+
+        long[] gcd;
+        long[] result = new long[moduloPolynomial.length];
+        long[] temp = new long[moduloPolynomial.length];
+
+        //xgcd to set the result
+        gcd = xgcd(moduloPolynomial, polynomial, temp, result);
+
+        if (gcd.length != 1) {
+            throw new IllegalArgumentException("Cannot compute inverse for this args.");
+        }
+
+        return clearZeroValuesFromPolynomial(result);
+    }
+
+    @Override
+    public long[] power(long[] polynomial, long exponent) {
+
+        isValid(polynomial);
+        long[] result = polynomial;
+
+        for (int x = 1; x < exponent; x++) {
+            result = multiply(polynomial, result);
+        }
+
+        return result;
+    }
+
+    @Override
+    public int compare(long[] polynomial1, long[] polynomial2) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public boolean clearZeroValuesFromPolynomial(List<Long> polynomial) {
-        for (int x = polynomial.size() - 1; x >= 0; x--) {
-            if (polynomial.get(x) == 0) {
-                polynomial.remove(x);
-            } else {
-                return true;
+    //return new array without zero values on highest positions in argument array
+    public long[] clearZeroValuesFromPolynomial(long[] polynomial) {
+
+        long[] result;
+
+        for (int x = polynomial.length - 1; x >= 0; x--) {
+            if (polynomial[x] != 0) {
+                result = new long[x + 1];
+                System.arraycopy(polynomial, 0, result, 0, x + 1);
+                return result;
             }
         }
-        return false;
+
+        result = new long[0];
+        return result;
     }
 
-    private void isValid(List<Long> polynomial1, List<Long> polynomial2) {
+    private void isValid(long[] polynomial1, long[] polynomial2) {
 
-        if (polynomial1.isEmpty() || polynomial2.isEmpty()) {
+        if (polynomial1.length == 0 || polynomial2.length == 0) {
             throw new IllegalArgumentException("Polynomial argument is empty.");
+        }
+
+        if (polynomial1[polynomial1.length - 1] <= 0 || polynomial2[polynomial2.length - 1] <= 0) {
+            throw new IllegalArgumentException("Highest coefficient of a polynomial must be positive nonzero number.");
         }
 
     }
 
-    private void isValid(List<Long> polynomial) {
+    private void isValid(long[] polynomial) {
 
-        if (polynomial.isEmpty()) {
+        if (polynomial.length == 0) {
             throw new IllegalArgumentException("Polynomial argument is empty.");
         }
 
+        if (polynomial[polynomial.length - 1] <= 0) {
+            throw new IllegalArgumentException("Highest coefficient of a polynomial must be positive nonzero number.");
+        }
     }
 }
