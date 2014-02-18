@@ -264,6 +264,11 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
     public long[] power(long[] polynomial, long exponent) {
 
         isValid(polynomial);
+        
+        if(exponent <= 0){
+            throw new IllegalArgumentException("Exponent must be positive number!");
+        }
+        
         long[] result = polynomial;
 
         for (int x = 1; x < exponent; x++) {
