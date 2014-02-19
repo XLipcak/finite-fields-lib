@@ -146,7 +146,21 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     @Override
     public long rank(long[][] matrix) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        isValid(matrix);
+
+        long rank = 0;
+        long[][] result = gauss(matrix);
+
+        for (int x = 0; x < matrix.length; x++) {
+            for (int y = 0; y < matrix[0].length; y++) {
+                if (result[x][y] != 0) {
+                    rank++;
+                    break;
+                }
+            }
+        }
+        return rank;
     }
 
     @Override
@@ -159,28 +173,31 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         for (int x = 0; x < matrix.length; x++) {
             System.arraycopy(matrix[x], 0, result[x], 0, matrix[0].length);
         }
-        
+
         for (int diagPos = 1; diagPos < Math.min(matrix.length, matrix[0].length) + 1; diagPos++) {
-            
+
             long value;
             for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < matrix.length; rowsUnderDiagPos++) {
-                
+
                 //find row with pivot at column, that we want to set to zero
                 if (result[diagPos - 1][diagPos - 1] == 0) {
                     result = findPivot(result, diagPos - 1, diagPos - 1);
                 }
-                
-                //set value, it will be used to set column at diagPos to zero
-                value = galoisField.divide(result[rowsUnderDiagPos][diagPos - 1], result[diagPos - 1][diagPos - 1]);
-                
-                //subtract from line, pivot will be set to zero and other values will be edited
-                for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < matrix[0].length; colsUnderDiagPos++) {
-                    result[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(galoisField.multiply
-                            (result[diagPos - 1][colsUnderDiagPos], value), result[rowsUnderDiagPos][colsUnderDiagPos]);
+
+                try {
+                    //set value, it will be used to set column at diagPos to zero
+                    value = galoisField.divide(result[rowsUnderDiagPos][diagPos - 1], result[diagPos - 1][diagPos - 1]);
+
+                    //subtract from line, pivot will be set to zero and other values will be edited
+                    for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < matrix[0].length; colsUnderDiagPos++) {
+                        result[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(galoisField.multiply(result[diagPos - 1][colsUnderDiagPos], value), result[rowsUnderDiagPos][colsUnderDiagPos]);
+                    }
+                } catch (IllegalArgumentException ex) {
+                    //division by zero, column full of zeroes, special case, check it later
                 }
             }
         }
-        
+
         //Gauss matrix
         return result;
     }
