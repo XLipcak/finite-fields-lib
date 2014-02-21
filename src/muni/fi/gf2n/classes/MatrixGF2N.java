@@ -119,7 +119,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     @Override
     public long[][] inverse(long[][] matrix) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -139,14 +139,34 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         return result;
     }
 
+    //Laplace expansion
     @Override
     public long determinant(long[][] matrix) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+        isValid(matrix);
+
+        if (matrix.length != matrix[0].length) {
+            throw new IllegalArgumentException("Cannot compute determinant of nonsquare matrix.");
+        }
+
+        if (matrix.length == 1) {
+            return matrix[0][0];
+        }
+
+        long result = 0;
+
+        for (int x = 0; x < matrix.length; x++) {
+            //Recursive call is used to compute determinant with Laplace expansion along the first row
+            result = galoisField.add(result, galoisField.multiply(matrix[0][x], determinant(subMatrix(matrix, 0, x))));
+        }
+
+        return result;
+
     }
 
     @Override
     public long rank(long[][] matrix) {
-        
+
         isValid(matrix);
 
         long rank = 0;
@@ -198,28 +218,92 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             }
         }
 
-        //Gauss matrix
+        //Result matrix is in row echelon form
+        return result;
+    }
+
+    //equationMatrix*result = results
+    @Override
+    public long[] solveLinearEquationsSystem(long[][] equationMatrix, long[] results) {
+
+        isValid(equationMatrix);
+
+        if (equationMatrix.length != equationMatrix[0].length) {
+            throw new IllegalArgumentException("Cannot solve linear equations system for nonsquare matrix.");
+        }
+
+        if (equationMatrix.length != results.length) {
+            throw new IllegalArgumentException("Cannot solve linear equations system: dimension mismatch.");
+        }
+
+        if (rank(equationMatrix) != results.length) {
+            //SKONTROLOVAT neskor tuto podmienku
+            throw new IllegalArgumentException("Cannot solve linear equations system: Some rows in "
+                    + "equationMatrix are linearly dependent.");
+        }
+
+        //prepare equation matrix
+        long[][] eqMat = new long[equationMatrix.length][equationMatrix[0].length + 1];
+        for (int x = 0; x < equationMatrix.length; x++) {
+            System.arraycopy(equationMatrix[x], 0, eqMat[x], 0, equationMatrix[0].length);
+            eqMat[x][equationMatrix[0].length] = results[x];
+        }
+
+
+        //modified Gauss elimination
+        for (int diagPos = 1; diagPos < Math.min(eqMat.length, eqMat[0].length) + 1; diagPos++) {
+
+            long value;
+            for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < eqMat.length; rowsUnderDiagPos++) {
+
+                //find row with pivot at column, that we want to set to zero
+                if (eqMat[diagPos - 1][diagPos - 1] == 0) {
+                    eqMat = findPivot(eqMat, diagPos - 1, diagPos - 1);
+                }
+
+                try {
+                    //set value, it will be used to set column at diagPos to zero
+                    value = galoisField.divide(eqMat[rowsUnderDiagPos][diagPos - 1], eqMat[diagPos - 1][diagPos - 1]);
+
+                    //subtract from line, pivot will be set to zero and other values will be edited
+                    for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < eqMat[0].length; colsUnderDiagPos++) {
+                        eqMat[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(galoisField.multiply(eqMat[diagPos - 1][colsUnderDiagPos], value), eqMat[rowsUnderDiagPos][colsUnderDiagPos]);
+                    }
+                } catch (IllegalArgumentException ex) {
+                    //division by zero, column full of zeroes, special case, check it later
+                }
+            }
+        }
+
+        //set result vector from values prepared in eqMat
+        long[] result = new long[equationMatrix[0].length];
+        for (int x = eqMat[0].length - 2; x >= 0; x--) {
+            for (int y = eqMat[0].length - 2; y >= x; y--) {
+                if (y == x) {
+                    result[x] = galoisField.divide(eqMat[x][eqMat[0].length - 1], eqMat[x][x]);
+                } else {
+                    eqMat[x][eqMat[0].length - 1] = galoisField.subtract(eqMat[x][eqMat[0].length - 1],
+                            galoisField.multiply(eqMat[x][y], result[y]));
+                }
+            }
+        }
+
         return result;
     }
 
     @Override
-    public long[] solveLinearEquationsSystem(long[][] equationMatrix, long[] results) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public long[] image(long[][] matrix) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public long[] kernel(long[][] matrix) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public int compare(long[][] matrix1, long[][] matrix2) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private void isValid(long[][] matrix1, long[][] matrix2) {
@@ -272,7 +356,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         return matrix;
     }
 
-    public long[][] swapLines(long[][] matrix, int row1, int row2) {
+    private long[][] swapLines(long[][] matrix, int row1, int row2) {
 
         long[][] result = new long[matrix.length][matrix[0].length];
 
@@ -288,6 +372,32 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             }
 
         }
+        return result;
+    }
+
+    //return matrix without row row and column column
+    private long[][] subMatrix(long[][] matrix, int row, int column) {
+
+        long[][] result = new long[matrix.length - 1][matrix[0].length - 1];
+
+        int rowIndex = 0;
+        int colIndex = 0;
+
+        for (int x = 0; x < matrix.length; x++) {
+            colIndex = 0;
+            for (int y = 0; y < matrix[0].length; y++) {
+                if ((x != row) && (y != column)) {
+                    result[rowIndex][colIndex] = matrix[x][y];
+                }
+                if (column != y) {
+                    colIndex++;
+                }
+            }
+            if (row != x) {
+                rowIndex++;
+            }
+        }
+
         return result;
     }
 
