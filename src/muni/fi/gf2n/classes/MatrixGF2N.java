@@ -5,8 +5,6 @@
 package muni.fi.gf2n.classes;
 
 import muni.fi.gf2n.interfaces.GaloisFieldMatrixArithmetic;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -119,7 +117,90 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     @Override
     public long[][] inverse(long[][] matrix) {
-        throw new UnsupportedOperationException("Not supported yet.");
+
+        isValid(matrix);
+
+        if (determinant(matrix) == 0) {
+            throw new IllegalArgumentException("Matrix is non-invertible.");
+        }
+
+        if (matrix.length != matrix[0].length) {
+            throw new IllegalArgumentException("Cannot compute inverse of nonsquare matrix.");
+        }
+
+        //Prepare double-wide inverseMatrix, created from original matrix, and in the other half from identity matrix
+        long[][] inverseMatrix = new long[matrix.length][matrix[0].length * 2];
+        for (int x = 0; x < matrix.length; x++) {
+            for (int y = 0; y < (matrix[0].length * 2); y++) {
+                if (y < matrix[0].length) {
+                    inverseMatrix[x][y] = matrix[x][y];
+                } else {
+                    if (x == y - matrix.length) {
+                        inverseMatrix[x][y] = 1;
+                    }
+                }
+            }
+        }
+
+        //Modified Gauss elimination, reduce all rows under the main diagonal, apply the changes to identity matrix 
+        for (int diagPos = 1; diagPos < Math.min(inverseMatrix.length, inverseMatrix[0].length) + 1; diagPos++) {
+
+            long value;
+            for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < inverseMatrix.length; rowsUnderDiagPos++) {
+
+                //find row with pivot at column, that we want to set to zero
+                if (inverseMatrix[diagPos - 1][diagPos - 1] == 0) {
+                    inverseMatrix = findPivot(inverseMatrix, diagPos - 1, diagPos - 1);
+                }
+
+                try {
+                    //set value, it will be used to set column at diagPos to zero
+                    value = galoisField.divide(inverseMatrix[rowsUnderDiagPos][diagPos - 1], inverseMatrix[diagPos - 1][diagPos - 1]);
+
+                    //subtract from line, pivot will be set to zero and other values will be edited
+                    for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < inverseMatrix[0].length; colsUnderDiagPos++) {
+                        inverseMatrix[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(galoisField.multiply(inverseMatrix[diagPos - 1][colsUnderDiagPos], value), inverseMatrix[rowsUnderDiagPos][colsUnderDiagPos]);
+                    }
+                } catch (IllegalArgumentException ex) {
+                    //division by zero, column full of zeroes, special case, check it later
+                }
+            }
+        }
+
+        //Modified Gauss elimination, reduce all rows over the main diagonal, apply the changes to identity matrix 
+        for (int diagPos = inverseMatrix.length - 1; diagPos >= 0; diagPos--) {
+
+            long value;
+            for (int rowsOverDiagPos = diagPos - 1; rowsOverDiagPos >= 0; rowsOverDiagPos--) {
+
+                try {
+                    //set value, it will be used to set column at diagPos to zero
+                    value = galoisField.divide(inverseMatrix[rowsOverDiagPos][diagPos], inverseMatrix[diagPos][diagPos]);
+
+                    //subtract from line, pivot will be set to zero and other values will be edited
+                    for (int colsOverDiagPos = diagPos; colsOverDiagPos < inverseMatrix[0].length; colsOverDiagPos++) {
+                        inverseMatrix[rowsOverDiagPos][colsOverDiagPos] = galoisField.subtract(galoisField.multiply(inverseMatrix[diagPos][colsOverDiagPos], value), inverseMatrix[rowsOverDiagPos][colsOverDiagPos]);
+                    }
+                } catch (IllegalArgumentException ex) {
+                    //division by zero, column full of zeroes, special case, check it later
+                }
+            }
+        }
+
+        //Prepare result, it is the second half of the inverseMatrix
+        long[][] result = new long[matrix.length][matrix.length];
+        for (int x = 0; x < inverseMatrix.length; x++) {
+            long value = inverseMatrix[x][x];
+            for (int y = 0; y < inverseMatrix[0].length; y++) {
+                //First half of the inverseMatrix is diagonal matrix, we divide it to create identity matrix 
+                inverseMatrix[x][y] = galoisField.divide(inverseMatrix[x][y], value);
+                if (y >= matrix.length) {
+                    result[x][y - matrix.length] = inverseMatrix[x][y];
+                }
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -154,7 +235,6 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         }
 
         long result = 0;
-
         for (int x = 0; x < matrix.length; x++) {
             //Recursive call is used to compute determinant with Laplace expansion along the first row
             result = galoisField.add(result, galoisField.multiply(matrix[0][x], determinant(subMatrix(matrix, 0, x))));
@@ -339,7 +419,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     }
 
-    //change line row with line with pivot on position column
+    //change line row with line with pivot at position column
     private long[][] findPivot(long[][] matrix, int column, int row) {
 
         for (int x = 0; x < matrix.length; x++) {
@@ -356,6 +436,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         return matrix;
     }
 
+    //return matrix with swapped rows (row1, row2)
     private long[][] swapLines(long[][] matrix, int row1, int row2) {
 
         long[][] result = new long[matrix.length][matrix[0].length];
