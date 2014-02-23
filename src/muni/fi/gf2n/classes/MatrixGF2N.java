@@ -116,16 +116,26 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     @Override
+    public long[][] multiply(long[] vector, long[][] matrix) {
+        long matrixVector[][] = new long[1][vector.length];
+
+        for (int x = 0; x < vector.length; x++) {
+            matrixVector[0][x] = vector[x];
+        }
+        return multiply(matrixVector, matrix);
+    }
+
+    @Override
     public long[][] inverse(long[][] matrix) {
 
         isValid(matrix);
 
-        if (determinant(matrix) == 0) {
-            throw new IllegalArgumentException("Matrix is non-invertible.");
-        }
-
         if (matrix.length != matrix[0].length) {
             throw new IllegalArgumentException("Cannot compute inverse of nonsquare matrix.");
+        }
+
+        if (determinant(matrix) == 0) {
+            throw new IllegalArgumentException("Matrix is non-invertible.");
         }
 
         //Prepare double-wide inverseMatrix, created from original matrix, and in the other half from identity matrix
@@ -245,11 +255,11 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     @Override
-    public long rank(long[][] matrix) {
+    public int rank(long[][] matrix) {
 
         isValid(matrix);
 
-        long rank = 0;
+        int rank = 0;
         long[][] result = gauss(matrix);
 
         for (int x = 0; x < matrix.length; x++) {
@@ -293,7 +303,8 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
                         result[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(galoisField.multiply(result[diagPos - 1][colsUnderDiagPos], value), result[rowsUnderDiagPos][colsUnderDiagPos]);
                     }
                 } catch (IllegalArgumentException ex) {
-                    //division by zero, column full of zeroes, special case, check it later
+                    //OSETRIT division by zero, column full of zeroes, special case, check it later
+                    //OSETRIT tieto vynimky, moze sa stat ze napriklad isInField vyhodi vynimku, a tu je odchytena
                 }
             }
         }
@@ -372,13 +383,52 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     @Override
-    public long[] image(long[][] matrix) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public long[][] image(long[][] matrix) {
+        isValid(matrix);
+        return reduceLinearlyDependentRows(matrix);
     }
 
+    //OSETRIT este division by zero exception, suvisi zrejme s implementaciou gauss elimination
     @Override
-    public long[] kernel(long[][] matrix) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public long[][] kernel(long[][] matrix) {
+        isValid(matrix);
+
+        long[][] kernelMatrix = transpose(matrix);
+        kernelMatrix = reduceLinearlyDependentRows(kernelMatrix);
+
+        //prepare result matrix
+        long[][] result = new long[matrix.length - rank(matrix)][matrix.length];
+        for (int x = 0; x < result.length; x++) {
+            result[x][result[0].length - x - 1] = 1;
+        }
+
+        int index = result.length;
+        int position = 0;
+        for (int counter = result.length - 1; counter >= 0; counter--) {
+
+            index--;
+            position++;
+
+            //set kernel vector for every row
+            for (int row = kernelMatrix.length - 1; row >= 0; row--) {
+                
+                long value = 0;
+                //loop used to find a good value in current row
+                for (int col = row + 1; col <= kernelMatrix[0].length - 1; col++) {
+                    value = galoisField.add(value, galoisField.multiply(kernelMatrix[row][col], result[index][col]));
+                }
+
+                if (row == kernelMatrix.length - 1) {
+                    long numerator = kernelMatrix[row][(kernelMatrix.length - 1) + position];
+                    long denumerator = kernelMatrix[row][row];
+                    result[index][row] = galoisField.divide(numerator, denumerator);
+                } else {
+                    result[index][row] = galoisField.divide(value, kernelMatrix[row][row]);
+                }
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -477,6 +527,20 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             if (row != x) {
                 rowIndex++;
             }
+        }
+
+        return result;
+    }
+
+    //return matrix in row echelon form without rows full of zeroes
+    private long[][] reduceLinearlyDependentRows(long[][] matrix) {
+
+        int rank = rank(matrix);
+        long[][] result = new long[rank][matrix[0].length];
+        long[][] gaussMatrix = gauss(matrix);
+
+        for (int x = 0; x < rank; x++) {
+            System.arraycopy(gaussMatrix[x], 0, result[x], 0, matrix[0].length);
         }
 
         return result;

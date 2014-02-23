@@ -24,17 +24,18 @@ public interface GaloisFieldMatrixArithmetic {
     
     //matrix*vector
     long[][] multiply(long[][] matrix, long[] vector);
+    long[][] multiply(long[] vector, long[][] matrix);
     
     long[][] inverse(long[][] matrix);
     long[][] power(long[][] matrix, long exponent);
     long determinant(long[][] matrix);
-    long rank(long[][] matrix);
+    int rank(long[][] matrix);
     long[][] gauss(long[][] matrix);
 
     //returnVector*equationMatrix = results
     long[] solveLinearEquationsSystem(long[][] equationMatrix, long[] results);
     
-    long[] image(long[][] matrix);
-    long[] kernel(long[][] matrix);
+    long[][] image(long[][] matrix);
+    long[][] kernel(long[][] matrix);
     int compare(long[][] matrix1, long[][] matrix2);
 }

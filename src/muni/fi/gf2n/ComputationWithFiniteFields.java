@@ -25,66 +25,57 @@ public class ComputationWithFiniteFields {
 
         int a = 38;
         int b = 95;
-        GF2N gf = new GF2N(11l);//32771...4194307l
+        GF2N gf = new GF2N(11l);//32771...4194307l..rnd k tomu 4194303l
+        //GF2N gf = new GF2N(4194307l);
         PolynomialGF2N poly = new PolynomialGF2N(gf);
         VectorGF2N vect = new VectorGF2N(gf);
         Random rn = new Random();
 
-        int xx = 4;
-        int yy = 7;
+        int xx = 15;
+        int yy = 6;
         int zz = 5;
         //x y y z
         long[][] matrix1 = new long[xx][yy];
-        long[][] matrix2 = new long[5][3];
-        
+        long[][] matrix2 = new long[xx][yy];
+
         //fill it
         for (int x = 0; x < xx; x++) {
             for (int y = 0; y < yy; y++) {
-                matrix1[x][y] = rn.nextInt(7)+1;
+                matrix1[x][y] = rn.nextInt(8);
+                //matrix1[x][y] = rn.nextInt(4194303);
             }
         }
-        for (int x = 0; x < 5; x++) {
-            for (int y = 0; y < 3; y++) {
-                matrix2[x][y] = rn.nextInt(8);
-            }
-        }
-        
+
 
         MatrixGF2N mat = new MatrixGF2N(gf);
-        
+
+
+        System.out.println("Matrix1: ");
         MatrixGF2N.printMatrix(matrix1);
-        System.out.println("");
-        System.out.println("Gauss:");
+        System.out.println("Gauss matrix1 : ");
         MatrixGF2N.printMatrix(mat.gauss(matrix1));
-        System.out.println("");
-        MatrixGF2N.printMatrix(matrix1);
-       /* MatrixGF2N.printMatrix(matrix1);
-        System.out.println("*");
-        MatrixGF2N.printMatrix(matrix2);
-        System.out.println("=");
-        MatrixGF2N.printMatrix(mat.multiply(matrix1, matrix2));*/
+        /* System.out.println("Vector: " + Arrays.toString(vec));
+         System.out.println("Coefficients" + Arrays.toString(mat.solveLinearEquationsSystem(matrix1, vec)));
+         System.out.println("Solved: ");
+         MatrixGF2N.printMatrix(mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, vec)));
+         */
 
-       /* System.out.println("Addition:");
-        for (int x = 0; x < 4; x++) {
-            System.out.println(Arrays.toString(matrix1[x]) + " + " + Arrays.toString(matrix2[x]) + " = "
-                    + Arrays.toString(mat.add(matrix1, matrix2)[x]));
-        }
-        System.out.println("Subtraction:");
-        for (int x = 0; x < 4; x++) {
-            System.out.println(Arrays.toString(matrix1[x]) + " + " + Arrays.toString(matrix2[x]) + " = "
-                    + Arrays.toString(mat.subtract(matrix1, matrix2)[x]));
-        }
-        System.out.println("Transpose:");
-        for (int x = 0; x < 4; x++) {
-            System.out.println(Arrays.toString(matrix1[x]) + " = "
-                    + Arrays.toString(mat.transpose(matrix1)[x]));
-        }*/
+        System.out.println("Image: ");
+        MatrixGF2N.printMatrix(mat.image(matrix1));
+        System.out.println("Kernel: ");
+        MatrixGF2N.printMatrix(mat.kernel(matrix1));
 
-        
+        long[][] kernel = mat.kernel(matrix1);
+        System.out.println("Skuska kernel: ");
+        for (int c = 0; c < kernel.length; c++) {
+            MatrixGF2N.printMatrix(mat.multiply(mat.kernel(matrix1)[c], matrix1));
+        }
+
+
     }
 }
 
-/*      //TESTY
+/*      //TESTY Polynomy
  long[] arrayPoly = new long[a];
  long[] arrayPoly2 = new long[b];
 
