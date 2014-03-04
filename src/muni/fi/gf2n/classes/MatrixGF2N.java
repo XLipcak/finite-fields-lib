@@ -9,10 +9,13 @@ import muni.fi.gf2n.interfaces.GaloisFieldMatrixArithmetic;
 /**
  *
  * @author Jakub Lipcak, Masaryk University
+ * 
+ * Class MatrixGF2N for computation with Matrices in Galois Fields.
+ * 
  */
 public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
-    GF2N galoisField;
+    private GF2N galoisField;
 
     public MatrixGF2N(GF2N galoisField) {
         this.galoisField = galoisField;
@@ -134,6 +137,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             throw new IllegalArgumentException("Cannot compute inverse of nonsquare matrix.");
         }
 
+        //NESKOR MOZNO KONTROLOVAT NEJAK INAK, PRE VELKE MATICE POMALE
         if (determinant(matrix) == 0) {
             throw new IllegalArgumentException("Matrix is non-invertible.");
         }
@@ -218,6 +222,10 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
         isValid(matrix);
 
+        if (matrix.length != matrix[0].length) {
+            throw new IllegalArgumentException("Cannot compute power of non-square matrix!");
+        }
+
         if (exponent <= 0) {
             throw new IllegalArgumentException("Exponent must be positive number!");
         }
@@ -273,6 +281,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         return rank;
     }
 
+    //return input matrix in row echelon form
     @Override
     public long[][] gauss(long[][] matrix) {
 
@@ -287,24 +296,35 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         for (int diagPos = 1; diagPos < Math.min(matrix.length, matrix[0].length) + 1; diagPos++) {
 
             long value;
-            for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < matrix.length; rowsUnderDiagPos++) {
 
-                //find row with pivot at column, that we want to set to zero
-                if (result[diagPos - 1][diagPos - 1] == 0) {
-                    result = findPivot(result, diagPos - 1, diagPos - 1);
+            //find column with pivot, swap lines if necessary
+            int colPos = diagPos - 1;
+            while (colPos < matrix[0].length && result[diagPos - 1][colPos] == 0) {
+                result = findPivot(result, colPos, diagPos - 1);
+                if (result[diagPos - 1][colPos] == 0) {
+                    colPos++;
                 }
+            }
+            if (colPos == matrix[0].length) {
+                colPos = diagPos - 1;
+            }
+
+            for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < matrix.length; rowsUnderDiagPos++) {
 
                 try {
                     //set value, it will be used to set column at diagPos to zero
-                    value = galoisField.divide(result[rowsUnderDiagPos][diagPos - 1], result[diagPos - 1][diagPos - 1]);
+                    value = galoisField.divide(result[rowsUnderDiagPos][colPos], result[diagPos - 1][colPos]);
 
                     //subtract from line, pivot will be set to zero and other values will be edited
                     for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < matrix[0].length; colsUnderDiagPos++) {
                         result[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(galoisField.multiply(result[diagPos - 1][colsUnderDiagPos], value), result[rowsUnderDiagPos][colsUnderDiagPos]);
                     }
                 } catch (IllegalArgumentException ex) {
-                    //OSETRIT division by zero, column full of zeroes, special case, check it later
-                    //OSETRIT tieto vynimky, moze sa stat ze napriklad isInField vyhodi vynimku, a tu je odchytena
+                    //catched division by zero, OK, thrown by columns full of zeroes
+                    if (ex.toString().contains("Values for this reducing polynomial must be in")) {
+                        //also catched, when some values are not in GF, new exception is thrown then
+                        throw new IllegalArgumentException(ex);
+                    }
                 }
             }
         }
@@ -327,11 +347,6 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             throw new IllegalArgumentException("Cannot solve linear equations system: dimension mismatch.");
         }
 
-        if (rank(equationMatrix) != results.length) {
-            //SKONTROLOVAT neskor tuto podmienku
-            throw new IllegalArgumentException("Cannot solve linear equations system: Some rows in "
-                    + "equationMatrix are linearly dependent.");
-        }
 
         //prepare equation matrix
         long[][] eqMat = new long[equationMatrix.length][equationMatrix[0].length + 1];
@@ -340,28 +355,42 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             eqMat[x][equationMatrix[0].length] = results[x];
         }
 
-
+        
         //modified Gauss elimination
         for (int diagPos = 1; diagPos < Math.min(eqMat.length, eqMat[0].length) + 1; diagPos++) {
 
             long value;
-            for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < eqMat.length; rowsUnderDiagPos++) {
 
-                //find row with pivot at column, that we want to set to zero
-                if (eqMat[diagPos - 1][diagPos - 1] == 0) {
-                    eqMat = findPivot(eqMat, diagPos - 1, diagPos - 1);
+            //find column with pivot, swap lines if necessary
+            int colPos = diagPos - 1;
+            while (colPos < eqMat[0].length && eqMat[diagPos - 1][colPos] == 0) {
+                eqMat = findPivot(eqMat, colPos, diagPos - 1);
+                if (eqMat[diagPos - 1][colPos] == 0) {
+                    colPos++;
                 }
+            }
+            if (colPos == eqMat[0].length) {
+                colPos = diagPos - 1;
+            }
+
+            for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < eqMat.length; rowsUnderDiagPos++) {
 
                 try {
                     //set value, it will be used to set column at diagPos to zero
-                    value = galoisField.divide(eqMat[rowsUnderDiagPos][diagPos - 1], eqMat[diagPos - 1][diagPos - 1]);
+                    value = galoisField.divide(eqMat[rowsUnderDiagPos][colPos], eqMat[diagPos - 1][colPos]);
 
                     //subtract from line, pivot will be set to zero and other values will be edited
                     for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < eqMat[0].length; colsUnderDiagPos++) {
-                        eqMat[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(galoisField.multiply(eqMat[diagPos - 1][colsUnderDiagPos], value), eqMat[rowsUnderDiagPos][colsUnderDiagPos]);
+                        eqMat[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(
+                                galoisField.multiply(eqMat[diagPos - 1][colsUnderDiagPos], value), 
+                                eqMat[rowsUnderDiagPos][colsUnderDiagPos]);
                     }
                 } catch (IllegalArgumentException ex) {
-                    //division by zero, column full of zeroes, special case, check it later
+                    //catched division by zero, OK, thrown by columns full of zeroes
+                    if (ex.toString().contains("Values for this reducing polynomial must be in")) {
+                        //also catched, when some values are not in GF, new exception is thrown then
+                        throw new IllegalArgumentException(ex);
+                    }
                 }
             }
         }
@@ -371,7 +400,14 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         for (int x = eqMat[0].length - 2; x >= 0; x--) {
             for (int y = eqMat[0].length - 2; y >= x; y--) {
                 if (y == x) {
-                    result[x] = galoisField.divide(eqMat[x][eqMat[0].length - 1], eqMat[x][x]);
+                    try{
+                        result[x] = galoisField.divide(eqMat[x][eqMat[0].length - 1], eqMat[x][x]);
+                    } catch (IllegalArgumentException ex){
+                        //Division by zero, som rows are linearly dependent, 
+                        //set result at this position to zero.
+                        result[x] = 0;
+                    }
+                    
                 } else {
                     eqMat[x][eqMat[0].length - 1] = galoisField.subtract(eqMat[x][eqMat[0].length - 1],
                             galoisField.multiply(eqMat[x][y], result[y]));
@@ -382,19 +418,21 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         return result;
     }
 
+    //image of matrix
     @Override
     public long[][] image(long[][] matrix) {
         isValid(matrix);
         return reduceLinearlyDependentRows(matrix);
     }
 
-    //OSETRIT este division by zero exception, suvisi zrejme s implementaciou gauss elimination
+    
+    //Kernel(Matrix) * (Matrix) = zeroMatrix
     @Override
     public long[][] kernel(long[][] matrix) {
         isValid(matrix);
 
         long[][] kernelMatrix = transpose(matrix);
-        kernelMatrix = reduceLinearlyDependentRows(kernelMatrix);
+        kernelMatrix = gauss(kernelMatrix);
 
         //prepare result matrix
         long[][] result = new long[matrix.length - rank(matrix)][matrix.length];
@@ -411,7 +449,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
             //set kernel vector for every row
             for (int row = kernelMatrix.length - 1; row >= 0; row--) {
-                
+
                 long value = 0;
                 //loop used to find a good value in current row
                 for (int col = row + 1; col <= kernelMatrix[0].length - 1; col++) {
@@ -421,9 +459,19 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
                 if (row == kernelMatrix.length - 1) {
                     long numerator = kernelMatrix[row][(kernelMatrix.length - 1) + position];
                     long denumerator = kernelMatrix[row][row];
-                    result[index][row] = galoisField.divide(numerator, denumerator);
+                    if (denumerator != 0) {
+                        result[index][row] = galoisField.divide(numerator, denumerator);
+                    } else {
+                        result[index][row] = 0;
+                    }
+
                 } else {
-                    result[index][row] = galoisField.divide(value, kernelMatrix[row][row]);
+                    if (kernelMatrix[row][row] != 0) {
+                        result[index][row] = galoisField.divide(value, kernelMatrix[row][row]);
+                    } else {
+                        result[index][row] = 0;
+                    }
+
                 }
             }
         }
@@ -448,7 +496,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
                     + "operation cannot be performed.");
         }
 
-        if (matrix1[0].length != matrix2[0].length) {
+        if ((matrix1[0].length != matrix2[0].length) || (matrix1.length != matrix2.length)) {
             throw new IllegalArgumentException("Argument matrices have different dimensions, "
                     + "operation cannot be performed.");
         }
@@ -472,7 +520,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     //change line row with line with pivot at position column
     private long[][] findPivot(long[][] matrix, int column, int row) {
 
-        for (int x = 0; x < matrix.length; x++) {
+        for (int x = /*0*/ row; x < matrix.length; x++) {
             for (int y = 0; y < column + 1; y++) {
                 if (matrix[x][y] != 0 && y == column) {
                     return swapLines(matrix, row, x);
