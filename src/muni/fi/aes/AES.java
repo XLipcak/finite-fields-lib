@@ -15,7 +15,7 @@ import muni.fi.gf2n.classes.MatrixGF2N;
  *
  * @author Jakub Lipcak, Masaryk University
  * 
- * Implementation of AES algorithm working with four types of 
+ * Implementation of AES algorithm working with four types of  
  * Block cipher modes(ECB, CBC, CFB, OFB) and with keys of three
  * different lengths(128bit, 192bit, 256bit).
  * 
@@ -773,7 +773,6 @@ public final class AES {
             } else {
                 length = 16;
             }
-
 
             //encryption
             System.arraycopy(input, x, temp, 0, length);

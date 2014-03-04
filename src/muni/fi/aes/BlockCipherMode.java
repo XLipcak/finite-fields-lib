@@ -8,7 +8,8 @@ package muni.fi.aes;
  *
  * @author Jakub Lipcak, Masaryk University
  * 
- * Block cipher mode of operation enumeration. 
+ * Block cipher mode of operation enumeration type. 
+ * Four types supported.
  * 
  */
 public enum BlockCipherMode {
