@@ -48,7 +48,7 @@ public class AESTest {
                 plaintext[y] = (byte) rn.nextInt(256);
             }
             ciphertext = aes.encryptBlock(plaintext, key);
-            assertArrayEquals(plaintext, aes.decryptBlock(ciphertext, key));
+            assertArrayEquals("Block of plaintext after encryption and decryption must be the same.", plaintext, aes.decryptBlock(ciphertext, key));
         }
     }
 
@@ -74,82 +74,66 @@ public class AESTest {
 
     @Test
     public void testVectorsEncryptionWith128BitKeyInEcbMode() {
-        AES aes = new AES(BlockCipherMode.ECB);
 
-        String[] keys = {"2b7e151628aed2a6abf7158809cf4f3c"};
+        String[] keys = {"2b7e151628aed2a6abf7158809cf4f3c",
+            "2b7e151628aed2a6abf7158809cf4f3c",
+            "2b7e151628aed2a6abf7158809cf4f3c",
+            "2b7e151628aed2a6abf7158809cf4f3c"};
         String[] plainTexts = {"6bc1bee22e409f96e93d7e117393172a",
             "ae2d8a571e03ac9c9eb76fac45af8e51",
             "30c81c46a35ce411e5fbc1191a0a52ef",
             "f69f2445df4f9b17ad2b417be66c3710"};
-
         String[] expectedCipherTexts = {"3ad77bb40d7a3660a89ecaf32466ef97",
             "f5d3d58503b9699de785895a96fdbaaf",
             "43b1cd7f598ece23881b00e3ed030688",
             "7b0c785e27e8ad3f8223207104725dd4"};
+        String[] initializationVectors = {"0", "0", "0", "0"};
 
-        for (int x = 0; x < 4; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[0]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-
-            assertArrayEquals(aes.encryptECB(plainText, key), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.ECB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith192BitKeyInEcbMode() {
-        AES aes = new AES(BlockCipherMode.ECB);
 
-        String[] keys = {"8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b"};
+        String[] keys = {"8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
+            "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
+            "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
+            "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b"};
         String[] plainTexts = {"6bc1bee22e409f96e93d7e117393172a",
             "ae2d8a571e03ac9c9eb76fac45af8e51",
             "30c81c46a35ce411e5fbc1191a0a52ef",
             "f69f2445df4f9b17ad2b417be66c3710"};
-
         String[] expectedCipherTexts = {"bd334f1d6e45f25ff712a214571fa5cc",
             "974104846d0ad3ad7734ecb3ecee4eef",
             "ef7afd2270e2e60adce0ba2face6444e",
             "9a4b41ba738d6c72fb16691603c18e0e"};
+        String[] initializationVectors = {"0", "0", "0", "0"};
 
-        for (int x = 0; x < 4; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[0]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-
-            assertArrayEquals(aes.encryptECB(plainText, key), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.ECB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith256BitKeyInEcbMode() {
-        AES aes = new AES(BlockCipherMode.ECB);
 
-        String[] keys = {"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4"};
+        String[] keys = {"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
+            "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
+            "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
+            "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4"};
         String[] plainTexts = {"6bc1bee22e409f96e93d7e117393172a",
             "ae2d8a571e03ac9c9eb76fac45af8e51",
             "30c81c46a35ce411e5fbc1191a0a52ef",
             "f69f2445df4f9b17ad2b417be66c3710"};
-
         String[] expectedCipherTexts = {"f3eed1bdb5d2a03c064b5a7e3db181f8",
             "591ccb10d410ed26dc5ba74a31362870",
             "b6ed21b99ca6f4f9f153e7b1beafed1d",
             "23304b7a39f9f3ff067d8d8f9e24ecc7"};
+        String[] initializationVectors = {"0", "0", "0", "0"};
 
-        for (int x = 0; x < 4; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[0]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-
-            assertArrayEquals(aes.encryptECB(plainText, key), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.ECB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith128BitKeyInCbcMode() {
-        AES aes = new AES(BlockCipherMode.CBC);
 
         String[] keys = {"00000000000000000000000000000000",
             "2b7e151628aed2a6abf7158809cf4f3c",
@@ -172,20 +156,11 @@ public class AESTest {
             "5086CB9B507219EE95DB113A917678B2",
             "73BED6B8E3C1743B7116E69E22229516"};
 
-        for (int x = 0; x < keys.length; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[x]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
-
-            assertArrayEquals(aes.encrypt(plainText, key, initializationVector), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.CBC, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith192BitKeyInCbcMode() {
-        AES aes = new AES(BlockCipherMode.CBC);
 
         String[] keys = {"e9f065d7c13573587f7875357dfbb16c53489f6a4bd0f7cd",
             "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
@@ -208,20 +183,11 @@ public class AESTest {
             "B4D9ADA9AD7DEDF4E5E738763F69145A",
             "571B242012FB7AE07FA9BAAC3DF102E0"};
 
-        for (int x = 0; x < keys.length; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[x]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
-
-            assertArrayEquals(aes.encrypt(plainText, key, initializationVector), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.CBC, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith256BitKeyInCbcMode() {
-        AES aes = new AES(BlockCipherMode.CBC);
 
         String[] keys = {"0000000000000000000000000000000000000000000000000000000000000000",
             "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
@@ -244,20 +210,11 @@ public class AESTest {
             "9CFC4E967EDB808D679F777BC6702C7D",
             "39F23369A9D9BACFA530E26304231461"};
 
-        for (int x = 0; x < keys.length; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[x]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
-
-            assertArrayEquals(aes.encrypt(plainText, key, initializationVector), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.CBC, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith128BitKeyInCfbMode() {
-        AES aes = new AES(BlockCipherMode.CFB);
 
         String[] keys = {"00000000000000000000000000000000",
             "2b7e151628aed2a6abf7158809cf4f3c",
@@ -280,20 +237,11 @@ public class AESTest {
             "C8A64537A0B3A93FCDE3CDAD9F1CE58B",
             "26751F67A3CBB140B1808CF187A4F4DF"};
 
-        for (int x = 0; x < keys.length; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[x]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
-
-            assertArrayEquals(aes.encrypt(plainText, key, initializationVector), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.CFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith192BitKeyInCfbMode() {
-        AES aes = new AES(BlockCipherMode.CFB);
 
         String[] keys = {"8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
             "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
@@ -312,20 +260,11 @@ public class AESTest {
             "67CE7F7F81173621961A2B70171D3D7A",
             "2E1E8A1DD59B88B1C8E60FED1EFAC4C9"};
 
-        for (int x = 0; x < keys.length; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[x]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
-
-            assertArrayEquals(aes.encrypt(plainText, key, initializationVector), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.CFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith256BitKeyInCfbMode() {
-        AES aes = new AES(BlockCipherMode.CFB);
 
         String[] keys = {"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
             "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
@@ -344,20 +283,11 @@ public class AESTest {
             "39FFED143B28B1C832113C6331E5407B",
             "DF10132415E54B92A13ED0A8267AE2F9"};
 
-        for (int x = 0; x < keys.length; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[x]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
-
-            assertArrayEquals(aes.encrypt(plainText, key, initializationVector), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.CFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith128BitKeyInOfbMode() {
-        AES aes = new AES(BlockCipherMode.OFB);
 
         String[] keys = {"2b7e151628aed2a6abf7158809cf4f3c",
             "2b7e151628aed2a6abf7158809cf4f3c",
@@ -376,20 +306,11 @@ public class AESTest {
             "D9A4DADA0892239F6B8B3D7680E15674",
             "A78819583F0308E7A6BF36B1386ABF23"};
 
-        for (int x = 0; x < keys.length; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[x]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
-
-            assertArrayEquals(aes.encrypt(plainText, key, initializationVector), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.OFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith192BitKeyInOfbMode() {
-        AES aes = new AES(BlockCipherMode.OFB);
 
         String[] keys = {"8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
             "8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b",
@@ -408,20 +329,11 @@ public class AESTest {
             "52EF01DA52602FE0975F78AC84BF8A50",
             "BD5286AC63AABD7EB067AC54B553F71D"};
 
-        for (int x = 0; x < keys.length; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[x]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
-
-            assertArrayEquals(aes.encrypt(plainText, key, initializationVector), expectedCipherText);
-        }
+        testVectorsEncryption(BlockCipherMode.OFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
     public void testVectorsEncryptionWith256BitKeyInOfbMode() {
-        AES aes = new AES(BlockCipherMode.OFB);
 
         String[] keys = {"603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
             "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4",
@@ -440,6 +352,206 @@ public class AESTest {
             "E1C656305ED1A7A6563805746FE03EDC",
             "41635BE625B48AFC1666DD42A09D96E7"};
 
+        testVectorsEncryption(BlockCipherMode.OFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith128BitKeyInEcbMode() {
+
+        String[] keys = {"00000000000000000000000000000000",
+            "ffe00000000000000000000000000000"};
+        String[] expectedPlainTexts = {"f34481ec3cc627bacd5dc3fb08f273e6",
+            "00000000000000000000000000000000"};
+        String[] cipherTexts = {"0336763e966d92595a567cc9ce537f5e",
+            "956d7798fac20f82a8823f984d06f7f5"};
+        String[] initializationVectors = {"0", "0"};
+
+        testVectorsDecryption(BlockCipherMode.ECB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith192BitKeyInEcbMode() {
+
+        String[] keys = {"ffffffffffffffffffff8000000000000000000000000000",
+            "ffffffffffffffffffffc000000000000000000000000000",
+            "ffffffffffffffffffffe000000000000000000000000000"};
+        String[] expectedPlainTexts = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+        String[] cipherTexts = {"054b3bf4998aeb05afd87ec536533a36",
+            "3783f7bf44c97f065258a666cae03020",
+            "aad4c8a63f80954104de7b92cede1be1"};
+        String[] initializationVectors = {"0", "0", "0", "0"};
+
+        testVectorsDecryption(BlockCipherMode.ECB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith256BitKeyInEcbMode() {
+
+        String[] keys = {"0000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000"};
+        String[] expectedPlainTexts = {"ffffffffffffffffffffffffffffff80",
+            "ffffffffffffffffffffffffffffffc0",
+            "ffffffffffffffffffffffffffffffe0"};
+        String[] cipherTexts = {"0493370e054b09871130fe49af730a5a",
+            "9b7b940f6c509f9e44a4ee140448ee46",
+            "2915be4a1ecfdcbe3e023811a12bb6c7"};
+        String[] initializationVectors = {"0", "0", "0", "0"};
+
+        testVectorsDecryption(BlockCipherMode.ECB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith128BitKeyInCbcMode() {
+
+        String[] keys = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+        String[] expectedPlainTexts = {"f0000000000000000000000000000000",
+            "f8000000000000000000000000000000"};
+        String[] cipherTexts = {"96d9fd5cc4f07441727df0f33e401a36",
+            "30ccdb044646d7e1f3ccea3dca08b8c0"};
+        String[] initializationVectors = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+
+        testVectorsDecryption(BlockCipherMode.CBC, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith192BitKeyInCbcMode() {
+
+        String[] keys = {"000000000000000000000000000000000000000000000000",
+            "000000000000000000000000000000000000000000000000",
+            "000000000000000000000000000000000000000000000000"};
+        String[] expectedPlainTexts = {"fffffffffffffff80000000000000000",
+            "fffffffffffffffc0000000000000000",
+            "fffffffffffffffe0000000000000000"};
+        String[] cipherTexts = {"3a3c15bfc11a9537c130687004e136ee",
+            "22c0a7678dc6d8cf5c8a6d5a9960767c",
+            "b46b09809d68b9a456432a79bdc2e38c"};
+        String[] initializationVectors = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+
+        testVectorsDecryption(BlockCipherMode.CBC, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith256BitKeyInCbcMode() {
+
+        String[] keys = {"ffffffffffffffffffffffffffffff8000000000000000000000000000000000",
+            "ffffffffffffffffffffffffffffffc000000000000000000000000000000000",
+            "ffffffffffffffffffffffffffffffe000000000000000000000000000000000"};
+        String[] expectedPlainTexts = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+        String[] cipherTexts = {"a866bc65b6941d86e8420a7ffb0964db",
+            "8193c6ff85225ced4255e92f6e078a14",
+            "9661cb2424d7d4a380d547f9e7ec1cb9"};
+        String[] initializationVectors = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+
+        testVectorsDecryption(BlockCipherMode.CBC, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith128BitKeyInCfbMode() {
+
+        String[] keys = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+        String[] expectedPlainTexts = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+        String[] cipherTexts = {"0336763e966d92595a567cc9ce537f5e",
+            "a9a1631bf4996954ebc093957b234589"};
+        String[] initializationVectors = {"f34481ec3cc627bacd5dc3fb08f273e6",
+            "9798c4640bad75c7c3227db910174e72"};
+
+        testVectorsDecryption(BlockCipherMode.CFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith192BitKeyInCfbMode() {
+
+        String[] keys = {"f029ce61d4e5a405b41ead0a883cc6a737da2cf50a6c92ae",
+            "61257134a518a0d57d9d244d45f6498cbc32f2bafc522d79"};
+        String[] expectedPlainTexts = {"00",
+            "00"};
+        String[] cipherTexts = {"a2",
+            "cf"};
+        String[] initializationVectors = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+
+        testVectorsDecryption(BlockCipherMode.CFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith256BitKeyInCfbMode() {
+
+        String[] keys = {"0000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000"};
+        String[] expectedPlainTexts = {"00",
+            "00"};
+        String[] cipherTexts = {"5c",
+            "a9"};
+        String[] initializationVectors = {"014730f80ac625fe84f026c60bfd547d",
+            "0b24af36193ce4665f2825d7b4749c98"};
+
+        testVectorsDecryption(BlockCipherMode.CFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith128BitKeyInOfbMode() {
+
+        String[] keys = {"ffff0000000000000000000000000000",
+            "ffff8000000000000000000000000000"};
+        String[] expectedPlainTexts = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+        String[] cipherTexts = {"97d0754fe68f11b9e375d070a608c884",
+            "c6a0b3e998d05068a5399778405200b4"};
+        String[] initializationVectors = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+
+        testVectorsDecryption(BlockCipherMode.OFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith192BitKeyInOfbMode() {
+
+        String[] keys = {"ffffffffffffffffffffffe0000000000000000000000000",
+            "fffffffffffffffffffffff0000000000000000000000000"};
+        String[] expectedPlainTexts = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+        String[] cipherTexts = {"88330baa4f2b618fc9d9b021bf503d5a",
+            "fc9e0ea22480b0bac935c8a8ebefcdcf"};
+        String[] initializationVectors = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+
+        testVectorsDecryption(BlockCipherMode.OFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    @Test
+    public void testVectorsDecryptionWith256BitKeyInOfbMode() {
+
+        String[] keys = {"0000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000"};
+        String[] expectedPlainTexts = {"00000000000000000000000000000000",
+            "00000000000000000000000000000000"};
+        String[] cipherTexts = {"7bfe9d876c6d63c1d035da8fe21c409d",
+            "acdace8078a32b1a182bfa4987ca1347"};
+        String[] initializationVectors = {"fffffffffffffffffffffffffffffffe",
+            "ffffffffffffffffffffffffffffffff"};
+
+        testVectorsDecryption(BlockCipherMode.OFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+    }
+
+    //use test vectors to encrypt data, check result
+    private void testVectorsEncryption(BlockCipherMode mode, String[] keys, String[] plainTexts,
+            String[] expectedCipherTexts, String[] initializationVectors) {
+
+        AES aes = new AES(mode);
+
         for (int x = 0; x < keys.length; x++) {
 
             byte[] key = hexaStringToByteArray(keys[x]);
@@ -447,27 +559,30 @@ public class AESTest {
             byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
             byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
 
-            assertArrayEquals(aes.encrypt(plainText, key, initializationVector), expectedCipherText);
+            assertArrayEquals("Encrypted plaintext differs from expected result vector.",
+                    expectedCipherText, aes.encrypt(plainText, key, initializationVector));
         }
     }
 
-    private byte[] hexaStringToByteArray(String str) {
-        byte[] result = new byte[(str.length() / 2)];
+    //use test vectors to decrypt data, check result
+    private void testVectorsDecryption(BlockCipherMode mode, String[] keys, String[] expectedPlainTexts,
+            String[] cipherTexts, String[] initializationVectors) {
 
-        for (int x = 0; x < result.length; x++) {
-            String hexa = str.substring(x * 2, (x * 2) + 2);
-            result[x] = (byte) Long.parseLong(hexa, 16);
+        AES aes = new AES(mode);
+
+        for (int x = 0; x < keys.length; x++) {
+
+            byte[] key = hexaStringToByteArray(keys[x]);
+            byte[] plainText = hexaStringToByteArray(expectedPlainTexts[x]);
+            byte[] expectedCipherText = hexaStringToByteArray(cipherTexts[x]);
+            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
+
+            assertArrayEquals("Decrypted plaintext differs from expected result vector.",
+                    plainText, reduceArray(aes.decrypt(expectedCipherText, key, initializationVector), plainText.length, false));
         }
-
-        return result;
     }
 
-    private byte[] reduceArray(byte[] input, int length) {
-        byte[] result = new byte[length];
-        System.arraycopy(input, 0, result, 0, length);
-        return result;
-    }
-
+    //create random text of random length, encrypt an decrypt it, check result
     private void testEncryptDecryptPlainTextOfDifferentLengths(BlockCipherMode mode) {
         AES aes = new AES(mode);
         Random rn = new Random();
@@ -487,7 +602,36 @@ public class AESTest {
                 plaintext[y] = (byte) rn.nextInt(256);
             }
             ciphertext = aes.encrypt(plaintext, key, initVector);
-            assertArrayEquals(plaintext, reduceArray(aes.decrypt(ciphertext, key, initVector), textLength));
+            assertArrayEquals("Plaintext after encryption and decryption must be the same.",
+                    plaintext, reduceArray(aes.decrypt(ciphertext, key, initVector), textLength, true));
         }
+    }
+
+    /*
+     * Convert pairs of Hexadecimal chars to array of bytes.
+     */
+    private byte[] hexaStringToByteArray(String str) {
+        byte[] result = new byte[(str.length() / 2)];
+
+        for (int x = 0; x < result.length; x++) {
+            String hexa = str.substring(x * 2, (x * 2) + 2);
+            result[x] = (byte) Long.parseLong(hexa, 16);
+        }
+
+        return result;
+    }
+
+    /*
+     * Reduce input array to length. Only zeroes are expected after length index.
+     */
+    private byte[] reduceArray(byte[] input, int length, boolean zeroControl) {
+        byte[] result = new byte[length];
+        System.arraycopy(input, 0, result, 0, length);
+        for (int x = length; x < input.length; x++) {
+            if (input[x] != 0 && zeroControl) {
+                fail();
+            }
+        }
+        return result;
     }
 }
