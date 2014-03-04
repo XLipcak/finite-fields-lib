@@ -7,6 +7,9 @@ package muni.fi.aes;
 /**
  *
  * @author Jakub Lipcak, Masaryk University
+ * 
+ * Block cipher mode of operation enumeration. 
+ * 
  */
 public enum BlockCipherMode {
     ECB, CBC, CFB, OFB;
