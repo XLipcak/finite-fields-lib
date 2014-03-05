@@ -4,6 +4,7 @@
  */
 package GaloisFieldsValidityTesting;
 
+import java.util.Arrays;
 import java.util.Random;
 import muni.fi.gf2n.classes.GF2N;
 import muni.fi.gf2n.classes.MatrixGF2N;
@@ -17,8 +18,9 @@ import static org.junit.Assert.*;
 /**
  *
  * @author Jakub Lipcak, Masaryk University
- * 
+ *
  * Class MatrixGF2N Testing
+ * 
  */
 public class MatrixGF2NTest {
 
@@ -355,15 +357,22 @@ public class MatrixGF2NTest {
                 resultVect[x] = rn.nextInt(4194303);
             }
 
-            long[][] resultMat = mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, resultVect));
-
-            for (int y = 0; y < resultMat[0].length; y++) {
-                assertEquals("Linear equations system solved wrong.", resultVect[y], resultMat[0][y]);
+            try {
+                long[][] resultMat = mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, resultVect));
+                for (int y = 0; y < resultMat[0].length; y++) {
+                    assertEquals("Linear equations system solved wrong.", resultVect[y], resultMat[0][y]);
+                }
+            } catch (IllegalArgumentException ex) {
+                if (ex.getMessage().equals("Cannot solve linear equations system: linearly dependent rows.")) {
+                    //this may sometimes happen
+                } else {
+                    fail(ex.toString());
+                }
             }
         }
 
-        mat = new MatrixGF2N(3);
-        for (int test = 0; test < 16; test++) {
+        mat = new MatrixGF2N(3);  
+        for (int test = 0; test < 64; test++) {
             int size = rn.nextInt(128) + 1;
             long[][] matrix1 = new long[size][size];
             long[] resultVect = new long[size];
@@ -378,10 +387,17 @@ public class MatrixGF2NTest {
                 resultVect[x] = rn.nextInt(2);
             }
 
-            long[][] resultMat = mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, resultVect));
-
-            for (int y = 0; y < resultMat[0].length; y++) {
-                assertEquals("Linear equations system solved wrong.", resultVect[y], resultMat[0][y]);
+            try {
+                long[][] resultMat = mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, resultVect));
+                for (int y = 0; y < resultMat[0].length; y++) {
+                    assertEquals("Linear equations system solved wrong.", resultVect[y], resultMat[0][y]);
+                }
+            } catch (IllegalArgumentException ex) {
+                if (ex.getMessage().equals("Cannot solve linear equations system: linearly dependent rows.")) {
+                    //this may happen, very often with binary finite fields
+                } else {
+                    fail(ex.toString());
+                }
             }
         }
     }

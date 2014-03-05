@@ -15,5 +15,4 @@ public interface GaloisFieldArithmetic {
     long divide(long element1, long element2);
     long invert(long element);
     long power(long element, long exponent);
-    int compare(long element1, long element2);
 }

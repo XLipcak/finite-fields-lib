@@ -13,5 +13,4 @@ public interface GaloisFieldVectorArithmetic {
     long[] add(long[] vector1, long[] vector2);
     long[] subtract(long[] vector1, long[] vector2);
     long[] multiply(long[] vector, long scalarValue);
-    int compare(long[] vector1, long[] vector2);
 }

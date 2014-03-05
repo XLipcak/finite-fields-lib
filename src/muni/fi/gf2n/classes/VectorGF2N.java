@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class VectorGF2N implements GaloisFieldVectorArithmetic {
 
-    GF2N galoisField;
+    private GF2N galoisField;
 
     public VectorGF2N(GF2N galoisField) {
         this.galoisField = galoisField;
@@ -56,11 +56,6 @@ public class VectorGF2N implements GaloisFieldVectorArithmetic {
         }
 
         return result;
-    }
-
-    @Override
-    public int compare(long[] vector1, long[] vector2) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     private void isValid(long[] vect1, long[] vect2) {

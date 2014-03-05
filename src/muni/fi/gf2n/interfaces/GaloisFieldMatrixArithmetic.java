@@ -37,5 +37,4 @@ public interface GaloisFieldMatrixArithmetic {
     
     long[][] image(long[][] matrix);
     long[][] kernel(long[][] matrix);
-    int compare(long[][] matrix1, long[][] matrix2);
 }

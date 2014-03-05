@@ -18,13 +18,10 @@ public interface GaloisFieldPolynomialArithmetic {
     long[] divide(long[] polynomial1, long[] polynomial2);
     long[] divide(long[] polynomial1, long[] polynomial2, long[] remainder);
     
-     // result = gcd(polynomial1, polynomial2) = a*polynomial1 + b*polynomial2
-    long[] xgcd(long[] polynomial1, long[] polynomial2, long[] a, long[] b);
     long[] gcd(long[] polynomial1, long[] polynomial2);
     
     //result = a^{-1} % f
     long[] invert(long[] polynomial, long[] moduloPolynomial);
     long[] power(long[] polynomial, long exponent);
-    int compare(long[] polynomial1, long[] polynomial2);
     
 }

@@ -4,6 +4,8 @@
  */
 package muni.fi.gf2n.classes;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import muni.fi.gf2n.interfaces.GaloisFieldArithmetic;
 
 /**
@@ -21,16 +23,15 @@ public class GF2N implements GaloisFieldArithmetic {
         2251799813685248L, 4503599627370496L, 9007199254740992L, 18014398509481984L, 36028797018963968L,
         72057594037927936L, 144115188075855872L, 288230376151711744L, 576460752303423488L, 1152921504606846976L,
         2305843009213693952L, 4611686018427387904L, 9223372036854775807L};
-    
     private long reducingPolynomial;
     private short fieldSize;
 
     public GF2N(long reducingPolynomial) {
-        
-        if(reducingPolynomial <= 0){
+
+        if (reducingPolynomial <= 0) {
             throw new IllegalArgumentException("Reducing polynomial must be represented by positive number.");
         }
-        
+
         this.reducingPolynomial = reducingPolynomial;
         fieldSize = countBinarySize(reducingPolynomial);
     }
@@ -74,7 +75,7 @@ public class GF2N implements GaloisFieldArithmetic {
     @Override
     public long divide(long element1, long element2) {
         isInField(element1, element2);
-        if (element2 == 0){
+        if (element2 == 0) {
             throw new IllegalArgumentException("Division by zero.");
         }
         return (multiply(element1, invert(element2)));
@@ -83,17 +84,18 @@ public class GF2N implements GaloisFieldArithmetic {
     @Override
     public long invert(long element) {
         isInField(element);
-        
-        if(element == 0){
-            throw new IllegalArgumentException("Cannot compute inversion of zero!");
+
+        if (element == 0) {
+            //throw new IllegalArgumentException("Cannot compute inversion of zero!"); OVERIT
+            return 0;
         }
-        
-        if(fieldSize == 1){
-            if(element == 1){
+
+        if (fieldSize == 1) {
+            if (element == 1) {
                 return 1;
             }
         }
-        
+
         return power(element, BINARY_POWERS[fieldSize] - 2);
     }
 
@@ -101,13 +103,13 @@ public class GF2N implements GaloisFieldArithmetic {
     @Override
     public long power(long element, long exponent) {
         isInField(element);
-        
+
         //overit este tie 2 podmienky ci je to good pristup
-        if(exponent < 0){
+        if (exponent < 0) {
             throw new IllegalArgumentException("Cannot compute power with negative exponent!");
         }
-        
-        if(exponent == 0){
+
+        if (exponent == 0 && element != 0) {
             return 1l;
         }
 
@@ -126,21 +128,16 @@ public class GF2N implements GaloisFieldArithmetic {
         return multiply(result, a);
     }
 
-    @Override
-    public int compare(long element1, long element2) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public long getReducingPolynomial() {
         return reducingPolynomial;
     }
 
     public void setReducingPolynomial(long reducingPolynomial) {
-        
-        if(reducingPolynomial <= 0){
+
+        if (reducingPolynomial <= 0) {
             throw new IllegalArgumentException("Reducing polynomial must be represented by positive number.");
         }
-        
+
         this.reducingPolynomial = reducingPolynomial;
         fieldSize = countBinarySize(reducingPolynomial);
     }
@@ -163,7 +160,7 @@ public class GF2N implements GaloisFieldArithmetic {
 
     private void isInField(long element) {
 
-        if ( (element >= BINARY_POWERS[fieldSize]) || (element < 0) ) {
+        if ((element >= BINARY_POWERS[fieldSize]) || (element < 0)) {
             throw new IllegalArgumentException("Values for this reducing polynomial must be in [0, "
                     + (BINARY_POWERS[fieldSize] - 1) + "].");
         }

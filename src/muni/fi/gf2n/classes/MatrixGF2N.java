@@ -9,9 +9,9 @@ import muni.fi.gf2n.interfaces.GaloisFieldMatrixArithmetic;
 /**
  *
  * @author Jakub Lipcak, Masaryk University
- * 
+ *
  * Class MatrixGF2N for computation with Matrices in Galois Fields.
- * 
+ *
  */
 public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
@@ -347,6 +347,10 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             throw new IllegalArgumentException("Cannot solve linear equations system: dimension mismatch.");
         }
 
+        if (rank(equationMatrix) != equationMatrix.length) {
+            throw new IllegalArgumentException("Cannot solve linear equations system: linearly dependent rows.");
+        }
+
 
         //prepare equation matrix
         long[][] eqMat = new long[equationMatrix.length][equationMatrix[0].length + 1];
@@ -355,7 +359,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             eqMat[x][equationMatrix[0].length] = results[x];
         }
 
-        
+
         //modified Gauss elimination
         for (int diagPos = 1; diagPos < Math.min(eqMat.length, eqMat[0].length) + 1; diagPos++) {
 
@@ -382,11 +386,12 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
                     //subtract from line, pivot will be set to zero and other values will be edited
                     for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < eqMat[0].length; colsUnderDiagPos++) {
                         eqMat[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(
-                                galoisField.multiply(eqMat[diagPos - 1][colsUnderDiagPos], value), 
+                                galoisField.multiply(eqMat[diagPos - 1][colsUnderDiagPos], value),
                                 eqMat[rowsUnderDiagPos][colsUnderDiagPos]);
                     }
                 } catch (IllegalArgumentException ex) {
                     //catched division by zero, OK, thrown by columns full of zeroes
+                    
                     if (ex.toString().contains("Values for this reducing polynomial must be in")) {
                         //also catched, when some values are not in GF, new exception is thrown then
                         throw new IllegalArgumentException(ex);
@@ -400,14 +405,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         for (int x = eqMat[0].length - 2; x >= 0; x--) {
             for (int y = eqMat[0].length - 2; y >= x; y--) {
                 if (y == x) {
-                    try{
-                        result[x] = galoisField.divide(eqMat[x][eqMat[0].length - 1], eqMat[x][x]);
-                    } catch (IllegalArgumentException ex){
-                        //Division by zero, som rows are linearly dependent, 
-                        //set result at this position to zero.
-                        result[x] = 0;
-                    }
-                    
+                    result[x] = galoisField.divide(eqMat[x][eqMat[0].length - 1], eqMat[x][x]);
                 } else {
                     eqMat[x][eqMat[0].length - 1] = galoisField.subtract(eqMat[x][eqMat[0].length - 1],
                             galoisField.multiply(eqMat[x][y], result[y]));
@@ -425,7 +423,6 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         return reduceLinearlyDependentRows(matrix);
     }
 
-    
     //Kernel(Matrix) * (Matrix) = zeroMatrix
     @Override
     public long[][] kernel(long[][] matrix) {
@@ -479,11 +476,6 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         return result;
     }
 
-    @Override
-    public int compare(long[][] matrix1, long[][] matrix2) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     private void isValid(long[][] matrix1, long[][] matrix2) {
 
         if (matrix1.length == 0 || matrix2.length == 0) {
@@ -520,7 +512,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     //change line row with line with pivot at position column
     private long[][] findPivot(long[][] matrix, int column, int row) {
 
-        for (int x = /*0*/ row; x < matrix.length; x++) {
+        for (int x = row; x < matrix.length; x++) {
             for (int y = 0; y < column + 1; y++) {
                 if (matrix[x][y] != 0 && y == column) {
                     return swapLines(matrix, row, x);
