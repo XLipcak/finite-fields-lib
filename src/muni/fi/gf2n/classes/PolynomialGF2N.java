@@ -12,10 +12,13 @@ import java.util.List;
 /**
  *
  * @author Jakub Lipcak, Masaryk University
+ *
+ * PolynomialGF2N class
+ *
  */
 public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
 
-    GF2N galoisField;
+    private GF2N galoisField;
 
     public PolynomialGF2N(GF2N galoisField) {
         this.galoisField = galoisField;
@@ -27,7 +30,6 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
 
     @Override
     public long[] add(long[] polynomial1, long[] polynomial2) {
-        isValid(polynomial1, polynomial2);
 
         int length = Math.max(polynomial1.length, polynomial2.length);
         long[] result = new long[length];
@@ -50,14 +52,15 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
 
     @Override
     public long[] subtract(long[] polynomial1, long[] polynomial2) {
-        isValid(polynomial1, polynomial2);
         return add(polynomial1, polynomial2);
     }
 
-    //Karatsuba would be faster
     @Override
     public long[] multiply(long[] polynomial1, long[] polynomial2) {
-        isValid(polynomial1, polynomial2);
+
+        if (isZero(polynomial1) || isZero(polynomial2)) {
+            return new long[0];
+        }
 
         long[] result = new long[polynomial1.length + polynomial2.length - 1];
 
@@ -77,15 +80,22 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
 
     @Override
     public long[] divide(long[] polynomial1, long[] polynomial2) {
-        isValid(polynomial1, polynomial2);
+
+        if (isZero(polynomial2)) {
+            throw new IllegalArgumentException("Division by zero!");
+        }
+
         long[] remainder = new long[Math.max(polynomial1.length, polynomial2.length)];
         return divide(polynomial1, polynomial2, remainder);
     }
 
-    //remainder length control?
+    //remainder length not controlled yet
     @Override
     public long[] divide(long[] polynomial1, long[] polynomial2, long[] remainder) {
-        isValid(polynomial1, polynomial2);
+
+        if (isZero(polynomial2)) {
+            throw new IllegalArgumentException("Division by zero!");
+        }
 
         long[] result;
         long[] rem;
@@ -131,10 +141,8 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         return result;
     }
 
-    //to repair computing with short polynomials
-    @Override
-    public long[] xgcd(long[] polynomial1, long[] polynomial2, long[] a, long[] b) {
-        isValid(polynomial1, polynomial2);
+    // result = gcd(polynomial1, polynomial2) = a*polynomial1 + b*polynomial2
+    private long[] xgcd(long[] polynomial1, long[] polynomial2, long[] a, long[] b) {
 
         if (polynomial2.length > polynomial1.length) {
             //swap
@@ -174,13 +182,12 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             denumerator = remainder;
         }
 
-        //overit este tuto podmienku
         if (resultList.size() > 3) {
+            //we don't need last 3 values
             resultList.remove(resultList.size() - 1);
             resultList.remove(resultList.size() - 1);
             resultList.remove(resultList.size() - 1);
         }
-
 
         long[] value = {1l};
         bezoutIdentity.add(value);
@@ -202,21 +209,27 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             bezoutIdentity.set(3, add(temp, multiply(bezoutIdentity.get(3), resultList.get(resultList.size() - 1))));
         }
 
-        //test control output to be deleted...
-        System.out.println("Test:  " + Arrays.toString(add(multiply(bezoutIdentity.get(0), bezoutIdentity.get(1)),
-                multiply(bezoutIdentity.get(2), bezoutIdentity.get(3)))));
-
         //save Bezout's coefficients and return gcd
         System.arraycopy(bezoutIdentity.get(0), 0, a, 0, bezoutIdentity.get(0).length);
         System.arraycopy(bezoutIdentity.get(3), 0, b, 0, bezoutIdentity.get(3).length);
 
+        //gcd, not normalized
         return result;
 
     }
 
     @Override
     public long[] gcd(long[] polynomial1, long[] polynomial2) {
-        isValid(polynomial1, polynomial2);
+
+        if (!isZero(polynomial1) && isZero(polynomial2)) {
+            return polynomial1;
+        }
+        if (isZero(polynomial1) && !isZero(polynomial2)) {
+            return polynomial2;
+        }
+        if (isZero(polynomial1) && isZero(polynomial2)) {
+            return new long[0];
+        }
 
         long[] result = new long[polynomial2.length];
         long[] remainder = polynomial2;
@@ -234,16 +247,25 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             denumerator = remainder;
         }
 
-        return result;
+        //make gcd monic
+        return divide(result, new long[]{result[result.length - 1]});
 
     }
 
     @Override
     public long[] invert(long[] polynomial, long[] moduloPolynomial) {
-        isValid(polynomial, polynomial);
+
+        if (isZero(polynomial) || isZero(moduloPolynomial)) {
+            throw new IllegalArgumentException("Cannot compute inverse for zero polynomials.");
+        }
 
         if ((polynomial.length >= moduloPolynomial.length) || (moduloPolynomial.length == 1)) {
             throw new IllegalArgumentException("Cannot compute inverse for this args.");
+        }
+
+        if (polynomial.length == 1) {
+            //special solution for special case :)
+            return divide(add(new long[]{1}, multiply(moduloPolynomial, polynomial)), polynomial);
         }
 
         long[] gcd;
@@ -257,18 +279,22 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             throw new IllegalArgumentException("Cannot compute inverse for this args.");
         }
 
-        return clearZeroValuesFromPolynomial(result);
+        //normalize result, after this, remainder after division by moduloPolynomial will be 1
+        result = clearZeroValuesFromPolynomial(result);
+        return divide(result, gcd);
     }
 
     @Override
     public long[] power(long[] polynomial, long exponent) {
 
-        isValid(polynomial);
-        
-        if(exponent <= 0){
+        if (exponent <= 0) {
             throw new IllegalArgumentException("Exponent must be positive number!");
         }
-        
+
+        if (isZero(polynomial)) {
+            return new long[0];
+        }
+
         long[] result = polynomial;
 
         for (int x = 1; x < exponent; x++) {
@@ -278,13 +304,8 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         return result;
     }
 
-    @Override
-    public int compare(long[] polynomial1, long[] polynomial2) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     //return new array without zero values on highest positions in argument array
-    public long[] clearZeroValuesFromPolynomial(long[] polynomial) {
+    private long[] clearZeroValuesFromPolynomial(long[] polynomial) {
 
         long[] result;
 
@@ -300,26 +321,16 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         return result;
     }
 
-    private void isValid(long[] polynomial1, long[] polynomial2) {
-
-        if (polynomial1.length == 0 || polynomial2.length == 0) {
-            throw new IllegalArgumentException("Polynomial argument is empty.");
-        }
-
-        if (polynomial1[polynomial1.length - 1] <= 0 || polynomial2[polynomial2.length - 1] <= 0) {
-            throw new IllegalArgumentException("Highest coefficient of a polynomial must be positive nonzero number.");
-        }
-
-    }
-
-    private void isValid(long[] polynomial) {
-
+    private boolean isZero(long[] polynomial) {
         if (polynomial.length == 0) {
-            throw new IllegalArgumentException("Polynomial argument is empty.");
+            return true;
         }
 
-        if (polynomial[polynomial.length - 1] <= 0) {
-            throw new IllegalArgumentException("Highest coefficient of a polynomial must be positive nonzero number.");
+        for (int x = 0; x < polynomial.length; x++) {
+            if (polynomial[x] != 0) {
+                return false;
+            }
         }
+        return true;
     }
 }
