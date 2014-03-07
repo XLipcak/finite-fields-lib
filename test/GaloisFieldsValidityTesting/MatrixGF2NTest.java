@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
  * @author Jakub Lipcak, Masaryk University
  *
  * Class MatrixGF2N Testing
- * 
+ *
  */
 public class MatrixGF2NTest {
 
@@ -322,24 +322,16 @@ public class MatrixGF2NTest {
                     true, isInRowEchelonForm(mat.gauss(matrix1)));
         }
 
-        mat = new MatrixGF2N(3);
 
+        mat = new MatrixGF2N(3);
         for (int test = 0; test < 32; test++) {
             int rowsCount = rn.nextInt(128) + 1;
             int colsCount = rn.nextInt(128) + 1;
 
-            long[][] matrix1 = new long[rowsCount][colsCount];
+            long[][] matrix1 = generateRandomBinaryMatrix(rowsCount, colsCount);
 
-            for (int x = 0; x < rowsCount; x++) {
-                for (int y = 0; y < colsCount; y++) {
-                    matrix1[x][y] = rn.nextInt(2);
-                }
-            }
-            if (!isInRowEchelonForm(mat.gauss(matrix1))) {
-                MatrixGF2N.printMatrix(mat.gauss(matrix1));
-            }
-            assertEquals("Matrix should be in row echelon form after Gauss elimination.",
-                    true, isInRowEchelonForm(mat.gauss(matrix1)));
+            assertTrue("Matrix should be in row echelon form after Gauss elimination.",
+                    isInRowEchelonForm(mat.gauss(matrix1)));
         }
     }
 
@@ -371,17 +363,12 @@ public class MatrixGF2NTest {
             }
         }
 
-        mat = new MatrixGF2N(3);  
+        mat = new MatrixGF2N(3);
         for (int test = 0; test < 64; test++) {
             int size = rn.nextInt(128) + 1;
-            long[][] matrix1 = new long[size][size];
+            long[][] matrix1 = generateRandomBinaryMatrix(size, size);
             long[] resultVect = new long[size];
 
-            for (int x = 0; x < size; x++) {
-                for (int y = 0; y < size; y++) {
-                    matrix1[x][y] = rn.nextInt(2);
-                }
-            }
 
             for (int x = 0; x < size; x++) {
                 resultVect[x] = rn.nextInt(2);
@@ -428,14 +415,42 @@ public class MatrixGF2NTest {
             long[][] matrix1 = generateRandomMatrix(rowsCount, colsCount);
 
             long[][] resultMat = mat.kernel(matrix1);
-            assertEquals("Number of kernel rows is wrong.", (rowsCount - colsCount),
-                    resultMat.length);
 
-            resultMat = mat.multiply(resultMat, matrix1);
-            for (int x = 0; x < resultMat.length; x++) {
-                for (int y = 0; y < resultMat[0].length; y++) {
-                    assertEquals("Kernel of Matrix multiplied by Matrix must be zero matrix.",
-                            0, resultMat[x][y]);
+            try {
+                resultMat = mat.multiply(resultMat, matrix1);
+                if (!isZeroMatrix(resultMat)) {
+                    fail("Kernel of Matrix multiplied by Matrix must be zero matrix.");
+                }
+            } catch (IllegalArgumentException ex) {
+                if (ex.getMessage().contains("Matrix argument is empty")) {
+                    //OK, kernel cannot be computed for some matrices
+                    //Exception is thrown when multiplying empty kernel matrix
+                } else {
+                    throw new IllegalArgumentException(ex.getMessage());
+                }
+            }
+        }
+
+        //Tests in binary GF
+        mat = new MatrixGF2N(3);
+        for (int test = 0; test < 16; test++) {
+            int colsCount = rn.nextInt(64) + 1;
+            int rowsCount = rn.nextInt(64) + 1 + colsCount;
+            long[][] matrix1 = generateRandomBinaryMatrix(rowsCount, colsCount);
+
+            long[][] resultMat = mat.kernel(matrix1);
+
+            try {
+                resultMat = mat.multiply(resultMat, matrix1);
+                if (!isZeroMatrix(resultMat)) {
+                    fail("Kernel of Matrix multiplied by Matrix must be zero matrix.");
+                }
+            } catch (IllegalArgumentException ex) {
+                if (ex.getMessage().contains("Matrix argument is empty")) {
+                    //OK, kernel cannot be computed for some matrices
+                    //Exception is thrown when multiplying empty kernel matrix
+                } else {
+                    throw new IllegalArgumentException(ex.getMessage());
                 }
             }
         }
@@ -459,6 +474,20 @@ public class MatrixGF2NTest {
         return true;
     }
 
+    //equals test for matrices, may be changed in the future for isZeroMatrix method in Matrix separate class
+    private boolean isZeroMatrix(long[][] matrix) {
+
+        for (int x = 0; x < matrix.length; x++) {
+            for (int y = 0; y < matrix[0].length; y++) {
+                if (matrix[x][y] != 0) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     private long[][] generateRandomMatrix(int rowsCount, int colsCount) {
 
         long[][] matrix = new long[rowsCount][colsCount];
@@ -466,6 +495,19 @@ public class MatrixGF2NTest {
         for (int x = 0; x < rowsCount; x++) {
             for (int y = 0; y < colsCount; y++) {
                 matrix[x][y] = rn.nextInt(4194303);
+            }
+        }
+
+        return matrix;
+    }
+
+    private long[][] generateRandomBinaryMatrix(int rowsCount, int colsCount) {
+
+        long[][] matrix = new long[rowsCount][colsCount];
+
+        for (int x = 0; x < rowsCount; x++) {
+            for (int y = 0; y < colsCount; y++) {
+                matrix[x][y] = rn.nextInt(2);
             }
         }
 
