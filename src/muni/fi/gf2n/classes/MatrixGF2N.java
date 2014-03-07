@@ -4,6 +4,9 @@
  */
 package muni.fi.gf2n.classes;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import muni.fi.gf2n.interfaces.GaloisFieldMatrixArithmetic;
 
 /**
@@ -358,47 +361,8 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             System.arraycopy(equationMatrix[x], 0, eqMat[x], 0, equationMatrix[0].length);
             eqMat[x][equationMatrix[0].length] = results[x];
         }
-
-
-        //modified Gauss elimination
-        for (int diagPos = 1; diagPos < Math.min(eqMat.length, eqMat[0].length) + 1; diagPos++) {
-
-            long value;
-
-            //find column with pivot, swap lines if necessary
-            int colPos = diagPos - 1;
-            while (colPos < eqMat[0].length && eqMat[diagPos - 1][colPos] == 0) {
-                eqMat = findPivot(eqMat, colPos, diagPos - 1);
-                if (eqMat[diagPos - 1][colPos] == 0) {
-                    colPos++;
-                }
-            }
-            if (colPos == eqMat[0].length) {
-                colPos = diagPos - 1;
-            }
-
-            for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < eqMat.length; rowsUnderDiagPos++) {
-
-                try {
-                    //set value, it will be used to set column at diagPos to zero
-                    value = galoisField.divide(eqMat[rowsUnderDiagPos][colPos], eqMat[diagPos - 1][colPos]);
-
-                    //subtract from line, pivot will be set to zero and other values will be edited
-                    for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < eqMat[0].length; colsUnderDiagPos++) {
-                        eqMat[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(
-                                galoisField.multiply(eqMat[diagPos - 1][colsUnderDiagPos], value),
-                                eqMat[rowsUnderDiagPos][colsUnderDiagPos]);
-                    }
-                } catch (IllegalArgumentException ex) {
-                    //catched division by zero, OK, thrown by columns full of zeroes
-                    
-                    if (ex.toString().contains("Values for this reducing polynomial must be in")) {
-                        //also catched, when some values are not in GF, new exception is thrown then
-                        throw new IllegalArgumentException(ex);
-                    }
-                }
-            }
-        }
+        
+        eqMat = gauss(eqMat);
 
         //set result vector from values prepared in eqMat
         long[] result = new long[equationMatrix[0].length];
@@ -432,10 +396,12 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         kernelMatrix = gauss(kernelMatrix);
 
         //prepare result matrix
-        long[][] result = new long[matrix.length - rank(matrix)][matrix.length];
+        long[][] result = new long[matrix.length - /*rank(matrix)*/ matrix[0].length][matrix.length];
         for (int x = 0; x < result.length; x++) {
             result[x][result[0].length - x - 1] = 1;
         }
+
+        HashSet rowsToDelete = new HashSet();
 
         int index = result.length;
         int position = 0;
@@ -459,21 +425,30 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
                     if (denumerator != 0) {
                         result[index][row] = galoisField.divide(numerator, denumerator);
                     } else {
-                        result[index][row] = 0;
+                        if (numerator == 0) {
+                            result[index][row] = 0;
+                        } else {
+                            rowsToDelete.add(counter);
+                        }
                     }
 
                 } else {
                     if (kernelMatrix[row][row] != 0) {
                         result[index][row] = galoisField.divide(value, kernelMatrix[row][row]);
                     } else {
-                        result[index][row] = 0;
+                        if (value == 0) {
+                            result[index][row] = 0;
+                        } else {
+                            rowsToDelete.add(counter);
+                        }
                     }
-
                 }
             }
         }
 
-        return result;
+        //For some matrices, kernel cannot be found for every parameter
+        //deleteRows is called to delete this rows from result matrix
+        return deleteRows(result, rowsToDelete);
     }
 
     private void isValid(long[][] matrix1, long[][] matrix2) {
@@ -581,6 +556,23 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
         for (int x = 0; x < rank; x++) {
             System.arraycopy(gaussMatrix[x], 0, result[x], 0, matrix[0].length);
+        }
+
+        return result;
+    }
+
+    //return matrix without rows in Set rowsToDelete
+    private long[][] deleteRows(long[][] matrix, HashSet rowsToDelete) {
+        long[][] result = new long[matrix.length - rowsToDelete.size()][matrix[0].length];
+
+        int position = 0;
+        for (int x = matrix.length - 1; x >= 0; x--) {
+            if (rowsToDelete.contains(x)) {
+                rowsToDelete.remove(x);
+            } else {
+                System.arraycopy(matrix[x], 0, result[ result.length - position - 1], 0, matrix[0].length);
+                position++;
+            }
         }
 
         return result;
