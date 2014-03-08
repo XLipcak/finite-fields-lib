@@ -128,6 +128,91 @@ public class GF2N implements GaloisFieldArithmetic {
         return multiply(result, a);
     }
 
+    //Rabin's test of irreducibility
+    @Override
+    public boolean isIrreducible(long polynomial) {
+
+        if (polynomial <= 0) {
+            throw new IllegalArgumentException("Polynomial must be represented by positive number.");
+        }
+        if (polynomial == 2) {
+            return false;
+        }
+        if (countBinarySize(polynomial) > 30) {
+            throw new IllegalArgumentException("Cannot test irreducibility for such a big number.");
+            //it would last one hundred years anyway...
+        }
+
+        long[] poly = new long[(int) countBinarySize(polynomial) + 1];
+        int degree = poly.length - 1;
+        long value = polynomial;
+
+        //create polynomial representation from Long
+        for (int x = 0; x < poly.length; x++) {
+            if ((value & 1) == 1) {
+                poly[x] = 1;
+            } else {
+                poly[x] = 0;
+            }
+            value >>= 1;
+        }
+
+        PolynomialGF2N polyGF = new PolynomialGF2N(3);
+        long[] primes = new long[]{2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
+            31, 37, 41, 43, 47, 53, 59, 61};
+        ArrayList<Long> divisors = new ArrayList<>();
+
+        //find prime divisors of degree of the polynomial
+        for (int x = 0; primes[x] <= degree; x++) {
+            if (degree % primes[x] == 0) {
+                divisors.add(primes[x]);
+            }
+        }
+
+        //divide degree by all its prime divisors
+        for (int x = 0; x < divisors.size(); x++) {
+            divisors.set(x, (long) (degree / divisors.get(x)));
+        }
+
+
+        for (int x = 0; x < divisors.size(); x++) {
+            //prepare tempPoly:   x^(2^divisors(x)) + x
+            long[] tempPoly = new long[(int) Math.pow(2, divisors.get(x)) + 1];
+            tempPoly[1] = 1;
+            tempPoly[tempPoly.length - 1] = 1;
+
+            long[] remainder = new long[tempPoly.length];
+            polyGF.divide(tempPoly, poly, remainder);
+
+            //remainder = tempPoly % poly
+            remainder = polyGF.clearZeroValuesFromPolynomial(remainder);
+
+            //gcd must be 1 for every irreducible polynomial
+            long[] gcd = polyGF.gcd(poly, remainder);
+            if (!(gcd.length == 1 && gcd[0] == 1)) {
+                return false;
+            }
+        }
+
+        //tempPoly = x^(2^degree) + x
+        long[] tempPoly = new long[(int) Math.pow(2, degree) + 1];
+        tempPoly[1] = 1;
+        tempPoly[tempPoly.length - 1] = 1;
+
+
+        //remainder = tempPoly % poly
+        long[] remainder = new long[tempPoly.length];
+        polyGF.divide(tempPoly, poly, remainder);
+        remainder = polyGF.clearZeroValuesFromPolynomial(remainder);
+
+        //tempPoly % poly must be 1 for every irreducible polynomial
+        if (remainder.length == 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     public long getReducingPolynomial() {
         return reducingPolynomial;
     }
