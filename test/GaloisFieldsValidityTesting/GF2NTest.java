@@ -166,8 +166,10 @@ public class GF2NTest {
         long value = gf.invert(1l);
         assertEquals("1^(-1) must be 1", 1l, value);
 
-        value = rn.nextInt(4194302) + 1;
-        assertEquals("(x^-1)^-1 must be x for positive x", value, gf.invert(gf.invert(value)));
+        for (int x = 0; x < 512; x++) {
+            value = rn.nextInt(4194302) + 1;
+            assertEquals("(x^-1)^-1 must be x for positive x", value, gf.invert(gf.invert(value)));
+        }
 
         try {
             gf.invert(7654321l);
@@ -234,25 +236,48 @@ public class GF2NTest {
 
     @Test
     public void testDivideAndMultiply() {
-        
-        for(int x = 0; x < 100; x++){
-            long value1 = rn.nextInt(4194302)+ 1;
-            long value2 = rn.nextInt(4194302)+ 1;
+
+        for (int x = 0; x < 100; x++) {
+            long value1 = rn.nextInt(4194302) + 1;
+            long value2 = rn.nextInt(4194302) + 1;
             assertEquals("(x * y) / y must be x", value1, gf.divide(gf.multiply(value1, value2), value2));
             assertEquals("(x / y) * y must be x", value1, gf.multiply(gf.divide(value1, value2), value2));
         }
-        
+
     }
 
     @Test
     public void testMultiplyInverse() {
-        
-        for(int x = 0; x < 100; x++){
-            long value = rn.nextInt(4194302)+ 1;
+
+        for (int x = 0; x < 100; x++) {
+            long value = rn.nextInt(4194302) + 1;
             assertEquals("x * x^-1 must be 1 for positive x", 1l, gf.multiply(value, gf.invert(value)));
             assertEquals("x^-1 * x must be 1 for positive x", 1l, gf.multiply(gf.invert(value), value));
         }
-        
+
     }
-    
+
+    @Test
+    public void testIsIrreducible() {
+        GF2N galoisField;
+        for (int x = 4; x < 1500; x++) {
+            galoisField = new GF2N(x);
+            if (galoisField.isIrreducible(x)) {
+                for (int y = 1; y < (int) Math.pow(2, galoisField.getFieldSize()); y++) {
+                    assertEquals("X * Inverse(X) must be 1 in Galois Field with irreducible "
+                            + "characteristic reducing polynomial.", 
+                            1, galoisField.multiply(galoisField.invert(y), y));
+                }
+            } else {
+                long maxValue = 0;
+                for (int y = 1; y < (int) Math.pow(2, galoisField.getFieldSize()); y++) {
+                    maxValue = Math.max(galoisField.multiply(galoisField.invert(y), y), maxValue);
+                }
+                if(maxValue == 1){
+                    fail("X * Inverse(X) is not always 1 in Galois Field with"
+                            + "reducible characteristic polynomial.");
+                }
+            }
+        }
+    }
 }

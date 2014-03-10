@@ -5,12 +5,12 @@
 package muni.fi.gf2n.classes;
 
 import muni.fi.gf2n.interfaces.GaloisFieldVectorArithmetic;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
  * @author Jakub Lipcak, Masaryk University
+ * 
+ * Class VectorGF2N 
  */
 public class VectorGF2N implements GaloisFieldVectorArithmetic {
 
@@ -25,53 +25,53 @@ public class VectorGF2N implements GaloisFieldVectorArithmetic {
     }
 
     @Override
-    public long[] add(long[] vector1, long[] vector2) {
+    public Vector add(Vector vector1, Vector vector2) {
         isValid(vector1, vector2);
 
-        long[] result = new long[vector1.length];
+        Vector result = new Vector(vector1.getSize());
 
-        for (int x = 0; x < vector1.length; x++) {
-            long value = galoisField.add(vector1[x], vector2[x]);
-            result[x] = value;
+        for (int x = 0; x < vector1.getSize(); x++) {
+            long value = galoisField.add(vector1.getElement(x), vector2.getElement(x));
+            result.setElement(x, value);
         }
 
         return result;
     }
 
     @Override
-    public long[] subtract(long[] vector1, long[] vector2) {
+    public Vector subtract(Vector vector1, Vector vector2) {
         isValid(vector1, vector2);
         return add(vector1, vector2);
     }
 
     @Override
-    public long[] multiply(long[] vector, long scalarValue) {
+    public Vector multiply(Vector vector, long scalarValue) {
         isValid(vector);
 
-        long[] result = new long[vector.length];
+        Vector result = new Vector(vector.getSize());
 
-        for (int x = 0; x < vector.length; x++) {
-            long value = galoisField.multiply(vector[x], scalarValue);
-            result[x] = value;
+        for (int x = 0; x < vector.getSize(); x++) {
+            long value = galoisField.multiply(vector.getElement(x), scalarValue);
+            result.setElement(x, value);
         }
 
         return result;
     }
 
-    private void isValid(long[] vect1, long[] vect2) {
+    private void isValid(Vector vect1, Vector vect2) {
 
-        if (vect1.length == 0 || vect2.length == 0) {
+        if (vect1.getSize() == 0 || vect2.getSize() == 0) {
             throw new IllegalArgumentException("Vector argument is empty.");
         }
 
-        if (vect1.length != vect2.length) {
+        if (vect1.getSize() != vect2.getSize()) {
             throw new IllegalArgumentException("Operation cannot be performed with vectors of different length.");
         }
     }
 
-    private void isValid(long[] vect) {
+    private void isValid(Vector vect) {
 
-        if (vect.length == 0) {
+        if (vect.getSize() == 0) {
             throw new IllegalArgumentException("Vector argument is empty.");
         }
     }

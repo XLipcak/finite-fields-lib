@@ -4,13 +4,15 @@
  */
 package muni.fi.gf2n.interfaces;
 
+import muni.fi.gf2n.classes.Vector;
+
 /**
  *
  * @author Jakub Lipcak, Masaryk University
  */
 public interface GaloisFieldVectorArithmetic {
     
-    long[] add(long[] vector1, long[] vector2);
-    long[] subtract(long[] vector1, long[] vector2);
-    long[] multiply(long[] vector, long scalarValue);
+    Vector add(Vector vector1, Vector vector2);
+    Vector subtract(Vector vector1, Vector vector2);
+    Vector multiply(Vector vector, long scalarValue);
 }

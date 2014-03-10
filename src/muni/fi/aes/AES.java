@@ -9,7 +9,9 @@ import static muni.fi.aes.BlockCipherMode.CFB;
 import static muni.fi.aes.BlockCipherMode.ECB;
 import static muni.fi.aes.BlockCipherMode.OFB;
 import muni.fi.gf2n.classes.GF2N;
+import muni.fi.gf2n.classes.Matrix;
 import muni.fi.gf2n.classes.MatrixGF2N;
+import muni.fi.gf2n.classes.Vector;
 
 /**
  *
@@ -431,12 +433,12 @@ public final class AES {
         byte[] result = new byte[4];
 
         GF2N aesField = new GF2N(283);
-        long[][] mulMatrix = new long[4][4];
+        Matrix mulMatrix = new Matrix(4, 4);
         MatrixGF2N aesMat = new MatrixGF2N(aesField);
 
-        long[] mulVector = new long[4];
+        Vector mulVector = new Vector(4);
         for (int x = 0; x < 4; x++) {
-            mulVector[x] = (long) (input[x] & 0xFF);
+            mulVector.setElement(x, input[x] & 0xFF);
         }
 
         /* mulMatrix:
@@ -447,26 +449,26 @@ public final class AES {
          [ 3, 1, 1, 2 ]
          
          */
-        mulMatrix[0][0] = 2;
-        mulMatrix[0][1] = 3;
-        mulMatrix[0][2] = 1;
-        mulMatrix[0][3] = 1;
-        mulMatrix[1][0] = 1;
-        mulMatrix[1][1] = 2;
-        mulMatrix[1][2] = 3;
-        mulMatrix[1][3] = 1;
-        mulMatrix[2][0] = 1;
-        mulMatrix[2][1] = 1;
-        mulMatrix[2][2] = 2;
-        mulMatrix[2][3] = 3;
-        mulMatrix[3][0] = 3;
-        mulMatrix[3][1] = 1;
-        mulMatrix[3][2] = 1;
-        mulMatrix[3][3] = 2;
+        mulMatrix.setElement(0, 0, 2);
+        mulMatrix.setElement(0, 1, 3);
+        mulMatrix.setElement(0, 2, 1);
+        mulMatrix.setElement(0, 3, 1);
+        mulMatrix.setElement(1, 0, 1);
+        mulMatrix.setElement(1, 1, 2);
+        mulMatrix.setElement(1, 2, 3);
+        mulMatrix.setElement(1, 3, 1);
+        mulMatrix.setElement(2, 0, 1);
+        mulMatrix.setElement(2, 1, 1);
+        mulMatrix.setElement(2, 2, 2);
+        mulMatrix.setElement(2, 3, 3);
+        mulMatrix.setElement(3, 0, 3);
+        mulMatrix.setElement(3, 1, 1);
+        mulMatrix.setElement(3, 2, 1);
+        mulMatrix.setElement(3, 3, 2);
 
-        long[][] resultMat = aesMat.multiply(mulMatrix, mulVector);
+        Matrix resultMat = aesMat.multiply(mulMatrix, mulVector);
         for (int x = 0; x < 4; x++) {
-            result[x] = (byte) resultMat[x][0];
+            result[x] = (byte) resultMat.getElement(x, 0);
         }
 
         return result;
@@ -477,12 +479,12 @@ public final class AES {
         byte[] result = new byte[4];
 
         GF2N aesField = new GF2N(283);
-        long[][] mulMatrix = new long[4][4];
+        Matrix mulMatrix = new Matrix(4, 4);
         MatrixGF2N aesMat = new MatrixGF2N(aesField);
 
-        long[] mulVector = new long[4];
+        Vector mulVector = new Vector(4);
         for (int x = 0; x < 4; x++) {
-            mulVector[x] = (long) (input[x] & 0xFF);
+            mulVector.setElement(x, (long) (input[x] & 0xFF));
         }
 
         /* mulMatrix:
@@ -493,26 +495,26 @@ public final class AES {
          [ 11, 13,  9, 14 ]
          
          */
-        mulMatrix[0][0] = 14;
-        mulMatrix[0][1] = 11;
-        mulMatrix[0][2] = 13;
-        mulMatrix[0][3] = 9;
-        mulMatrix[1][0] = 9;
-        mulMatrix[1][1] = 14;
-        mulMatrix[1][2] = 11;
-        mulMatrix[1][3] = 13;
-        mulMatrix[2][0] = 13;
-        mulMatrix[2][1] = 9;
-        mulMatrix[2][2] = 14;
-        mulMatrix[2][3] = 11;
-        mulMatrix[3][0] = 11;
-        mulMatrix[3][1] = 13;
-        mulMatrix[3][2] = 9;
-        mulMatrix[3][3] = 14;
+        mulMatrix.setElement(0, 0, 14);
+        mulMatrix.setElement(0, 1, 11);
+        mulMatrix.setElement(0, 2, 13);
+        mulMatrix.setElement(0, 3, 9);
+        mulMatrix.setElement(1, 0, 9);
+        mulMatrix.setElement(1, 1, 14);
+        mulMatrix.setElement(1, 2, 11);
+        mulMatrix.setElement(1, 3, 13);
+        mulMatrix.setElement(2, 0, 13);
+        mulMatrix.setElement(2, 1, 9);
+        mulMatrix.setElement(2, 2, 14);
+        mulMatrix.setElement(2, 3, 11);
+        mulMatrix.setElement(3, 0, 11);
+        mulMatrix.setElement(3, 1, 13);
+        mulMatrix.setElement(3, 2, 9);
+        mulMatrix.setElement(3, 3, 14);
 
-        long[][] resultMat = aesMat.multiply(mulMatrix, mulVector);
+        Matrix resultMat = aesMat.multiply(mulMatrix, mulVector);
         for (int x = 0; x < 4; x++) {
-            result[x] = (byte) resultMat[x][0];
+            result[x] = (byte) resultMat.getElement(x, 0);
         }
 
         return result;
@@ -598,13 +600,13 @@ public final class AES {
          [ 0, 0, 0, 1, 1, 1, 1, 1 ]
          
          */
-        long[][] affineMatrix = new long[8][8];
+        Matrix affineMatrix = new Matrix(8, 8);
         int pos = 0;
         for (int x = 0; x < 8; x++) {
             pos++;
             for (int y = 0; y < 8; y++) {
                 if (!((y == (pos % 8)) || ((y == ((pos + 1) % 8))) || ((y == ((pos + 2) % 8))))) {
-                    affineMatrix[x][y] = 1;
+                    affineMatrix.setElement(x, y, 1);
                 }
             }
         }
@@ -612,17 +614,17 @@ public final class AES {
         GF2N aesField = new GF2N(283);
         MatrixGF2N aesMat = new MatrixGF2N(aesField);
 
-        long[][] resultMatrix = aesMat.multiply(affineMatrix, decimalNumberToBinaryVector(aesField.invert(value)));
+        Matrix resultMatrix = aesMat.multiply(affineMatrix, decimalNumberToBinaryVector(aesField.invert(value)));
 
-        long[][] addMatrix = new long[8][1];//{1,1,0,0,0,1,1,0};
-        addMatrix[0][0] = 1;
-        addMatrix[1][0] = 1;
-        addMatrix[2][0] = 0;
-        addMatrix[3][0] = 0;
-        addMatrix[4][0] = 0;
-        addMatrix[5][0] = 1;
-        addMatrix[6][0] = 1;
-        addMatrix[7][0] = 0;
+        Matrix addMatrix = new Matrix(8, 1);//{1,1,0,0,0,1,1,0};
+        addMatrix.setElement(0, 0, 1);
+        addMatrix.setElement(1, 0, 1);
+        addMatrix.setElement(2, 0, 0);
+        addMatrix.setElement(3, 0, 0);
+        addMatrix.setElement(4, 0, 0);
+        addMatrix.setElement(5, 0, 1);
+        addMatrix.setElement(6, 0, 1);
+        addMatrix.setElement(7, 0, 0);
 
         return (int) binaryMatrixToDecimalNumber(aesMat.add(resultMatrix, addMatrix));
 
@@ -643,29 +645,29 @@ public final class AES {
          [ 0, 1, 0, 0, 1, 0, 1, 0 ]
          
          */
-        long[][] affineMatrix = new long[8][8];
+        Matrix affineMatrix = new Matrix(8, 8);
         int pos = 6;
         for (int x = 0; x < 8; x++) {
             pos++;
-            affineMatrix[x][pos % 8] = 1;
-            affineMatrix[x][(pos + 3) % 8] = 1;
-            affineMatrix[x][(pos + 6) % 8] = 1;
+            affineMatrix.setElement(x, pos % 8, 1);
+            affineMatrix.setElement(x, (pos + 3) % 8, 1);
+            affineMatrix.setElement(x, (pos + 6) % 8, 1);
         }
 
         GF2N aesField = new GF2N(283);
         MatrixGF2N aesMat = new MatrixGF2N(aesField);
 
-        long[][] resultMatrix = aesMat.multiply(affineMatrix, decimalNumberToBinaryVector(value));
+        Matrix resultMatrix = aesMat.multiply(affineMatrix, decimalNumberToBinaryVector(value));
 
-        long[][] addMatrix = new long[8][1];//{1,0,1,0,0,0,0,0};
-        addMatrix[0][0] = 1;
-        addMatrix[1][0] = 0;
-        addMatrix[2][0] = 1;
-        addMatrix[3][0] = 0;
-        addMatrix[4][0] = 0;
-        addMatrix[5][0] = 0;
-        addMatrix[6][0] = 0;
-        addMatrix[7][0] = 0;
+        Matrix addMatrix = new Matrix(8, 1);//{1,0,1,0,0,0,0,0};
+        addMatrix.setElement(0, 0, 1);
+        addMatrix.setElement(1, 0, 0);
+        addMatrix.setElement(2, 0, 1);
+        addMatrix.setElement(3, 0, 0);
+        addMatrix.setElement(4, 0, 0);
+        addMatrix.setElement(5, 0, 0);
+        addMatrix.setElement(6, 0, 0);
+        addMatrix.setElement(7, 0, 0);
 
         return (int) aesField.invert(binaryMatrixToDecimalNumber(aesMat.add(resultMatrix, addMatrix)));
 
@@ -905,23 +907,23 @@ public final class AES {
         return result;
     }
 
-    private long[] decimalNumberToBinaryVector(long value) {
-        long[] result = new long[8];
+    private Vector decimalNumberToBinaryVector(long value) {
+        Vector result = new Vector(8);
 
         long temp = value;
         for (int x = 0; x < 8; x++) {
-            result[x] = temp & 1;
+            result.setElement(x, temp & 1);
             temp >>= 1;
         }
 
         return result;
     }
 
-    private long binaryMatrixToDecimalNumber(long[][] matrix) {
+    private long binaryMatrixToDecimalNumber(Matrix matrix) {
         int result = 0;
 
         for (int x = 7; x >= 0; x--) {
-            result ^= matrix[x][0];
+            result ^= matrix.getElement(x, 0);
             if (x != 0) {
                 result <<= 1;
             }

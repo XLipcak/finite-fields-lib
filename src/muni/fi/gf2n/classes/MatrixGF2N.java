@@ -29,14 +29,15 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     @Override
-    public long[][] add(long[][] matrix1, long[][] matrix2) {
+    public Matrix add(Matrix matrix1, Matrix matrix2) {
         isValid(matrix1, matrix2);
 
-        long[][] result = new long[matrix1.length][matrix1[0].length];
-        for (int row = 0; row < matrix1.length; row++) {
+        Matrix result = new Matrix(matrix1.getRows(), matrix1.getColumns());
+        for (int row = 0; row < matrix1.getRows(); row++) {
 
-            for (int col = 0; col < matrix1[0].length; col++) {
-                result[row][col] = galoisField.add(matrix1[row][col], matrix2[row][col]);
+            for (int col = 0; col < matrix1.getColumns(); col++) {
+                result.setElement(row, col,
+                        galoisField.add(matrix1.getElement(row, col), matrix2.getElement(row, col)));
             }
         }
 
@@ -44,52 +45,39 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     @Override
-    public long[][] subtract(long[][] matrix1, long[][] matrix2) {
+    public Matrix subtract(Matrix matrix1, Matrix matrix2) {
         isValid(matrix1, matrix2);
         return add(matrix1, matrix2);
     }
 
     @Override
-    public long[][] transpose(long[][] matrix) {
-        isValid(matrix);
+    public Matrix multiply(Matrix matrix1, Matrix matrix2) {
+        Matrix result = new Matrix(matrix1.getRows(), matrix2.getColumns());
 
-        long[][] result = new long[matrix[0].length][matrix.length];
-        for (int col = 0; col < matrix.length; col++) {
-
-            for (int row = 0; row < matrix[0].length; row++) {
-                result[row][col] = matrix[col][row];
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public long[][] multiply(long[][] matrix1, long[][] matrix2) {
-        long[][] result = new long[matrix1.length][matrix2[0].length];
-
-        if (matrix1.length == 0 || matrix2.length == 0) {
+        if (matrix1.getRows() == 0 || matrix2.getRows() == 0) {
             throw new IllegalArgumentException("Matrix argument is empty, "
                     + "operation cannot be performed.");
         }
 
-        if (matrix1[0].length == 0 || matrix2[0].length == 0) {
+        if (matrix1.getColumns() == 0 || matrix2.getColumns() == 0) {
             throw new IllegalArgumentException("Argument matrix has empty row, "
                     + "operation cannot be performed.");
         }
 
-        if (matrix1[0].length != matrix2.length) {
+        if (matrix1.getColumns() != matrix2.getRows()) {
             throw new IllegalArgumentException("Argument matrices cannot be multiplied, "
                     + "their dimensions are wrong.");
         }
 
 
-        for (int x = 0; x < matrix1.length; x++) {
-            for (int y = 0; y < matrix2[0].length; y++) {
+        for (int x = 0; x < matrix1.getRows(); x++) {
+            for (int y = 0; y < matrix2.getColumns(); y++) {
                 long value = 0;
-                for (int z = 0; z < matrix1[0].length; z++) {
-                    value = galoisField.add(value, galoisField.multiply(matrix1[x][z], matrix2[z][y]));
+                for (int z = 0; z < matrix1.getColumns(); z++) {
+                    value = galoisField.add(value,
+                            galoisField.multiply(matrix1.getElement(x, z), matrix2.getElement(z, y)));
                 }
-                result[x][y] = value;
+                result.setElement(x, y, value);
             }
         }
 
@@ -97,14 +85,13 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     @Override
-    public long[][] multiply(long[][] matrix, long scalarValue) {
+    public Matrix multiply(Matrix matrix, long scalarValue) {
         isValid(matrix);
 
-        long[][] result = new long[matrix.length][matrix[0].length];
-        for (int row = 0; row < matrix.length; row++) {
-
-            for (int col = 0; col < matrix[0].length; col++) {
-                result[row][col] = galoisField.multiply(matrix[row][col], scalarValue);
+        Matrix result = new Matrix(matrix.getRows(), matrix.getColumns());
+        for (int row = 0; row < matrix.getRows(); row++) {
+            for (int col = 0; col < matrix.getColumns(); col++) {
+                result.setElement(row, col, galoisField.multiply(matrix.getElement(row, col), scalarValue));
             }
         }
 
@@ -112,91 +99,71 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     @Override
-    public long[][] multiply(long[][] matrix, long[] vector) {
-        long matrixVector[][] = new long[vector.length][1];
+    public Matrix multiply(Matrix matrix, Vector vector) {
+        Matrix matrixVector = new Matrix(vector.getSize(), 1);
 
-        for (int x = 0; x < vector.length; x++) {
-            matrixVector[x][0] = vector[x];
+        for (int x = 0; x < vector.getSize(); x++) {
+            matrixVector.setElement(x, 0, vector.getElement(x));
         }
         return multiply(matrix, matrixVector);
     }
 
     @Override
-    public long[][] multiply(long[] vector, long[][] matrix) {
-        long matrixVector[][] = new long[1][vector.length];
+    public Matrix multiply(Vector vector, Matrix matrix) {
+        Matrix matrixVector = new Matrix(1, vector.getSize());
 
-        for (int x = 0; x < vector.length; x++) {
-            matrixVector[0][x] = vector[x];
+        for (int x = 0; x < vector.getSize(); x++) {
+            matrixVector.setElement(0, x, vector.getElement(x));
         }
         return multiply(matrixVector, matrix);
     }
 
     @Override
-    public long[][] inverse(long[][] matrix) {
+    public Matrix inverse(Matrix matrix) {
 
         isValid(matrix);
 
-        if (matrix.length != matrix[0].length) {
+        if (matrix.getRows() != matrix.getColumns()) {
             throw new IllegalArgumentException("Cannot compute inverse of nonsquare matrix.");
         }
 
-        //NESKOR MOZNO KONTROLOVAT NEJAK INAK, PRE VELKE MATICE POMALE
         if (determinant(matrix) == 0) {
             throw new IllegalArgumentException("Matrix is non-invertible.");
         }
 
         //Prepare double-wide inverseMatrix, created from original matrix, and in the other half from identity matrix
-        long[][] inverseMatrix = new long[matrix.length][matrix[0].length * 2];
-        for (int x = 0; x < matrix.length; x++) {
-            for (int y = 0; y < (matrix[0].length * 2); y++) {
-                if (y < matrix[0].length) {
-                    inverseMatrix[x][y] = matrix[x][y];
+        Matrix inverseMatrix = new Matrix(matrix.getRows(), matrix.getColumns() * 2);
+        for (int x = 0; x < matrix.getRows(); x++) {
+            for (int y = 0; y < (matrix.getColumns() * 2); y++) {
+                if (y < matrix.getColumns()) {
+                    inverseMatrix.setElement(x, y, matrix.getElement(x, y));
                 } else {
-                    if (x == y - matrix.length) {
-                        inverseMatrix[x][y] = 1;
+                    if (x == y - matrix.getRows()) {
+                        inverseMatrix.setElement(x, y, 1);
                     }
                 }
             }
         }
 
-        //Modified Gauss elimination, reduce all rows under the main diagonal, apply the changes to identity matrix 
-        for (int diagPos = 1; diagPos < Math.min(inverseMatrix.length, inverseMatrix[0].length) + 1; diagPos++) {
+        //Reduce all rows under the main diagonal, apply the changes to identity matrix 
+        inverseMatrix = gauss(inverseMatrix);
 
-            long value;
-            for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < inverseMatrix.length; rowsUnderDiagPos++) {
-
-                //find row with pivot at column, that we want to set to zero
-                if (inverseMatrix[diagPos - 1][diagPos - 1] == 0) {
-                    inverseMatrix = findPivot(inverseMatrix, diagPos - 1, diagPos - 1);
-                }
-
-                try {
-                    //set value, it will be used to set column at diagPos to zero
-                    value = galoisField.divide(inverseMatrix[rowsUnderDiagPos][diagPos - 1], inverseMatrix[diagPos - 1][diagPos - 1]);
-
-                    //subtract from line, pivot will be set to zero and other values will be edited
-                    for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < inverseMatrix[0].length; colsUnderDiagPos++) {
-                        inverseMatrix[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(galoisField.multiply(inverseMatrix[diagPos - 1][colsUnderDiagPos], value), inverseMatrix[rowsUnderDiagPos][colsUnderDiagPos]);
-                    }
-                } catch (IllegalArgumentException ex) {
-                    //division by zero, column full of zeroes, special case, check it later
-                }
-            }
-        }
-
-        //Modified Gauss elimination, reduce all rows over the main diagonal, apply the changes to identity matrix 
-        for (int diagPos = inverseMatrix.length - 1; diagPos >= 0; diagPos--) {
+        //Modified Gauss elimination, reduce all rows over the main diagonal, 
+        //apply the changes to identity matrix 
+        for (int diagPos = inverseMatrix.getRows() - 1; diagPos >= 0; diagPos--) {
 
             long value;
             for (int rowsOverDiagPos = diagPos - 1; rowsOverDiagPos >= 0; rowsOverDiagPos--) {
 
                 try {
                     //set value, it will be used to set column at diagPos to zero
-                    value = galoisField.divide(inverseMatrix[rowsOverDiagPos][diagPos], inverseMatrix[diagPos][diagPos]);
+                    value = galoisField.divide(inverseMatrix.getElement(rowsOverDiagPos, diagPos), inverseMatrix.getElement(diagPos, diagPos));
 
                     //subtract from line, pivot will be set to zero and other values will be edited
-                    for (int colsOverDiagPos = diagPos; colsOverDiagPos < inverseMatrix[0].length; colsOverDiagPos++) {
-                        inverseMatrix[rowsOverDiagPos][colsOverDiagPos] = galoisField.subtract(galoisField.multiply(inverseMatrix[diagPos][colsOverDiagPos], value), inverseMatrix[rowsOverDiagPos][colsOverDiagPos]);
+                    for (int colsOverDiagPos = diagPos; colsOverDiagPos < inverseMatrix.getColumns(); colsOverDiagPos++) {
+                        inverseMatrix.setElement(rowsOverDiagPos, colsOverDiagPos,
+                                galoisField.subtract(galoisField.multiply(inverseMatrix.getElement(diagPos, colsOverDiagPos), value),
+                                inverseMatrix.getElement(rowsOverDiagPos, colsOverDiagPos)));
                     }
                 } catch (IllegalArgumentException ex) {
                     //division by zero, column full of zeroes, special case, check it later
@@ -205,14 +172,14 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         }
 
         //Prepare result, it is the second half of the inverseMatrix
-        long[][] result = new long[matrix.length][matrix.length];
-        for (int x = 0; x < inverseMatrix.length; x++) {
-            long value = inverseMatrix[x][x];
-            for (int y = 0; y < inverseMatrix[0].length; y++) {
+        Matrix result = new Matrix(matrix.getRows(), matrix.getRows());
+        for (int x = 0; x < inverseMatrix.getRows(); x++) {
+            long value = inverseMatrix.getElement(x, x);
+            for (int y = 0; y < inverseMatrix.getColumns(); y++) {
                 //First half of the inverseMatrix is diagonal matrix, we divide it to create identity matrix 
-                inverseMatrix[x][y] = galoisField.divide(inverseMatrix[x][y], value);
-                if (y >= matrix.length) {
-                    result[x][y - matrix.length] = inverseMatrix[x][y];
+                inverseMatrix.setElement(x, y, galoisField.divide(inverseMatrix.getElement(x, y), value));
+                if (y >= matrix.getRows()) {
+                    result.setElement(x, y - matrix.getRows(), inverseMatrix.getElement(x, y));
                 }
             }
         }
@@ -221,11 +188,11 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     @Override
-    public long[][] power(long[][] matrix, long exponent) {
+    public Matrix power(Matrix matrix, long exponent) {
 
         isValid(matrix);
 
-        if (matrix.length != matrix[0].length) {
+        if (matrix.getRows() != matrix.getColumns()) {
             throw new IllegalArgumentException("Cannot compute power of non-square matrix!");
         }
 
@@ -233,7 +200,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             throw new IllegalArgumentException("Exponent must be positive number!");
         }
 
-        long[][] result = matrix;
+        Matrix result = matrix;
         for (int x = 1; x < exponent; x++) {
             result = multiply(matrix, result);
         }
@@ -241,41 +208,39 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         return result;
     }
 
-    //Laplace expansion
+    //Laplace expansion used to compute determinant
     @Override
-    public long determinant(long[][] matrix) {
+    public long determinant(Matrix matrix) {
 
         isValid(matrix);
 
-        if (matrix.length != matrix[0].length) {
+        if (matrix.getRows() != matrix.getColumns()) {
             throw new IllegalArgumentException("Cannot compute determinant of nonsquare matrix.");
         }
 
-        if (matrix.length == 1) {
-            return matrix[0][0];
+        if (matrix.getRows() == 1) {
+            return matrix.getElement(0, 0);
         }
 
         long result = 0;
-        for (int x = 0; x < matrix.length; x++) {
+        for (int x = 0; x < matrix.getRows(); x++) {
             //Recursive call is used to compute determinant with Laplace expansion along the first row
-            result = galoisField.add(result, galoisField.multiply(matrix[0][x], determinant(subMatrix(matrix, 0, x))));
+            result = galoisField.add(result, galoisField.multiply(matrix.getElement(0, x), determinant(subMatrix(matrix, 0, x))));
         }
-
         return result;
-
     }
 
     @Override
-    public int rank(long[][] matrix) {
+    public int rank(Matrix matrix) {
 
         isValid(matrix);
 
         int rank = 0;
-        long[][] result = gauss(matrix);
+        Matrix result = gauss(matrix);
 
-        for (int x = 0; x < matrix.length; x++) {
-            for (int y = 0; y < matrix[0].length; y++) {
-                if (result[x][y] != 0) {
+        for (int x = 0; x < matrix.getRows(); x++) {
+            for (int y = 0; y < matrix.getColumns(); y++) {
+                if (result.getElement(x, y) != 0) {
                     rank++;
                     break;
                 }
@@ -286,41 +251,40 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     //return input matrix in row echelon form
     @Override
-    public long[][] gauss(long[][] matrix) {
+    public Matrix gauss(Matrix matrix) {
 
         isValid(matrix);
 
         //prepare result
-        long[][] result = new long[matrix.length][matrix[0].length];
-        for (int x = 0; x < matrix.length; x++) {
-            System.arraycopy(matrix[x], 0, result[x], 0, matrix[0].length);
-        }
+        Matrix result = new Matrix(matrix);
 
-        for (int diagPos = 1; diagPos < Math.min(matrix.length, matrix[0].length) + 1; diagPos++) {
+        for (int diagPos = 1; diagPos < Math.min(matrix.getRows(), matrix.getColumns()) + 1; diagPos++) {
 
             long value;
 
             //find column with pivot, swap lines if necessary
             int colPos = diagPos - 1;
-            while (colPos < matrix[0].length && result[diagPos - 1][colPos] == 0) {
+            while (colPos < matrix.getColumns() && result.getElement(diagPos - 1, colPos) == 0) {
                 result = findPivot(result, colPos, diagPos - 1);
-                if (result[diagPos - 1][colPos] == 0) {
+                if (result.getElement(diagPos - 1, colPos) == 0) {
                     colPos++;
                 }
             }
-            if (colPos == matrix[0].length) {
+            if (colPos == matrix.getColumns()) {
                 colPos = diagPos - 1;
             }
 
-            for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < matrix.length; rowsUnderDiagPos++) {
+            for (int rowsUnderDiagPos = diagPos; rowsUnderDiagPos < matrix.getRows(); rowsUnderDiagPos++) {
 
                 try {
                     //set value, it will be used to set column at diagPos to zero
-                    value = galoisField.divide(result[rowsUnderDiagPos][colPos], result[diagPos - 1][colPos]);
+                    value = galoisField.divide(result.getElement(rowsUnderDiagPos, colPos), result.getElement(diagPos - 1, colPos));
 
                     //subtract from line, pivot will be set to zero and other values will be edited
-                    for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < matrix[0].length; colsUnderDiagPos++) {
-                        result[rowsUnderDiagPos][colsUnderDiagPos] = galoisField.subtract(galoisField.multiply(result[diagPos - 1][colsUnderDiagPos], value), result[rowsUnderDiagPos][colsUnderDiagPos]);
+                    for (int colsUnderDiagPos = diagPos - 1; colsUnderDiagPos < matrix.getColumns(); colsUnderDiagPos++) {
+                        result.setElement(rowsUnderDiagPos, colsUnderDiagPos,
+                                galoisField.subtract(galoisField.multiply(result.getElement(diagPos - 1, colsUnderDiagPos), value),
+                                result.getElement(rowsUnderDiagPos, colsUnderDiagPos)));
                     }
                 } catch (IllegalArgumentException ex) {
                     //catched division by zero, OK, thrown by columns full of zeroes
@@ -338,41 +302,45 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     //equationMatrix*result = results
     @Override
-    public long[] solveLinearEquationsSystem(long[][] equationMatrix, long[] results) {
+    public Vector solveLinearEquationsSystem(Matrix equationMatrix, Vector results) {
 
         isValid(equationMatrix);
 
-        if (equationMatrix.length != equationMatrix[0].length) {
+        if (equationMatrix.getRows() != equationMatrix.getColumns()) {
             throw new IllegalArgumentException("Cannot solve linear equations system for nonsquare matrix.");
         }
 
-        if (equationMatrix.length != results.length) {
+        if (equationMatrix.getRows() != results.getSize()) {
             throw new IllegalArgumentException("Cannot solve linear equations system: dimension mismatch.");
         }
 
-        if (rank(equationMatrix) != equationMatrix.length) {
+        if (rank(equationMatrix) != equationMatrix.getRows()) {
             throw new IllegalArgumentException("Cannot solve linear equations system: linearly dependent rows.");
         }
 
 
         //prepare equation matrix
-        long[][] eqMat = new long[equationMatrix.length][equationMatrix[0].length + 1];
-        for (int x = 0; x < equationMatrix.length; x++) {
-            System.arraycopy(equationMatrix[x], 0, eqMat[x], 0, equationMatrix[0].length);
-            eqMat[x][equationMatrix[0].length] = results[x];
+        Matrix eqMat = new Matrix(equationMatrix.getRows(), equationMatrix.getColumns() + 1);
+        for (int x = 0; x < equationMatrix.getRows(); x++) {
+            for (int y = 0; y < equationMatrix.getColumns(); y++) {
+                eqMat.setElement(x, y, equationMatrix.getElement(x, y));
+            }
+            eqMat.setElement(x, equationMatrix.getColumns(), results.getElement(x));
         }
-        
+
         eqMat = gauss(eqMat);
 
         //set result vector from values prepared in eqMat
-        long[] result = new long[equationMatrix[0].length];
-        for (int x = eqMat[0].length - 2; x >= 0; x--) {
-            for (int y = eqMat[0].length - 2; y >= x; y--) {
+        Vector result = new Vector(equationMatrix.getColumns());
+        for (int x = eqMat.getColumns() - 2; x >= 0; x--) {
+            for (int y = eqMat.getColumns() - 2; y >= x; y--) {
                 if (y == x) {
-                    result[x] = galoisField.divide(eqMat[x][eqMat[0].length - 1], eqMat[x][x]);
+                    result.setElement(x, galoisField.divide(eqMat.getElement(x, eqMat.getColumns() - 1),
+                            eqMat.getElement(x, x)));
                 } else {
-                    eqMat[x][eqMat[0].length - 1] = galoisField.subtract(eqMat[x][eqMat[0].length - 1],
-                            galoisField.multiply(eqMat[x][y], result[y]));
+                    eqMat.setElement(x, eqMat.getColumns() - 1,
+                            galoisField.subtract(eqMat.getElement(x, eqMat.getColumns() - 1),
+                            galoisField.multiply(eqMat.getElement(x, y), result.getElement(y))));
                 }
             }
         }
@@ -382,62 +350,64 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     //image of matrix
     @Override
-    public long[][] image(long[][] matrix) {
+    public Matrix image(Matrix matrix) {
         isValid(matrix);
         return reduceLinearlyDependentRows(matrix);
     }
 
     //Kernel(Matrix) * (Matrix) = zeroMatrix
     @Override
-    public long[][] kernel(long[][] matrix) {
+    public Matrix kernel(Matrix matrix) {
         isValid(matrix);
 
-        long[][] kernelMatrix = transpose(matrix);
+        Matrix kernelMatrix = new Matrix(matrix);
+        kernelMatrix.transpose();
         kernelMatrix = gauss(kernelMatrix);
 
         //prepare result matrix
-        long[][] result = new long[matrix.length - /*rank(matrix)*/ matrix[0].length][matrix.length];
-        for (int x = 0; x < result.length; x++) {
-            result[x][result[0].length - x - 1] = 1;
+        Matrix result = new Matrix(matrix.getRows() - matrix.getColumns(), matrix.getRows());
+        for (int x = 0; x < result.getRows(); x++) {
+            result.setElement(x, result.getColumns() - x - 1, 1);
         }
 
         HashSet rowsToDelete = new HashSet();
 
-        int index = result.length;
+        int index = result.getRows();
         int position = 0;
-        for (int counter = result.length - 1; counter >= 0; counter--) {
+        for (int counter = result.getRows() - 1; counter >= 0; counter--) {
 
             index--;
             position++;
 
             //set kernel vector for every row
-            for (int row = kernelMatrix.length - 1; row >= 0; row--) {
+            for (int row = kernelMatrix.getRows() - 1; row >= 0; row--) {
 
                 long value = 0;
                 //loop used to find a good value in current row
-                for (int col = row + 1; col <= kernelMatrix[0].length - 1; col++) {
-                    value = galoisField.add(value, galoisField.multiply(kernelMatrix[row][col], result[index][col]));
+                for (int col = row + 1; col <= kernelMatrix.getColumns() - 1; col++) {
+                    value = galoisField.add(value, galoisField.multiply(kernelMatrix.getElement(row, col),
+                            result.getElement(index, col)));
                 }
 
-                if (row == kernelMatrix.length - 1) {
-                    long numerator = kernelMatrix[row][(kernelMatrix.length - 1) + position];
-                    long denumerator = kernelMatrix[row][row];
+                if (row == kernelMatrix.getRows() - 1) {
+                    long numerator = kernelMatrix.getElement(row, (kernelMatrix.getRows() - 1) + position);
+                    long denumerator = kernelMatrix.getElement(row, row);
                     if (denumerator != 0) {
-                        result[index][row] = galoisField.divide(numerator, denumerator);
+                        result.setElement(index, row, galoisField.divide(numerator, denumerator));
                     } else {
                         if (numerator == 0) {
-                            result[index][row] = 0;
+                            result.setElement(index, row, 0);
                         } else {
                             rowsToDelete.add(counter);
                         }
                     }
 
                 } else {
-                    if (kernelMatrix[row][row] != 0) {
-                        result[index][row] = galoisField.divide(value, kernelMatrix[row][row]);
+                    if (kernelMatrix.getElement(row, row) != 0) {
+                        result.setElement(index, row, galoisField.divide(value, kernelMatrix.getElement(row, row)));
                     } else {
                         if (value == 0) {
-                            result[index][row] = 0;
+                            result.setElement(index, row, 0);
                         } else {
                             rowsToDelete.add(counter);
                         }
@@ -451,33 +421,34 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         return deleteRows(result, rowsToDelete);
     }
 
-    private void isValid(long[][] matrix1, long[][] matrix2) {
+    //check, if matrices have the same size and no zero rows or columns size
+    private void isValid(Matrix matrix1, Matrix matrix2) {
 
-        if (matrix1.length == 0 || matrix2.length == 0) {
+        if (matrix1.getRows() == 0 || matrix2.getRows() == 0) {
             throw new IllegalArgumentException("Matrix argument is empty, "
                     + "operation cannot be performed.");
         }
 
-        if (matrix1[0].length == 0 || matrix2[0].length == 0) {
+        if (matrix1.getColumns() == 0 || matrix2.getColumns() == 0) {
             throw new IllegalArgumentException("Argument matrix has empty row, "
                     + "operation cannot be performed.");
         }
 
-        if ((matrix1[0].length != matrix2[0].length) || (matrix1.length != matrix2.length)) {
+        if ((matrix1.getColumns() != matrix2.getColumns()) || (matrix1.getRows() != matrix2.getRows())) {
             throw new IllegalArgumentException("Argument matrices have different dimensions, "
                     + "operation cannot be performed.");
         }
     }
 
-    private void isValid(long[][] matrix) {
+    //check, if matrix has no zero rows or columns size
+    private void isValid(Matrix matrix) {
 
-        if (matrix.length == 0) {
+        if (matrix.getRows() == 0) {
             throw new IllegalArgumentException("Matrix argument is empty, "
                     + "operation cannot be performed.");
         }
 
-        int length = matrix[0].length;
-        if (length == 0) {
+        if (matrix.getColumns() == 0) {
             throw new IllegalArgumentException("Argument matrix has empty row, "
                     + "operation cannot be performed.");
         }
@@ -485,36 +456,41 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     //change line row with line with pivot at position column
-    private long[][] findPivot(long[][] matrix, int column, int row) {
+    private Matrix findPivot(Matrix matrix, int column, int row) {
 
-        for (int x = row; x < matrix.length; x++) {
+        for (int x = row; x < matrix.getRows(); x++) {
             for (int y = 0; y < column + 1; y++) {
-                if (matrix[x][y] != 0 && y == column) {
+                if (matrix.getElement(x, y) != 0 && y == column) {
                     return swapLines(matrix, row, x);
                 }
-                if (matrix[x][y] != 0) {
+                if (matrix.getElement(x, y) != 0) {
                     break;
                 }
             }
         }
-
         return matrix;
     }
 
     //return matrix with swapped rows (row1, row2)
-    private long[][] swapLines(long[][] matrix, int row1, int row2) {
+    private Matrix swapLines(Matrix matrix, int row1, int row2) {
 
-        long[][] result = new long[matrix.length][matrix[0].length];
+        Matrix result = new Matrix(matrix.getRows(), matrix.getColumns());
 
-        for (int x = 0; x < matrix.length; x++) {
+        for (int x = 0; x < matrix.getRows(); x++) {
             if (x == row1) {
-                System.arraycopy(matrix[row2], 0, result[row1], 0, matrix[row2].length);
+                for (int y = 0; y < matrix.getColumns(); y++) {
+                    result.setElement(row1, y, matrix.getElement(row2, y));
+                }
             }
             if (x == row2) {
-                System.arraycopy(matrix[row1], 0, result[row2], 0, matrix[row1].length);
+                for (int y = 0; y < matrix.getColumns(); y++) {
+                    result.setElement(row2, y, matrix.getElement(row1, y));
+                }
             }
             if (x != row1 && x != row2) {
-                System.arraycopy(matrix[x], 0, result[x], 0, matrix[x].length);
+                for (int y = 0; y < matrix.getColumns(); y++) {
+                    result.setElement(x, y, matrix.getElement(x, y));
+                }
             }
 
         }
@@ -522,18 +498,18 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     //return matrix without row row and column column
-    private long[][] subMatrix(long[][] matrix, int row, int column) {
+    private Matrix subMatrix(Matrix matrix, int row, int column) {
 
-        long[][] result = new long[matrix.length - 1][matrix[0].length - 1];
+        Matrix result = new Matrix(matrix.getRows() - 1, matrix.getColumns() - 1);
 
         int rowIndex = 0;
         int colIndex = 0;
 
-        for (int x = 0; x < matrix.length; x++) {
+        for (int x = 0; x < matrix.getRows(); x++) {
             colIndex = 0;
-            for (int y = 0; y < matrix[0].length; y++) {
+            for (int y = 0; y < matrix.getColumns(); y++) {
                 if ((x != row) && (y != column)) {
-                    result[rowIndex][colIndex] = matrix[x][y];
+                    result.setElement(rowIndex, colIndex, matrix.getElement(x, y));
                 }
                 if (column != y) {
                     colIndex++;
@@ -548,44 +524,35 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     }
 
     //return matrix in row echelon form without rows full of zeroes
-    private long[][] reduceLinearlyDependentRows(long[][] matrix) {
+    private Matrix reduceLinearlyDependentRows(Matrix matrix) {
 
         int rank = rank(matrix);
-        long[][] result = new long[rank][matrix[0].length];
-        long[][] gaussMatrix = gauss(matrix);
+        Matrix result = new Matrix(rank, matrix.getColumns());
+        Matrix gaussMatrix = gauss(matrix);
 
         for (int x = 0; x < rank; x++) {
-            System.arraycopy(gaussMatrix[x], 0, result[x], 0, matrix[0].length);
+            for (int y = 0; y < matrix.getColumns(); y++) {
+                result.setElement(x, y, gaussMatrix.getElement(x, y));
+            }
         }
-
         return result;
     }
 
     //return matrix without rows in Set rowsToDelete
-    private long[][] deleteRows(long[][] matrix, HashSet rowsToDelete) {
-        long[][] result = new long[matrix.length - rowsToDelete.size()][matrix[0].length];
+    private Matrix deleteRows(Matrix matrix, HashSet rowsToDelete) {
+        Matrix result = new Matrix(matrix.getRows() - rowsToDelete.size(), matrix.getColumns());
 
         int position = 0;
-        for (int x = matrix.length - 1; x >= 0; x--) {
+        for (int x = matrix.getRows() - 1; x >= 0; x--) {
             if (rowsToDelete.contains(x)) {
                 rowsToDelete.remove(x);
             } else {
-                System.arraycopy(matrix[x], 0, result[ result.length - position - 1], 0, matrix[0].length);
+                for (int y = 0; y < matrix.getColumns(); y++) {
+                    result.setElement(result.getRows() - position - 1, y, matrix.getElement(x, y));
+                }
                 position++;
             }
         }
-
         return result;
-    }
-
-    public static void printMatrix(long[][] matrix) {
-
-        for (int x = 0; x < matrix.length; x++) {
-            System.out.print("[ ");
-            for (int y = 0; y < matrix[x].length - 1; y++) {
-                System.out.print(matrix[x][y] + ", ");
-            }
-            System.out.println(matrix[x][matrix[x].length - 1] + " ]");
-        }
     }
 }

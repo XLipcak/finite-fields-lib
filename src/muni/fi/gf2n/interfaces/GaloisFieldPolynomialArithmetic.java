@@ -4,6 +4,8 @@
  */
 package muni.fi.gf2n.interfaces;
 
+import muni.fi.gf2n.classes.Polynomial;
+
 
 
 /**
@@ -12,16 +14,16 @@ package muni.fi.gf2n.interfaces;
  */
 public interface GaloisFieldPolynomialArithmetic {
     
-    long[] add(long[] polynomial1, long[] polynomial2);
-    long[] subtract(long[] polynomial1, long[] polynomial2);
-    long[] multiply(long[] polynomial1, long[] polynomial2);
-    long[] divide(long[] polynomial1, long[] polynomial2);
-    long[] divide(long[] polynomial1, long[] polynomial2, long[] remainder);
+    Polynomial add(Polynomial polynomial1, Polynomial polynomial2);
+    Polynomial subtract(Polynomial polynomial1, Polynomial polynomial2);
+    Polynomial multiply(Polynomial polynomial1, Polynomial polynomial2);
+    Polynomial divide(Polynomial polynomial1, Polynomial polynomial2);
+    Polynomial divide(Polynomial polynomial1, Polynomial polynomial2, Polynomial remainder);
     
-    long[] gcd(long[] polynomial1, long[] polynomial2);
+    Polynomial gcd(Polynomial polynomial1, Polynomial polynomial2);
     
     //result = a^{-1} % f
-    long[] invert(long[] polynomial, long[] moduloPolynomial);
-    long[] power(long[] polynomial, long exponent);
+    Polynomial invert(Polynomial polynomial, Polynomial moduloPolynomial);
+    Polynomial power(Polynomial polynomial, long exponent);
     
 }

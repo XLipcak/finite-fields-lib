@@ -11,7 +11,9 @@ import java.util.Random;
  *
  * @author Jakub Lipcak, Masaryk University
  * 
- * Class Polynomial
+ * Class Polynomial is objective representation of polynomial. Data are stored in array 
+ * and each coefficient of polynomial is accessed by its numerical index.
+ * Highest coefficients of polynomial are stored at highest indexes of array.
  * 
  */
 public class Polynomial {
@@ -50,9 +52,10 @@ public class Polynomial {
         this(size);
         Random rn = new Random();
 
-        for (int x = 0; x < size; x++) {
+        for (int x = 0; x < size - 1; x++) {
             elements[x] = rn.nextInt((int) Math.pow(2, bitSize));
         }
+        elements[size - 1] = rn.nextInt((int) Math.pow(2, bitSize) - 1) + 1;
     }
 
     public void setElement(int index, long value) {

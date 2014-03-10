@@ -143,16 +143,16 @@ public class GF2N implements GaloisFieldArithmetic {
             //it would last one hundred years anyway...
         }
 
-        long[] poly = new long[(int) countBinarySize(polynomial) + 1];
-        int degree = poly.length - 1;
+        Polynomial poly = new Polynomial((int) countBinarySize(polynomial) + 1);
+        int degree = poly.getSize() - 1;
         long value = polynomial;
 
         //create polynomial representation from Long
-        for (int x = 0; x < poly.length; x++) {
+        for (int x = 0; x < poly.getSize(); x++) {
             if ((value & 1) == 1) {
-                poly[x] = 1;
+                poly.setElement(x, 1);
             } else {
-                poly[x] = 0;
+                poly.setElement(x, 0);
             }
             value >>= 1;
         }
@@ -177,36 +177,36 @@ public class GF2N implements GaloisFieldArithmetic {
 
         for (int x = 0; x < divisors.size(); x++) {
             //prepare tempPoly:   x^(2^divisors(x)) + x
-            long[] tempPoly = new long[(int) Math.pow(2, divisors.get(x)) + 1];
-            tempPoly[1] = 1;
-            tempPoly[tempPoly.length - 1] = 1;
+            Polynomial tempPoly = new Polynomial((int) Math.pow(2, divisors.get(x)) + 1);
+            tempPoly.setElement(1, 1);
+            tempPoly.setElement(tempPoly.getSize() - 1, 1);
 
-            long[] remainder = new long[tempPoly.length];
+            Polynomial remainder = new Polynomial(tempPoly.getSize());
             polyGF.divide(tempPoly, poly, remainder);
 
             //remainder = tempPoly % poly
             remainder = polyGF.clearZeroValuesFromPolynomial(remainder);
 
             //gcd must be 1 for every irreducible polynomial
-            long[] gcd = polyGF.gcd(poly, remainder);
-            if (!(gcd.length == 1 && gcd[0] == 1)) {
+            Polynomial gcd = polyGF.gcd(poly, remainder);
+            if (!(gcd.getSize() == 1 && gcd.getElement(0) == 1)) {
                 return false;
             }
         }
 
         //tempPoly = x^(2^degree) + x
-        long[] tempPoly = new long[(int) Math.pow(2, degree) + 1];
-        tempPoly[1] = 1;
-        tempPoly[tempPoly.length - 1] = 1;
+        Polynomial tempPoly = new Polynomial((int) Math.pow(2, degree) + 1);
+        tempPoly.setElement(1, 1);
+        tempPoly.setElement(tempPoly.getSize() - 1, 1);
 
 
         //remainder = tempPoly % poly
-        long[] remainder = new long[tempPoly.length];
+        Polynomial remainder = new Polynomial(tempPoly.getSize());
         polyGF.divide(tempPoly, poly, remainder);
         remainder = polyGF.clearZeroValuesFromPolynomial(remainder);
 
         //tempPoly % poly must be 1 for every irreducible polynomial
-        if (remainder.length == 0) {
+        if (remainder.getSize() == 0) {
             return true;
         }
 

@@ -7,7 +7,9 @@ package GaloisFieldsValidityTesting;
 import java.util.Arrays;
 import java.util.Random;
 import muni.fi.gf2n.classes.GF2N;
+import muni.fi.gf2n.classes.Matrix;
 import muni.fi.gf2n.classes.MatrixGF2N;
+import muni.fi.gf2n.classes.Vector;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -42,32 +44,25 @@ public class MatrixGF2NTest {
 
         int rowsCount = rn.nextInt(255) + 1;
         int colsCount = rn.nextInt(255) + 1;
-        long[][] matrix1 = new long[rowsCount][colsCount];
-        long[][] matrix2 = new long[rowsCount][colsCount];
+        Matrix matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
+        Matrix matrix2 = new Matrix(rowsCount, colsCount);
 
-        matrix1 = generateRandomMatrix(rowsCount, colsCount);
-
-        if (!isEqual(mat.add(matrix1, matrix1), matrix2)) {
-            fail("Addidion of two identical matrices must be zero matrix.");
-        }
-
-        if (!isEqual(mat.add(matrix1, matrix2), matrix1)) {
-            fail("Matrix1 + zeroMatrix must be Matrix1.");
-        }
-
-        if (!isEqual(mat.add(matrix2, matrix2), matrix2)) {
-            fail("zeroMatrix + zeroMatrix must be zeroMatrix.");
-        }
+        assertEquals("Addidion of two identical matrices must be zero matrix.",
+                matrix2, mat.add(matrix1, matrix1));
+        assertEquals("Matrix1 + zeroMatrix must be Matrix1.",
+                matrix1, mat.add(matrix1, matrix2));
+        assertEquals("zeroMatrix + zeroMatrix must be zeroMatrix.",
+                matrix2, mat.add(matrix2, matrix2));
 
         try {
-            mat.add(matrix1, new long[rowsCount][colsCount + 1]);
+            mat.add(matrix1, new Matrix(rowsCount, colsCount + 1));
             fail("Addition of matrices with different dimensions should throw IllegalArgumentException.");
         } catch (IllegalArgumentException ex) {
             //OK
         }
 
         try {
-            mat.add(matrix1, new long[rowsCount + 1][colsCount]);
+            mat.add(matrix1, new Matrix(rowsCount + 1, colsCount));
             fail("Addition of matrices with different dimensions should throw IllegalArgumentException.");
         } catch (IllegalArgumentException ex) {
             //OK
@@ -80,59 +75,29 @@ public class MatrixGF2NTest {
 
         int rowsCount = rn.nextInt(255) + 1;
         int colsCount = rn.nextInt(255) + 1;
-        long[][] matrix1 = new long[rowsCount][colsCount];
-        long[][] matrix2 = new long[rowsCount][colsCount];
+        Matrix matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
+        Matrix matrix2 = new Matrix(rowsCount, colsCount);
 
-        matrix1 = generateRandomMatrix(rowsCount, colsCount);
-
-        if (!isEqual(mat.subtract(matrix1, matrix1), matrix2)) {
-            fail("Subtraction of two identical matrices must be zero matrix.");
-        }
-
-        if (!isEqual(mat.subtract(matrix1, matrix2), matrix1)) {
-            fail("Matrix1 - zeroMatrix must be Matrix1.");
-        }
-
-        if (!isEqual(mat.subtract(matrix2, matrix2), matrix2)) {
-            fail("zeroMatrix - zeroMatrix must be zeroMatrix.");
-        }
+        assertEquals("Subtraction of two identical matrices must be zero matrix.",
+                matrix2, mat.add(matrix1, matrix1));
+        assertEquals("Matrix1 - zeroMatrix must be Matrix1.",
+                matrix1, mat.add(matrix1, matrix2));
+        assertEquals("zeroMatrix - zeroMatrix must be zeroMatrix.",
+                matrix2, mat.add(matrix2, matrix2));
 
         try {
-            mat.subtract(matrix1, new long[rowsCount][colsCount + 1]);
+            mat.add(matrix1, new Matrix(rowsCount, colsCount + 1));
             fail("Subtraction of matrices with different dimensions should throw IllegalArgumentException.");
         } catch (IllegalArgumentException ex) {
             //OK
         }
 
         try {
-            mat.subtract(matrix1, new long[rowsCount + 1][colsCount]);
+            mat.add(matrix1, new Matrix(rowsCount + 1, colsCount));
             fail("Subtraction of matrices with different dimensions should throw IllegalArgumentException.");
         } catch (IllegalArgumentException ex) {
             //OK
         }
-    }
-
-    @Test
-    public void testTranspose() {
-        MatrixGF2N mat = new MatrixGF2N(gf);
-
-        for (int x = 0; x < 100; x++) {
-
-            int rowsCount = rn.nextInt(255) + 1;
-            int colsCount = rn.nextInt(255) + 1;
-
-            long[][] matrix1 = new long[rowsCount][colsCount];
-            long[][] matrix2 = mat.transpose(matrix1);
-
-            assertEquals("Transposed matrix rowCount and colCount must be swapped.",
-                    matrix1.length, matrix2[0].length);
-            assertEquals("Transposed matrix rowCount and colCount must be swapped.",
-                    matrix1[0].length, matrix2.length);
-            if (!isEqual(matrix1, mat.transpose(matrix2))) {
-                fail("Matrix after double transposion cannot be changed.");
-            }
-        }
-
     }
 
     @Test
@@ -141,38 +106,37 @@ public class MatrixGF2NTest {
 
         for (int x = 0; x < 32; x++) {
 
-            int size = rn.nextInt(255) + 1;
+            int size = rn.nextInt(32) + 1;
 
-            long[][] matrix1 = new long[size][size];
-            long[][] identityMatrix = generateIdentityMatrix(size);
+            Matrix matrix1 = new Matrix(size, size, gf.getFieldSize());
+            Matrix identityMatrix = generateIdentityMatrix(size);
 
-            if (!isEqual(matrix1, mat.multiply(matrix1, identityMatrix))) {
-                fail("Matrix after being multiplied by identity matrix cannot be changed.");
-            }
-            if (!isEqual(matrix1, mat.multiply(identityMatrix, matrix1))) {
-                fail("Matrix after being multiplied by identity matrix cannot be changed.");
-            }
+            assertEquals("Matrix after being multiplied by identity matrix cannot be changed.",
+                    matrix1, mat.multiply(matrix1, identityMatrix));
+            assertEquals("Matrix after being multiplied by identity matrix cannot be changed.",
+                    matrix1, mat.multiply(identityMatrix, matrix1));
+
         }
 
         int rowsCount = rn.nextInt(255) + 1;
         int colsCount = rn.nextInt(255) + 1;
 
         try {
-            mat.multiply(new long[rowsCount][colsCount], new long[colsCount][rowsCount + 1]);
+            mat.multiply(new Matrix(rowsCount, colsCount), new Matrix(colsCount, rowsCount + 1));
             //OK
         } catch (IllegalArgumentException ex) {
             fail("IllegalArgumentException was thrown when two matrices of good dimensions were multiplied.");
         }
 
         try {
-            mat.multiply(new long[rowsCount][colsCount], new long[colsCount + 1][rowsCount]);
+            mat.multiply(new Matrix(rowsCount, colsCount), new Matrix(colsCount + 1, rowsCount));
             fail("IllegalArgumentException should be thrown when multiplying two matrices of wrong dimensions.");
         } catch (IllegalArgumentException ex) {
             //OK
         }
 
         try {
-            mat.multiply(new long[rowsCount][colsCount + 1], new long[colsCount][rowsCount]);
+            mat.multiply(new Matrix(rowsCount, colsCount + 1), new Matrix(colsCount, rowsCount));
             fail("IllegalArgumentException should be thrown when multiplying two matrices of wrong dimensions.");
         } catch (IllegalArgumentException ex) {
             //OK
@@ -190,17 +154,15 @@ public class MatrixGF2NTest {
 
             int size = rn.nextInt(9) + 1;
 
-            long[][] matrix1 = generateRandomMatrix(size, size);
-            long[][] identityMatrix = generateIdentityMatrix(size);
+            Matrix matrix1 = new Matrix(size, size, gf.getFieldSize());
+            Matrix identityMatrix = generateIdentityMatrix(size);
             try {
-                long[][] inverseMatrix = mat.inverse(matrix1);
+                Matrix inverseMatrix = mat.inverse(matrix1);
 
-                if (!isEqual(identityMatrix, mat.multiply(matrix1, inverseMatrix))) {
-                    fail("Matrix after being multiplied by inverse matrix must be identity matrix.");
-                }
-                if (!isEqual(identityMatrix, mat.multiply(inverseMatrix, matrix1))) {
-                    fail("Matrix after being multiplied by inverse matrix must be identity matrix.");
-                }
+                assertEquals("Matrix after being multiplied by inverse matrix must be identity matrix.",
+                        identityMatrix, mat.multiply(matrix1, inverseMatrix));
+                assertEquals("Matrix after being multiplied by inverse matrix must be identity matrix.",
+                        identityMatrix, mat.multiply(inverseMatrix, matrix1));
             } catch (IllegalArgumentException ex) {
                 //Matrix is non-invertible, this may happen sometimes
             }
@@ -216,8 +178,8 @@ public class MatrixGF2NTest {
         MatrixGF2N mat = new MatrixGF2N(gf);
 
         int size = rn.nextInt(9) + 1;
-        long[][] matrix1 = generateRandomMatrix(size, size + 1);
-        long[][] identityMatrix = generateIdentityMatrix(size);
+        Matrix matrix1 = new Matrix(size, size + 1, gf.getFieldSize());
+        Matrix identityMatrix = generateIdentityMatrix(size);
 
         try {
             mat.determinant(matrix1);
@@ -228,11 +190,11 @@ public class MatrixGF2NTest {
 
         assertEquals("Determinant of identity matrix must be equal to 1.", 1, mat.determinant(identityMatrix));
 
-        matrix1 = new long[size + 1][size + 1];
+        matrix1 = new Matrix(size + 1, size + 1);
         long value = rn.nextInt(4194303);
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
-                matrix1[x][y] = value;
+                matrix1.setElement(x, y, value);
             }
         }
 
@@ -247,8 +209,8 @@ public class MatrixGF2NTest {
         MatrixGF2N mat = new MatrixGF2N(gf);
 
         int size = rn.nextInt(9) + 1;
-        long[][] matrix1 = generateRandomMatrix(size, size + 1);
-        long[][] identityMatrix = generateIdentityMatrix(size);
+        Matrix matrix1 = new Matrix(size, size + 1, gf.getFieldSize());
+        Matrix identityMatrix = generateIdentityMatrix(size);
 
         try {
             mat.power(matrix1, rn.nextInt(255) + 1);
@@ -265,9 +227,8 @@ public class MatrixGF2NTest {
         }
 
         for (int x = 1; x < 32; x++) {
-            if (!isEqual(identityMatrix, mat.power(identityMatrix, x))) {
-                fail("IdentityMatrix powered to anything muse be IdentityMatrix.");
-            }
+            assertEquals("IdentityMatrix powered to anything muse be IdentityMatrix.",
+                    identityMatrix, mat.power(identityMatrix, x));
         }
     }
 
@@ -281,14 +242,14 @@ public class MatrixGF2NTest {
             int colsCount = rowsCount + rn.nextInt(128) + 1;
             int value = (rn.nextInt(4194303) + (rowsCount + colsCount)) % 4194303;
 
-            long[][] matrix1 = new long[rowsCount][colsCount];
+            Matrix matrix1 = new Matrix(rowsCount, colsCount);
             for (int x = 0; x < rowsCount; x++) {
                 for (int y = 0; y < colsCount; y++) {
-                    matrix1[x][y] = value + x + y;
+                    matrix1.setElement(x, y, value + x + y);
                 }
             }
             assertEquals("Rank of this matrix should be equal to number of its rows.",
-                    matrix1.length, mat.rank(matrix1));
+                    matrix1.getRows(), mat.rank(matrix1));
         }
 
         for (int test = 0; test < 10; test++) {
@@ -296,14 +257,14 @@ public class MatrixGF2NTest {
             int rowsCount = colsCount + rn.nextInt(128) + 1;
             int value = (rn.nextInt(4194303) + (rowsCount + colsCount)) % 4194303;
 
-            long[][] matrix1 = new long[rowsCount][colsCount];
+            Matrix matrix1 = new Matrix(rowsCount, colsCount);
             for (int x = 0; x < rowsCount; x++) {
                 for (int y = 0; y < colsCount; y++) {
-                    matrix1[x][y] = value + x + y;
+                    matrix1.setElement(x, y, value + x + y);
                 }
             }
             assertEquals("Rank of this matrix should be equal to number of its columns.",
-                    matrix1[0].length, mat.rank(matrix1));
+                    matrix1.getColumns(), mat.rank(matrix1));
         }
 
 
@@ -317,9 +278,9 @@ public class MatrixGF2NTest {
             int rowsCount = rn.nextInt(128) + 1;
             int colsCount = rn.nextInt(128) + 1;
 
-            long[][] matrix1 = generateRandomMatrix(rowsCount, colsCount);
-            assertEquals("Matrix should be in row echelon form after Gauss elimination.",
-                    true, isInRowEchelonForm(mat.gauss(matrix1)));
+            Matrix matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
+            assertTrue("Matrix should be in row echelon form after Gauss elimination.",
+                    isInRowEchelonForm(mat.gauss(matrix1)));
         }
 
 
@@ -328,7 +289,7 @@ public class MatrixGF2NTest {
             int rowsCount = rn.nextInt(128) + 1;
             int colsCount = rn.nextInt(128) + 1;
 
-            long[][] matrix1 = generateRandomBinaryMatrix(rowsCount, colsCount);
+            Matrix matrix1 = new Matrix(rowsCount, colsCount, 1);
 
             assertTrue("Matrix should be in row echelon form after Gauss elimination.",
                     isInRowEchelonForm(mat.gauss(matrix1)));
@@ -342,17 +303,14 @@ public class MatrixGF2NTest {
         for (int test = 0; test < 16; test++) {
 
             int size = rn.nextInt(128) + 1;
-            long[][] matrix1 = generateRandomMatrix(size, size);
-            long[] resultVect = new long[size];
-
-            for (int x = 0; x < size; x++) {
-                resultVect[x] = rn.nextInt(4194303);
-            }
+            Matrix matrix1 = new Matrix(size, size, gf.getFieldSize());
+            Vector resultVect = new Vector(size, gf.getFieldSize());
 
             try {
-                long[][] resultMat = mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, resultVect));
-                for (int y = 0; y < resultMat[0].length; y++) {
-                    assertEquals("Linear equations system solved wrong.", resultVect[y], resultMat[0][y]);
+                Matrix resultMat = mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, resultVect));
+                for (int y = 0; y < resultMat.getColumns(); y++) {
+                    assertEquals("Linear equations system solved wrong.",
+                            resultVect.getElement(y), resultMat.getElement(0, y));
                 }
             } catch (IllegalArgumentException ex) {
                 if (ex.getMessage().equals("Cannot solve linear equations system: linearly dependent rows.")) {
@@ -365,23 +323,20 @@ public class MatrixGF2NTest {
 
         mat = new MatrixGF2N(3);
         for (int test = 0; test < 64; test++) {
+
             int size = rn.nextInt(128) + 1;
-            long[][] matrix1 = generateRandomBinaryMatrix(size, size);
-            long[] resultVect = new long[size];
-
-
-            for (int x = 0; x < size; x++) {
-                resultVect[x] = rn.nextInt(2);
-            }
+            Matrix matrix1 = new Matrix(size, size, 1);
+            Vector resultVect = new Vector(size, 1);
 
             try {
-                long[][] resultMat = mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, resultVect));
-                for (int y = 0; y < resultMat[0].length; y++) {
-                    assertEquals("Linear equations system solved wrong.", resultVect[y], resultMat[0][y]);
+                Matrix resultMat = mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, resultVect));
+                for (int y = 0; y < resultMat.getColumns(); y++) {
+                    assertEquals("Linear equations system solved wrong.",
+                            resultVect.getElement(y), resultMat.getElement(0, y));
                 }
             } catch (IllegalArgumentException ex) {
                 if (ex.getMessage().equals("Cannot solve linear equations system: linearly dependent rows.")) {
-                    //this may happen, very often with binary finite fields
+                    //this may sometimes happen
                 } else {
                     fail(ex.toString());
                 }
@@ -399,9 +354,9 @@ public class MatrixGF2NTest {
             int rowsCount = rn.nextInt(128) + 1;
             int colsCount = rn.nextInt(128) + 1;
 
-            long[][] matrix1 = generateRandomMatrix(rowsCount, colsCount);
+            Matrix matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
             assertEquals("Number of image rows must be equal to rank of a matrix.", mat.rank(matrix1),
-                    mat.image(matrix1).length);
+                    mat.image(matrix1).getRows());
         }
     }
 
@@ -409,12 +364,12 @@ public class MatrixGF2NTest {
     public void testKernel() {
         MatrixGF2N mat = new MatrixGF2N(gf);
 
-        for (int test = 0; test < 16; test++) {
+        for (int test = 0; test < 32; test++) {
             int colsCount = rn.nextInt(64) + 1;
             int rowsCount = rn.nextInt(64) + 1 + colsCount;
-            long[][] matrix1 = generateRandomMatrix(rowsCount, colsCount);
+            Matrix matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
 
-            long[][] resultMat = mat.kernel(matrix1);
+            Matrix resultMat = mat.kernel(matrix1);
 
             try {
                 resultMat = mat.multiply(resultMat, matrix1);
@@ -433,12 +388,12 @@ public class MatrixGF2NTest {
 
         //Tests in binary GF
         mat = new MatrixGF2N(3);
-        for (int test = 0; test < 16; test++) {
+        for (int test = 0; test < 32; test++) {
             int colsCount = rn.nextInt(64) + 1;
             int rowsCount = rn.nextInt(64) + 1 + colsCount;
-            long[][] matrix1 = generateRandomBinaryMatrix(rowsCount, colsCount);
+            Matrix matrix1 = new Matrix(rowsCount, colsCount, 1);
 
-            long[][] resultMat = mat.kernel(matrix1);
+            Matrix resultMat = mat.kernel(matrix1);
 
             try {
                 resultMat = mat.multiply(resultMat, matrix1);
@@ -456,30 +411,12 @@ public class MatrixGF2NTest {
         }
     }
 
-    //equals test for matrices, may be changed in the future for equals method in Matrix separate class
-    private boolean isEqual(long[][] matrix1, long[][] matrix2) {
-
-        if ((matrix1[0].length != matrix2[0].length) || (matrix1.length != matrix2.length)) {
-            return false;
-        }
-
-        for (int x = 0; x < matrix1.length; x++) {
-            for (int y = 0; y < matrix1[0].length; y++) {
-                if (matrix1[x][y] != matrix2[x][y]) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
     //equals test for matrices, may be changed in the future for isZeroMatrix method in Matrix separate class
-    private boolean isZeroMatrix(long[][] matrix) {
+    private boolean isZeroMatrix(Matrix matrix) {
 
-        for (int x = 0; x < matrix.length; x++) {
-            for (int y = 0; y < matrix[0].length; y++) {
-                if (matrix[x][y] != 0) {
+        for (int x = 0; x < matrix.getRows(); x++) {
+            for (int y = 0; y < matrix.getColumns(); y++) {
+                if (matrix.getElement(x, y) != 0) {
                     return false;
                 }
             }
@@ -488,47 +425,21 @@ public class MatrixGF2NTest {
         return true;
     }
 
-    private long[][] generateRandomMatrix(int rowsCount, int colsCount) {
+    private Matrix generateIdentityMatrix(int size) {
 
-        long[][] matrix = new long[rowsCount][colsCount];
-
-        for (int x = 0; x < rowsCount; x++) {
-            for (int y = 0; y < colsCount; y++) {
-                matrix[x][y] = rn.nextInt(4194303);
-            }
-        }
-
-        return matrix;
-    }
-
-    private long[][] generateRandomBinaryMatrix(int rowsCount, int colsCount) {
-
-        long[][] matrix = new long[rowsCount][colsCount];
-
-        for (int x = 0; x < rowsCount; x++) {
-            for (int y = 0; y < colsCount; y++) {
-                matrix[x][y] = rn.nextInt(2);
-            }
-        }
-
-        return matrix;
-    }
-
-    private long[][] generateIdentityMatrix(int size) {
-
-        long[][] matrix = new long[size][size];
+        Matrix matrix = new Matrix(size, size);
 
         for (int x = 0; x < size; x++) {
-            matrix[x][x] = 1;
+            matrix.setElement(x, x, 1);
         }
 
         return matrix;
     }
 
-    private boolean isInRowEchelonForm(long[][] matrix) {
+    private boolean isInRowEchelonForm(Matrix matrix) {
 
         boolean tempCtrl = false;
-        for (int x = 0; x < matrix.length; x++) {
+        for (int x = 0; x < matrix.getRows(); x++) {
             int pivot = findPivotInRow(matrix, x);
             if (pivot == -1) {
                 tempCtrl = true;
@@ -538,8 +449,8 @@ public class MatrixGF2NTest {
                 return false;
             }
 
-            for (int y = x + 1; y < matrix.length && pivot != -1; y++) {
-                if (matrix[y][pivot] != 0) {
+            for (int y = x + 1; y < matrix.getRows() && pivot != -1; y++) {
+                if (matrix.getElement(y, pivot) != 0) {
                     return false;
                 }
             }
@@ -548,10 +459,10 @@ public class MatrixGF2NTest {
     }
 
     //return position of pivot in row row, -1 returned for row full of zeroes
-    private int findPivotInRow(long[][] matrix, int row) {
+    private int findPivotInRow(Matrix matrix, int row) {
 
-        for (int y = 0; y < matrix[0].length; y++) {
-            if (matrix[row][y] != 0) {
+        for (int y = 0; y < matrix.getColumns(); y++) {
+            if (matrix.getElement(row, y) != 0) {
                 return y;
             }
         }
