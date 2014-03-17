@@ -1,29 +1,44 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package muni.fi.gf2n.classes;
 
 import muni.fi.gf2n.interfaces.GaloisFieldPolynomialArithmetic;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
+ * Class PolynomialGF2N implements interface GaloisFieldPolynomialArithmetic for
+ * computation with polynomials in Galois Fields. Object of PolynomialGF2N class
+ * has to be specified by reducing polynomial for Galois Field, or by object of
+ * class GF2N.
  *
  * @author Jakub Lipcak, Masaryk University
- *
- * PolynomialGF2N class computes with Polynomials in Galois Field
  *
  */
 public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
 
     private GF2N galoisField;
 
+    /**
+     * Constructs an object of PolynomialGF2N class. Object of PolynomialGF2N
+     * class has to be specified by galoisField, which is used for computation
+     * with polynomials over Galois Field.
+     *
+     * @param galoisField GF2N galoisField used for computation with polynomials
+     * over Galois Field
+     *
+     */
     public PolynomialGF2N(GF2N galoisField) {
         this.galoisField = galoisField;
     }
 
+    /**
+     * Constructs an object of PolynomialGF2N class. Object of PolynomialGF2N
+     * class has to be specified by reducingPolynomial, which is used as
+     * characteristic reducingPolynomial for computation with polynomials over
+     * Galois Field.
+     *
+     * @param reducingPolynomial reducing polynomial for galoisField used for
+     * computation with polynomials over Galois Field.
+     *
+     */
     public PolynomialGF2N(long reducingPolynomial) {
         galoisField = new GF2N(reducingPolynomial);
     }
@@ -47,7 +62,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             }
         }
 
-        return clearZeroValuesFromPolynomial(result);
+        return result.clearZeroValues();
     }
 
     @Override
@@ -75,7 +90,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             }
         }
 
-        return clearZeroValuesFromPolynomial(result);
+        return result.clearZeroValues();
     }
 
     @Override
@@ -89,7 +104,6 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         return divide(polynomial1, polynomial2, remainder);
     }
 
-    //remainder length not controlled yet
     @Override
     public Polynomial divide(Polynomial polynomial1, Polynomial polynomial2, Polynomial remainder) {
 
@@ -138,6 +152,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         }
 
         //copy remainder of division to remainder attribute of this method
+        remainder.setSize(numerator.getSize());
         for (int x = 0; x < numerator.getSize(); x++) {
             remainder.setElement(x, numerator.getElement(x));
         }
@@ -181,7 +196,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             resultList.add(denumerator);
             resultList.add(temp);
 
-            remainder = clearZeroValuesFromPolynomial(remainder);
+            remainder.clearZeroValues();
             numerator = denumerator;
             denumerator = remainder;
         }
@@ -249,7 +264,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             result = remainder;
             remainder = new Polynomial(Math.max(numerator.getSize(), denumerator.getSize()));
             divide(numerator, denumerator, remainder);
-            remainder = clearZeroValuesFromPolynomial(remainder);
+            remainder.clearZeroValues();
             numerator = denumerator;
             denumerator = remainder;
         }
@@ -289,7 +304,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         }
 
         //normalize result, after this, remainder after division by moduloPolynomial will be 1
-        result = clearZeroValuesFromPolynomial(result);
+        result.clearZeroValues();
         return divide(result, gcd);
     }
 
@@ -310,25 +325,6 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             result = multiply(polynomial, result);
         }
 
-        return result;
-    }
-
-    //return polynomial without zero coefficients at highest positions
-    public Polynomial clearZeroValuesFromPolynomial(Polynomial polynomial) {
-
-        Polynomial result;
-
-        for (int x = polynomial.getSize() - 1; x >= 0; x--) {
-            if (polynomial.getElement(x) != 0) {
-                result = new Polynomial(x + 1);
-                for (int y = 0; y < x + 1; y++) {
-                    result.setElement(y, polynomial.getElement(y));
-                }
-                return result;
-            }
-        }
-
-        result = new Polynomial();
         return result;
     }
 

@@ -1,17 +1,14 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package muni.fi.gf2n.classes;
 
 import java.util.Arrays;
 import java.util.Random;
 
 /**
+ * Class Matrix is objective representation of matrix. Data are stored in
+ * 2-dimensional array and each element of matrix is accessed by its position in
+ * matrix (row, column).
  *
  * @author Jakub Lipcak, Masaryk University
- *
- * Class matrix
  *
  */
 public class Matrix {
@@ -19,12 +16,34 @@ public class Matrix {
     private long[][] elements;
     private int rows, columns;
 
+    /**
+     * Constructs a Matrix with 0 rows and columns and with no elements.
+     */
     public Matrix() {
         rows = 0;
         columns = 0;
         elements = new long[0][0];
     }
 
+    /**
+     * Constructs a Matrix of specified size. All elements of this matrix are
+     * set to zero.
+     *
+     * @param rows number of rows
+     * @param columns number of columns
+     */
+    public Matrix(int rows, int columns) {
+        this.rows = rows;
+        this.columns = columns;
+        elements = new long[rows][columns];
+    }
+
+    /**
+     * Constructs a Matrix. Constructed Matrix is identical with Matrix given as
+     * attribute to this constructor.
+     *
+     * @param matrix Matrix to clone
+     */
     public Matrix(Matrix matrix) {
         rows = matrix.getRows();
         columns = matrix.getColumns();
@@ -36,26 +55,33 @@ public class Matrix {
             }
         }
     }
-    
-    public Matrix(long[][] matrix){
+
+    /**
+     * Constructs a Matrix. Constructed Matrix is identical with Matrix
+     * represented by 2-dimensional array given as attribute to this
+     * constructor.
+     *
+     * @param matrix Matrix to clone
+     */
+    public Matrix(long[][] matrix) {
         rows = matrix.length;
         columns = matrix[0].length;
-        
-        for(int x = 0; x < rows; x++){
-            for(int y = 0; y < columns; y++){
+
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < columns; y++) {
                 elements[x][y] = matrix[x][y];
             }
         }
     }
 
-    public Matrix(int rows, int columns) {
-        this.rows = rows;
-        this.columns = columns;
-        elements = new long[rows][columns];
-    }
-
-    /*
-     * Generate random matrix, each element of size 2^bitSize
+    /**
+     * Constructs a Matrix with specified number of rows and columns.
+     * Constructed Matrix is filled up with numbers generated randomly between 0
+     * and 2^bitSize - 1 .
+     *
+     * @param rows number of rows
+     * @param columns number of columns
+     * @param bitSize bit size of values generated randomly
      */
     public Matrix(int rows, int columns, int bitSize) {
         this(rows, columns);
@@ -68,14 +94,31 @@ public class Matrix {
         }
     }
 
+    /**
+     * Set element of matrix at specified position to specified value.
+     *
+     * @param x row position of element
+     * @param y column position of element
+     * @param value value to be set
+     */
     public void setElement(int x, int y, long value) {
         elements[x][y] = value;
     }
 
+    /**
+     * Returns element of matrix at specified position.
+     *
+     * @param x row position of element
+     * @param y column position of element
+     * @return element at specified position
+     */
     public long getElement(int x, int y) {
         return elements[x][y];
     }
 
+    /**
+     * Transpose matrix.
+     */
     public void transpose() {
         long[][] transposedMatrix = new long[columns][rows];
 
@@ -90,10 +133,20 @@ public class Matrix {
         rows = transposedMatrix.length;
     }
 
+    /**
+     * Returns number of rows in matrix.
+     *
+     * @return number of rows
+     */
     public int getRows() {
         return rows;
     }
 
+    /**
+     * Returns number of columns in matrix.
+     *
+     * @return number of columns
+     */
     public int getColumns() {
         return columns;
     }
@@ -103,14 +156,14 @@ public class Matrix {
         if (!(matrix instanceof Matrix)) {
             return false;
         }
-        
-        if (((Matrix)matrix).getRows() != rows || ((Matrix)matrix).getColumns() != columns) {
+
+        if (((Matrix) matrix).getRows() != rows || ((Matrix) matrix).getColumns() != columns) {
             return false;
         }
 
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < columns; y++) {
-                if (((Matrix)matrix).getElement(x, y) != elements[x][y]) {
+                if (((Matrix) matrix).getElement(x, y) != elements[x][y]) {
                     return false;
                 }
             }

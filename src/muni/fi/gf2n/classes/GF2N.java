@@ -1,14 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package muni.fi.gf2n.classes;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import muni.fi.gf2n.interfaces.GaloisFieldArithmetic;
 
 /**
+ * Class GF2N implements methods for computation with finite fields. Instance of
+ * this class is specified by reducing polynomial. This reducing polynomial is
+ * used as characteristic polynomial for this Galois Field and methods for
+ * computation with this field depend on it.
  *
  * @author Jakub Lipcak, Masaryk University
  */
@@ -26,6 +25,15 @@ public class GF2N implements GaloisFieldArithmetic {
     private long reducingPolynomial;
     private short fieldSize;
 
+    /**
+     * Constructs an object of GF2N Class. This object has to be specified by
+     * reducing polynomial. This polynomial is used as characteristic polynomial
+     * for Galois field, in which we want to perform operations.
+     *
+     * @param reducingPolynomial Characteristic polynomial of Galois field. It
+     * is represented by long, and coefficients of this polynomial are created
+     * from binary representation of this number.
+     */
     public GF2N(long reducingPolynomial) {
 
         if (reducingPolynomial <= 0) {
@@ -185,7 +193,7 @@ public class GF2N implements GaloisFieldArithmetic {
             polyGF.divide(tempPoly, poly, remainder);
 
             //remainder = tempPoly % poly
-            remainder = polyGF.clearZeroValuesFromPolynomial(remainder);
+            remainder.clearZeroValues();
 
             //gcd must be 1 for every irreducible polynomial
             Polynomial gcd = polyGF.gcd(poly, remainder);
@@ -203,7 +211,7 @@ public class GF2N implements GaloisFieldArithmetic {
         //remainder = tempPoly % poly
         Polynomial remainder = new Polynomial(tempPoly.getSize());
         polyGF.divide(tempPoly, poly, remainder);
-        remainder = polyGF.clearZeroValuesFromPolynomial(remainder);
+        remainder.clearZeroValues();
 
         //tempPoly % poly must be 1 for every irreducible polynomial
         if (remainder.getSize() == 0) {
@@ -213,10 +221,20 @@ public class GF2N implements GaloisFieldArithmetic {
         return false;
     }
 
+    /**
+     * Returns reducing polynomial of this Galois field.
+     *
+     * @return reducing polynomial
+     */
     public long getReducingPolynomial() {
         return reducingPolynomial;
     }
 
+    /**
+     * Set reducing polynomial for computation in this Galois Field.
+     *
+     * @param reducingPolynomial reducing polynomial to be set
+     */
     public void setReducingPolynomial(long reducingPolynomial) {
 
         if (reducingPolynomial <= 0) {
@@ -227,6 +245,11 @@ public class GF2N implements GaloisFieldArithmetic {
         fieldSize = countBinarySize(reducingPolynomial);
     }
 
+    /**
+     * Return max binary size of elements, which belong to this Galois Field.
+     *
+     * @return field size
+     */
     public short getFieldSize() {
         return fieldSize;
     }

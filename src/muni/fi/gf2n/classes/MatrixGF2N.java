@@ -1,29 +1,41 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package muni.fi.gf2n.classes;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 import muni.fi.gf2n.interfaces.GaloisFieldMatrixArithmetic;
 
 /**
+ * Class MatrixGF2N implements interface GaloisFieldMatrixArithmetic for
+ * computation with matrices in Galois Fields. Object of MatrixGF2N class has to
+ * be specified by reducing polynomial for Galois Field, or by object of class
+ * GF2N.
  *
  * @author Jakub Lipcak, Masaryk University
- *
- * Class MatrixGF2N for computation with Matrices in Galois Fields.
  *
  */
 public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     private GF2N galoisField;
 
+    /**
+     * Constructs an object of MatrixGF2N Class. Object of MatrixGF2N class has
+     * to be specified by galoisField, which is used for computation with
+     * matrices over Galois Field.
+     *
+     * @param galoisField GF2N galoisField used for computation with matrices
+     * over Galois Field.
+     */
     public MatrixGF2N(GF2N galoisField) {
         this.galoisField = galoisField;
     }
 
+    /**
+     * Constructs an object of MatrixGF2N Class. Object of MatrixGF2N class has
+     * to be specified by reducingPolynomial, which is used as characteristic
+     * reducingPolynomial for computation with matrices over Galois Field.
+     *
+     * @param reducingPolynomial reducing polynomial for galoisField used for
+     * computation with matrices over Galois Field.
+     */
     public MatrixGF2N(long reducingPolynomial) {
         galoisField = new GF2N(reducingPolynomial);
     }
@@ -440,7 +452,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         }
     }
 
-    //check, if matrix has no zero rows or columns size
+    //check, if matrix has no zero rows or columns
     private void isValid(Matrix matrix) {
 
         if (matrix.getRows() == 0) {

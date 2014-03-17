@@ -1,25 +1,42 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package muni.fi.gf2n.classes;
 
 import muni.fi.gf2n.interfaces.GaloisFieldVectorArithmetic;
 
 /**
+ * Class VectorGF2N implements interface GaloisFieldVectorArithmetic for
+ * computation with vectors in Galois Fields. Object of VectorGF2N class has to
+ * be specified by reducing polynomial for Galois Field, or by object of class
+ * GF2N.
  *
  * @author Jakub Lipcak, Masaryk University
- * 
- * Class VectorGF2N 
+ *
  */
 public class VectorGF2N implements GaloisFieldVectorArithmetic {
 
     private GF2N galoisField;
 
+    /**
+     * Constructs an object of VectorGF2N class. Object of VectorGF2N class has
+     * to be specified by galoisField, which is used for computation with
+     * vectors over Galois Field.
+     *
+     * @param galoisField GF2N galoisField used for computation with vectors
+     * over Galois Field
+     *
+     */
     public VectorGF2N(GF2N galoisField) {
         this.galoisField = galoisField;
     }
 
+    /**
+     * Constructs an object of VectorGF2N class. Object of VectorGF2N class has
+     * to be specified by reducingPolynomial, which is used as characteristic
+     * reducingPolynomial for computation with vectors over Galois Field.
+     *
+     * @param reducingPolynomial reducing polynomial for galoisField used for
+     * computation with vectors over Galois Field.
+     *
+     */
     public VectorGF2N(long reducingPolynomial) {
         galoisField = new GF2N(reducingPolynomial);
     }

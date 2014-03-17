@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package muni.fi.aes;
 
 import static muni.fi.aes.BlockCipherMode.CBC;
@@ -14,13 +10,12 @@ import muni.fi.gf2n.classes.MatrixGF2N;
 import muni.fi.gf2n.classes.Vector;
 
 /**
+ * Class AES implements AES algorithm working with four types of Block cipher
+ * modes(ECB, CBC, CFB, OFB) and with keys of three different lengths(128bit,
+ * 192bit, 256bit).
  *
  * @author Jakub Lipcak, Masaryk University
- * 
- * Implementation of AES algorithm working with four types of  
- * Block cipher modes(ECB, CBC, CFB, OFB) and with keys of three
- * different lengths(128bit, 192bit, 256bit).
- * 
+ *
  */
 public final class AES {
 
@@ -29,10 +24,9 @@ public final class AES {
     private int[] Rcon;
     private BlockCipherMode mode;
 
-    
     /**
-     * Creates AES object and initializes S-Box, Inverse S-box and Rcon.
-     * ECB Block cipher mode is set as default.
+     * Creates AES object and initializes S-Box, Inverse S-box and Rcon. ECB
+     * Block cipher mode is set as default.
      */
     public AES() {
         //build
@@ -50,7 +44,7 @@ public final class AES {
 
     /**
      * Creates AES object and initializes S-Box, Inverse S-box and Rcon.
-     * 
+     *
      * @param mode Block cipher mode used for encryption and decryption
      */
     public AES(BlockCipherMode mode) {
@@ -59,19 +53,19 @@ public final class AES {
     }
 
     /**
-     * Returns encrypted array of bytes. Data are encrypted in blocks(16 bytes), 
+     * Returns encrypted array of bytes. Data are encrypted in blocks(16 bytes),
      * length of returned array is always divisible by 16.
-     * 
+     *
      * @param input array of bytes to encrypt
      * @param key key used to encrypt data
-     * @param initializationVector initializationVector is used in some modes of encryption
-     * @throws IllegalArgumentException if key or initializationVector has wrong length
+     * @param initializationVector initializationVector is used in some modes of
+     * encryption
      * @return encrypted input
      */
     public byte[] encrypt(byte[] input, byte[] key, byte[] initializationVector) {
-        
+
         isKeyValid(key);
-        if( mode != ECB){
+        if (mode != ECB) {
             isInitializationVectorValid(initializationVector);
         }
 
@@ -95,19 +89,19 @@ public final class AES {
     }
 
     /**
-     * Returns decrypted array of bytes. Data are decrypted in blocks(16 bytes), 
+     * Returns decrypted array of bytes. Data are decrypted in blocks(16 bytes),
      * length of returned array is always divisible by 16.
-     * 
+     *
      * @param input array of bytes to decrypt
      * @param key key used to decrypt data
-     * @param initializationVector initializationVector is used in some modes of decryption
-     * @throws IllegalArgumentException if key or initializationVector has wrong length
+     * @param initializationVector initializationVector is used in some modes of
+     * decryption
      * @return decrypted input
      */
     public byte[] decrypt(byte[] input, byte[] key, byte[] initializationVector) {
-        
+
         isKeyValid(key);
-        if( mode != ECB){
+        if (mode != ECB) {
             isInitializationVectorValid(initializationVector);
         }
 
@@ -131,17 +125,16 @@ public final class AES {
     }
 
     /**
-     * Returns encrypted array of bytes. Data are encrypted in blocks(16 bytes), 
+     * Returns encrypted array of bytes. Data are encrypted in blocks(16 bytes),
      * length of returned array is always divisible by 16. ECB Block Cipher Mode
      * is used here, the same blocks are encrypted to the same result.
-     * 
+     *
      * @param input array of bytes to encrypt
      * @param key key used to encrypt data
-     * @throws IllegalArgumentException if key has wrong length
      * @return encrypted input
      */
     public byte[] encryptECB(byte[] input, byte[] key) {
-        
+
         isKeyValid(key);
 
         int length = input.length % 16;
@@ -170,19 +163,18 @@ public final class AES {
 
         return result;
     }
-    
+
     /**
-     * Returns decrypted array of bytes. Data are decrypted in blocks(16 bytes), 
+     * Returns decrypted array of bytes. Data are decrypted in blocks(16 bytes),
      * length of returned array is always divisible by 16. ECB Block Cipher Mode
      * is used here, the same blocks are decrypted to the same result.
-     * 
+     *
      * @param input array of bytes to decrypt
      * @param key key used to decrypt data
-     * @throws IllegalArgumentException if key has wrong length
      * @return decrypted input
      */
     public byte[] decryptECB(byte[] input, byte[] key) {
-        
+
         isKeyValid(key);
 
         int length = input.length % 16;
@@ -214,19 +206,18 @@ public final class AES {
 
     /**
      * Returns encrypted block of bytes. Block consists of 16 bytes. Only first
-     * 16 bytes of input are encrypted. Exception is thrown for inputs shorter 
+     * 16 bytes of input are encrypted. Exception is thrown for inputs shorter
      * than 16 bytes.
-     * 
+     *
      * @param input array of bytes to encrypt
      * @param key key used to encrypt data
-     * @throws IllegalArgumentException if input is shorter than 16 bytes, or length of key is wrong
      * @return encrypted input block of data
      */
     public byte[] encryptBlock(byte[] input, byte[] key) {
-        
+
         isKeyValid(key);
-        
-        if(input.length < 16){
+
+        if (input.length < 16) {
             throw new IllegalArgumentException("Cannot encrypt input shorter than 16 bytes(block).");
         }
 
@@ -272,19 +263,18 @@ public final class AES {
 
     /**
      * Returns decrypted block of bytes. Block consists of 16 bytes. Only first
-     * 16 bytes of input are decrypted. Exception is thrown for inputs shorter 
+     * 16 bytes of input are decrypted. Exception is thrown for inputs shorter
      * than 16 bytes.
-     * 
+     *
      * @param input array of bytes to decrypt
      * @param key key used to decrypt data
-     * @throws IllegalArgumentException if input is shorter than 16 bytes, or length of key is wrong
      * @return decrypted input block of data
      */
     public byte[] decryptBlock(byte[] input, byte[] key) {
-        
+
         isKeyValid(key);
-        
-        if(input.length < 16){
+
+        if (input.length < 16) {
             throw new IllegalArgumentException("Cannot decrypt input shorter than 16 bytes(block).");
         }
 
@@ -969,15 +959,15 @@ public final class AES {
 
         return 0;
     }
-    
-    private void isKeyValid(byte[] key){
-        if( ( key.length != 16 ) && ( key.length != 24 ) && ( key.length != 32 ) ){
+
+    private void isKeyValid(byte[] key) {
+        if ((key.length != 16) && (key.length != 24) && (key.length != 32)) {
             throw new IllegalArgumentException("Input key must be 16, 24, or 32 bytes long.");
         }
     }
-    
-    private void isInitializationVectorValid(byte[] vector){
-        if( vector.length != 16 ){
+
+    private void isInitializationVectorValid(byte[] vector) {
+        if (vector.length != 16) {
             throw new IllegalArgumentException("Input vector must be 16 bytes long.");
         }
     }
