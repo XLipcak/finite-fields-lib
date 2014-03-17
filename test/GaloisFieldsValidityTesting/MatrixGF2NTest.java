@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package GaloisFieldsValidityTesting;
 
 import java.util.Arrays;
@@ -20,8 +16,6 @@ import static org.junit.Assert.*;
 /**
  *
  * @author Jakub Lipcak, Masaryk University
- *
- * Class MatrixGF2N Testing
  *
  */
 public class MatrixGF2NTest {

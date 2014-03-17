@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package GaloisFieldsValidityTesting;
 
 import java.util.Arrays;
@@ -19,8 +15,6 @@ import static org.junit.Assert.*;
 /**
  *
  * @author Jakub Lipcak, Masaryk University
- *
- * Class PolynomialGF2N Testing
  *
  */
 public class PolynomialGF2NTest {
@@ -64,7 +58,7 @@ public class PolynomialGF2NTest {
                 polynomial, polyGF.subtract(polynomial, zeroPolynomial));
 
         assertEquals("Subtraction of two identical polynomials must be zero polynomial.",
-                polyGF.clearZeroValuesFromPolynomial(zeroPolynomial), polyGF.subtract(polynomial, polynomial));
+                zeroPolynomial.clearZeroValues(), polyGF.subtract(polynomial, polynomial));
     }
 
     @Test
@@ -123,7 +117,7 @@ public class PolynomialGF2NTest {
             //test division with remainder
             Polynomial remainder = new Polynomial(length1);
             Polynomial result = polyGF.divide(polynomial2, polynomial1, remainder);
-            remainder = polyGF.clearZeroValuesFromPolynomial(remainder);
+            remainder.clearZeroValues();
 
             /* Deep test of result
              * X / Y = Z + R    =>  X = (Z * Y) + R
@@ -157,7 +151,7 @@ public class PolynomialGF2NTest {
             //test division with remainder
             Polynomial remainder = new Polynomial(length1);
             Polynomial result = polyGF.divide(polynomial2, polynomial1, remainder);
-            remainder = polyGF.clearZeroValuesFromPolynomial(remainder);
+            remainder.clearZeroValues();
 
             /* Deep test of result
              * X / Y = Z + R    =>  X = (Z * Y) + R
@@ -194,7 +188,7 @@ public class PolynomialGF2NTest {
             Polynomial polynomial2 = new Polynomial(length2, gf.getFieldSize());
 
             Polynomial monicDiv = new Polynomial(1);
-            monicDiv.setElement(0, polynomial1.getElement(polynomial1.getSize()-1));
+            monicDiv.setElement(0, polynomial1.getElement(polynomial1.getSize() - 1));
             assertEquals("Gcd(poly, poly*poly) must be poly(monic).",
                     polyGF.divide(polynomial1, monicDiv),
                     polyGF.gcd(polynomial1, polyGF.multiply(polynomial1, polynomial1)));
@@ -234,7 +228,7 @@ public class PolynomialGF2NTest {
                 Polynomial inverse = polyGF.invert(polynomial1, polynomial2);
                 Polynomial remainder = new Polynomial(length1);
                 Polynomial result = polyGF.divide(polyGF.multiply(polynomial1, inverse), polynomial2, remainder);
-                remainder = polyGF.clearZeroValuesFromPolynomial(remainder);
+                remainder.clearZeroValues();
 
                 assertEquals("Inverse result is wrong.",
                         new Polynomial(1, 1),
@@ -269,7 +263,7 @@ public class PolynomialGF2NTest {
                 Polynomial inverse = polyGF.invert(polynomial1, polynomial2);
                 Polynomial remainder = new Polynomial(length1);
                 Polynomial result = polyGF.divide(polyGF.multiply(polynomial1, inverse), polynomial2, remainder);
-                remainder = polyGF.clearZeroValuesFromPolynomial(remainder);
+                remainder.clearZeroValues();
 
                 assertEquals("Inverse result is wrong.",
                         new Polynomial(1, 1),
@@ -323,5 +317,4 @@ public class PolynomialGF2NTest {
             //OK
         }
     }
-    
 }

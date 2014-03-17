@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package GaloisFieldsValidityTesting;
 
 import java.util.Random;
@@ -18,9 +14,7 @@ import static org.junit.Assert.*;
 /**
  *
  * @author Jakub Lipcak, Masaryk University
- * 
- * Class VectorGF2N Testing
- * 
+ *
  */
 public class VectorGF2NTest {
 
@@ -58,7 +52,7 @@ public class VectorGF2NTest {
             }
         }
     }
-    
+
     @Test
     public void testSubtract() {
         VectorGF2N vecGF = new VectorGF2N(gf);
@@ -81,7 +75,7 @@ public class VectorGF2NTest {
             }
         }
     }
-    
+
     @Test
     public void testMultiply() {
         VectorGF2N vecGF = new VectorGF2N(gf);
@@ -89,7 +83,7 @@ public class VectorGF2NTest {
             int size = rn.nextInt(128) + 1;
             Vector vector1 = new Vector(size, gf.getFieldSize());
             Vector vector2 = new Vector(size, 0);
-            
+
             assertEquals("Vector cannot be changed after being multiplied by 1.",
                     vector1, vecGF.multiply(vector1, 1));
             assertEquals("Vector after being multiplied by 0 must be zero vector.",

@@ -1,9 +1,5 @@
 package GaloisFieldsValidityTesting;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 import java.util.Random;
 import muni.fi.gf2n.classes.GF2N;
 import org.junit.After;
@@ -265,7 +261,7 @@ public class GF2NTest {
             if (galoisField.isIrreducible(x)) {
                 for (int y = 1; y < (int) Math.pow(2, galoisField.getFieldSize()); y++) {
                     assertEquals("X * Inverse(X) must be 1 in Galois Field with irreducible "
-                            + "characteristic reducing polynomial.", 
+                            + "characteristic reducing polynomial.",
                             1, galoisField.multiply(galoisField.invert(y), y));
                 }
             } else {
@@ -273,7 +269,7 @@ public class GF2NTest {
                 for (int y = 1; y < (int) Math.pow(2, galoisField.getFieldSize()); y++) {
                     maxValue = Math.max(galoisField.multiply(galoisField.invert(y), y), maxValue);
                 }
-                if(maxValue == 1){
+                if (maxValue == 1) {
                     fail("X * Inverse(X) is not always 1 in Galois Field with"
                             + "reducible characteristic polynomial.");
                 }
