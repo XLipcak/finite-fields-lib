@@ -12,13 +12,13 @@ import static org.junit.Assert.*;
 
 /**
  * AesBlockTest is class used to test encryption and decryption of blocks in AES
- * class.
+ * class with 256 bit key.
  *
  * Sources of all AES Test-vectors used in this class:
+ * http://aes.online-domain-tools.com/
  * http://www.inconteam.com/software-development/41-encryption/55-aes-test-vectors
  * http://csrc.nist.gov/groups/STM/cavp/documents/aes/KAT_AES.zip
  * http://csrc.nist.gov/publications/nistpubs/800-38a/sp800-38a.pdf
- * http://www.3amsystems.com/Crypto-Toolbox#rijndael-128,ecb,Encrypt
  *
  * @author Jakub Lipcak, Masaryk University
  *
@@ -69,11 +69,17 @@ public class AesBlockTest {
         plainTexts = new String[]{"6BC1BEE22E409F96E93D7E117393172A",
             "AE2D8A571E03AC9C9EB76FAC45AF8E51",
             "30C81C46A35CE411E5FBC1191A0A52EF",
-            "F69F2445DF4F9B17AD2B417BE66C3710"};
+            "F69F2445DF4F9B17AD2B417BE66C3710",
+            "dc8f0e4915fd81ba70a331310882f6da",
+            "c218faa16056bd0774c3e8d79c35a5e4",
+            "047bba83f7aa841731504e012208fc9e"};
         expectedCipherTexts = new String[]{"F3EED1BDB5D2A03C064B5A7E3DB181F8",
             "591CCB10D410ED26DC5BA74A31362870",
             "B6ED21B99CA6F4F9F153E7B1BEAFED1D",
-            "23304B7A39F9F3FF067D8D8F9E24ECC7"};
+            "23304B7A39F9F3FF067D8D8F9E24ECC7",
+            "1477df32bc224e16a1a7044b36997ebe",
+            "07ab3a2b33f0b0f67182d4739d42e421",
+            "06f3ab85e6a4aad87228be02bca3d35e"};
         testVectorsEncryptBlock(keys, plainTexts, expectedCipherTexts);
 
         //KEY 3
@@ -94,6 +100,26 @@ public class AesBlockTest {
             "27e3ee8da6fb1f4c8431129d4e896a9d",
             "ce84ab63e6a3bdb7f081365d5b705b7e",
             "e999e41d4ca770da5387117b5d8f57ee"};
+        testVectorsEncryptBlock(keys, plainTexts, expectedCipherTexts);
+
+        //KEY 4
+        keys = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        plainTexts = new String[]{"8ea2b7ca516745bfeafc49904b496089",
+            "8fea42df1e7d2526039374c04181dcc7",
+            "6b5c56fc511912b9328423ad8188a500",
+            "542ddea4d5faad623ef884cf4e198bdc",
+            "1fd0f38e35614abf31ca51243550676b",
+            "27e3ee8da6fb1f4c8431129d4e896a9d",
+            "ce84ab63e6a3bdb7f081365d5b705b7e",
+            "e999e41d4ca770da5387117b5d8f57ee"};
+        expectedCipherTexts = new String[]{"251b6b3fd2b67408de6cbe25623e1c5c",
+            "770795ecd5f3c367f88ac733af431c83",
+            "5c9e48a607f914a082003b61f1c5d1d6",
+            "9fcf812c0319be6ac073045b247ed128",
+            "c5730068460a501b89e3c16d210a3243",
+            "eac2b07468ccb1d157ad8624e15bce68",
+            "ace9102fbd353f3a63a26c59f2be1bfa",
+            "456af5a43263eabc709c295a7097451e"};
         testVectorsEncryptBlock(keys, plainTexts, expectedCipherTexts);
 
         /*
@@ -185,6 +211,26 @@ public class AesBlockTest {
             "ffffffffffffffffffffffffffffffff"};
         testVectorsDecryptBlock(keys, cipherTexts, expectedPlainTexts);
 
+        //KEY 4
+        keys = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        cipherTexts = new String[]{"251b6b3fd2b67408de6cbe25623e1c5c",
+            "770795ecd5f3c367f88ac733af431c83",
+            "5c9e48a607f914a082003b61f1c5d1d6",
+            "9fcf812c0319be6ac073045b247ed128",
+            "c5730068460a501b89e3c16d210a3243",
+            "eac2b07468ccb1d157ad8624e15bce68",
+            "ace9102fbd353f3a63a26c59f2be1bfa",
+            "456af5a43263eabc709c295a7097451e"};
+        expectedPlainTexts = new String[]{"8ea2b7ca516745bfeafc49904b496089",
+            "8fea42df1e7d2526039374c04181dcc7",
+            "6b5c56fc511912b9328423ad8188a500",
+            "542ddea4d5faad623ef884cf4e198bdc",
+            "1fd0f38e35614abf31ca51243550676b",
+            "27e3ee8da6fb1f4c8431129d4e896a9d",
+            "ce84ab63e6a3bdb7f081365d5b705b7e",
+            "e999e41d4ca770da5387117b5d8f57ee"};
+        testVectorsDecryptBlock(keys, cipherTexts, expectedPlainTexts);
+
         /*
          * Texts compared after 1000 decryption cycles in MonteCarlo test mode.
          */
@@ -233,11 +279,11 @@ public class AesBlockTest {
 
         AES aes = new AES();
 
-        byte[] key = hexaStringToByteArray(inputKey);
+        byte[] key = AESTestHelper.hexaStringToByteArray(inputKey);
         for (int x = 0; x < plainTexts.length; x++) {
 
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
+            byte[] plainText = AESTestHelper.hexaStringToByteArray(plainTexts[x]);
+            byte[] expectedCipherText = AESTestHelper.hexaStringToByteArray(expectedCipherTexts[x]);
 
             assertArrayEquals("Encrypted plaintext differs from expected result vector.",
                     expectedCipherText, aes.encryptBlock(plainText, key));
@@ -250,11 +296,11 @@ public class AesBlockTest {
 
         AES aes = new AES();
 
-        byte[] key = hexaStringToByteArray(inputKey);
+        byte[] key = AESTestHelper.hexaStringToByteArray(inputKey);
         for (int x = 0; x < cipherTexts.length; x++) {
 
-            byte[] plainText = hexaStringToByteArray(expectedPlainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(cipherTexts[x]);
+            byte[] plainText = AESTestHelper.hexaStringToByteArray(expectedPlainTexts[x]);
+            byte[] expectedCipherText = AESTestHelper.hexaStringToByteArray(cipherTexts[x]);
 
             assertArrayEquals("Decrypted plaintext differs from expected result vector.",
                     plainText, aes.decryptBlock(expectedCipherText, key));
@@ -267,11 +313,11 @@ public class AesBlockTest {
 
         AES aes = new AES();
 
-        byte[] key = hexaStringToByteArray(inputKey);
+        byte[] key = AESTestHelper.hexaStringToByteArray(inputKey);
         for (int x = 0; x < plainTexts.length; x++) {
 
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
+            byte[] plainText = AESTestHelper.hexaStringToByteArray(plainTexts[x]);
+            byte[] expectedCipherText = AESTestHelper.hexaStringToByteArray(expectedCipherTexts[x]);
 
 
             for (int monteCarlo = 0; monteCarlo < 1000; monteCarlo++) {
@@ -288,11 +334,11 @@ public class AesBlockTest {
 
         AES aes = new AES();
 
-        byte[] key = hexaStringToByteArray(inputKey);
+        byte[] key = AESTestHelper.hexaStringToByteArray(inputKey);
         for (int x = 0; x < cipherTexts.length; x++) {
 
-            byte[] cipherText = hexaStringToByteArray(cipherTexts[x]);
-            byte[] expectedPlainText = hexaStringToByteArray(expectedPlainTexts[x]);
+            byte[] cipherText = AESTestHelper.hexaStringToByteArray(cipherTexts[x]);
+            byte[] expectedPlainText = AESTestHelper.hexaStringToByteArray(expectedPlainTexts[x]);
 
 
             for (int monteCarlo = 0; monteCarlo < 1000; monteCarlo++) {
@@ -303,18 +349,4 @@ public class AesBlockTest {
         }
     }
 
-
-    /*
-     * Convert pairs of Hexadecimal chars to array of bytes.
-     */
-    private byte[] hexaStringToByteArray(String str) {
-        byte[] result = new byte[(str.length() / 2)];
-
-        for (int x = 0; x < result.length; x++) {
-            String hexa = str.substring(x * 2, (x * 2) + 2);
-            result[x] = (byte) Long.parseLong(hexa, 16);
-        }
-
-        return result;
-    }
 }

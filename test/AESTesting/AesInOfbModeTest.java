@@ -29,7 +29,7 @@ public class AesInOfbModeTest {
 
     @Test
     public void testEncryptDecryptOfbMode() {
-        testEncryptDecryptPlainTextOfDifferentLengths(BlockCipherMode.OFB);
+        AESTestHelper.testEncryptDecryptPlainTextOfDifferentLengths(BlockCipherMode.OFB);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class AesInOfbModeTest {
             "D9A4DADA0892239F6B8B3D7680E15674",
             "A78819583F0308E7A6BF36B1386ABF23"};
 
-        testVectorsEncryption(BlockCipherMode.OFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
+        AESTestHelper.testVectorsEncryption(BlockCipherMode.OFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class AesInOfbModeTest {
             "52EF01DA52602FE0975F78AC84BF8A50",
             "BD5286AC63AABD7EB067AC54B553F71D"};
 
-        testVectorsEncryption(BlockCipherMode.OFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
+        AESTestHelper.testVectorsEncryption(BlockCipherMode.OFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class AesInOfbModeTest {
             "E1C656305ED1A7A6563805746FE03EDC",
             "41635BE625B48AFC1666DD42A09D96E7"};
 
-        testVectorsEncryption(BlockCipherMode.OFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
+        AESTestHelper.testVectorsEncryption(BlockCipherMode.OFB, keys, plainTexts, expectedCipherTexts, initializationVectors);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class AesInOfbModeTest {
         String[] initializationVectors = {"00000000000000000000000000000000",
             "00000000000000000000000000000000"};
 
-        testVectorsDecryption(BlockCipherMode.OFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+        AESTestHelper.testVectorsDecryption(BlockCipherMode.OFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class AesInOfbModeTest {
         String[] initializationVectors = {"00000000000000000000000000000000",
             "00000000000000000000000000000000"};
 
-        testVectorsDecryption(BlockCipherMode.OFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+        AESTestHelper.testVectorsDecryption(BlockCipherMode.OFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
     }
 
     @Test
@@ -143,95 +143,7 @@ public class AesInOfbModeTest {
         String[] initializationVectors = {"fffffffffffffffffffffffffffffffe",
             "ffffffffffffffffffffffffffffffff"};
 
-        testVectorsDecryption(BlockCipherMode.OFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
+        AESTestHelper.testVectorsDecryption(BlockCipherMode.OFB, keys, expectedPlainTexts, cipherTexts, initializationVectors);
     }
 
-    //create random text of random length, encrypt and decrypt it, check result
-    private void testEncryptDecryptPlainTextOfDifferentLengths(BlockCipherMode mode) {
-        AES aes = new AES(mode);
-        Random rn = new Random();
-
-        byte[] key = new byte[16];
-        byte[] ciphertext = new byte[16];
-        byte[] initVector = new byte[16];
-
-        for (int x = 0; x < 100; x++) {
-            int textLength = rn.nextInt(1024) + 1;
-            byte[] plaintext = new byte[textLength];
-            for (int y = 0; y < 16; y++) {
-                key[y] = (byte) rn.nextInt(256);
-                initVector[y] = (byte) rn.nextInt(256);
-            }
-            for (int y = 0; y < textLength; y++) {
-                plaintext[y] = (byte) rn.nextInt(256);
-            }
-            ciphertext = aes.encrypt(plaintext, key, initVector);
-            assertArrayEquals("Plaintext after encryption and decryption must be the same.",
-                    plaintext, reduceArray(aes.decrypt(ciphertext, key, initVector), textLength, true));
-        }
-    }
-
-    /*
-     * Reduce input array to length. Only zeroes are expected after length index.
-     */
-    private byte[] reduceArray(byte[] input, int length, boolean zeroControl) {
-        byte[] result = new byte[length];
-        System.arraycopy(input, 0, result, 0, length);
-        for (int x = length; x < input.length; x++) {
-            if (input[x] != 0 && zeroControl) {
-                fail();
-            }
-        }
-        return result;
-    }
-
-    //use test vectors to encrypt data, check result
-    private void testVectorsEncryption(BlockCipherMode mode, String[] keys, String[] plainTexts,
-            String[] expectedCipherTexts, String[] initializationVectors) {
-
-        AES aes = new AES(mode);
-
-        for (int x = 0; x < keys.length; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[x]);
-            byte[] plainText = hexaStringToByteArray(plainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(expectedCipherTexts[x]);
-            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
-
-            assertArrayEquals("Encrypted plaintext differs from expected result vector.",
-                    expectedCipherText, aes.encrypt(plainText, key, initializationVector));
-        }
-    }
-
-    //use test vectors to decrypt data, check result
-    private void testVectorsDecryption(BlockCipherMode mode, String[] keys, String[] expectedPlainTexts,
-            String[] cipherTexts, String[] initializationVectors) {
-
-        AES aes = new AES(mode);
-
-        for (int x = 0; x < keys.length; x++) {
-
-            byte[] key = hexaStringToByteArray(keys[x]);
-            byte[] plainText = hexaStringToByteArray(expectedPlainTexts[x]);
-            byte[] expectedCipherText = hexaStringToByteArray(cipherTexts[x]);
-            byte[] initializationVector = hexaStringToByteArray(initializationVectors[x]);
-
-            assertArrayEquals("Decrypted plaintext differs from expected result vector.",
-                    plainText, aes.decrypt(expectedCipherText, key, initializationVector));
-        }
-    }
-
-    /*
-     * Convert pairs of Hexadecimal chars to array of bytes.
-     */
-    private byte[] hexaStringToByteArray(String str) {
-        byte[] result = new byte[(str.length() / 2)];
-
-        for (int x = 0; x < result.length; x++) {
-            String hexa = str.substring(x * 2, (x * 2) + 2);
-            result[x] = (byte) Long.parseLong(hexa, 16);
-        }
-
-        return result;
-    }
 }
