@@ -42,20 +42,6 @@ public class AESTestHelper {
     }
 
     /*
-     * Reduce input array to length. Only zeroes are expected after length index.
-     */
-    public static byte[] reduceArray(byte[] input, int length) {
-        byte[] result = new byte[length];
-        System.arraycopy(input, 0, result, 0, length);
-        for (int x = length; x < input.length; x++) {
-            if (input[x] != 0) {
-                fail();
-            }
-        }
-        return result;
-    }
-
-    /*
      * Use test vectors to encrypt data, check result.
      */
     public static void testVectorsEncryption(BlockCipherMode mode, String[] keys, String[] plainTexts,
@@ -106,6 +92,20 @@ public class AESTestHelper {
             result[x] = (byte) Long.parseLong(hexa, 16);
         }
 
+        return result;
+    }
+
+    /*
+     * Reduce input array to length. Only zeroes are expected after length index.
+     */
+    private static byte[] reduceArray(byte[] input, int length) {
+        byte[] result = new byte[length];
+        System.arraycopy(input, 0, result, 0, length);
+        for (int x = length; x < input.length; x++) {
+            if (input[x] != 0) {
+                fail();
+            }
+        }
         return result;
     }
 }

@@ -14,9 +14,12 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
+ * Class MatrixGF2NTest is used to test computation with matrices with
+ * elements in Galois Field.
+ * It includes testing with constants and testing with values generated randomly.
+ * Results of all tests with constant values were computed by NTL library.
  *
  * @author Jakub Lipcak, Masaryk University
- *
  */
 public class MatrixGF2NTest {
 
@@ -34,129 +37,423 @@ public class MatrixGF2NTest {
 
     @Test
     public void testAdd() {
-        MatrixGF2N mat = new MatrixGF2N(gf);
+        /*
+         * Test with constant values.
+         */
+        gf = new GF2N(283);
+        MatrixGF2N matGF = new MatrixGF2N(gf);
 
-        int rowsCount = rn.nextInt(255) + 1;
-        int colsCount = rn.nextInt(255) + 1;
-        Matrix matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
-        Matrix matrix2 = new Matrix(rowsCount, colsCount);
+        Matrix matrix1 = new Matrix(3, 3);
+        matrix1.setElement(0, 0, 80);
+        matrix1.setElement(0, 1, 123);
+        matrix1.setElement(0, 2, 138);
+        matrix1.setElement(1, 0, 9);
+        matrix1.setElement(1, 1, 202);
+        matrix1.setElement(1, 2, 53);
+        matrix1.setElement(2, 0, 75);
+        matrix1.setElement(2, 1, 180);
+        matrix1.setElement(2, 2, 201);
 
-        assertEquals("Addidion of two identical matrices must be zero matrix.",
-                matrix2, mat.add(matrix1, matrix1));
-        assertEquals("Matrix1 + zeroMatrix must be Matrix1.",
-                matrix1, mat.add(matrix1, matrix2));
-        assertEquals("zeroMatrix + zeroMatrix must be zeroMatrix.",
-                matrix2, mat.add(matrix2, matrix2));
+        Matrix matrix2 = new Matrix(3, 3);
+        matrix2.setElement(0, 0, 191);
+        matrix2.setElement(0, 1, 87);
+        matrix2.setElement(0, 2, 253);
+        matrix2.setElement(1, 0, 112);
+        matrix2.setElement(1, 1, 144);
+        matrix2.setElement(1, 2, 62);
+        matrix2.setElement(2, 0, 23);
+        matrix2.setElement(2, 1, 230);
+        matrix2.setElement(2, 2, 202);
 
-        try {
-            mat.add(matrix1, new Matrix(rowsCount, colsCount + 1));
-            fail("Addition of matrices with different dimensions should throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
-            //OK
-        }
+        Matrix resultMatrix = new Matrix(3, 3);
+        resultMatrix.setElement(0, 0, 239);
+        resultMatrix.setElement(0, 1, 44);
+        resultMatrix.setElement(0, 2, 119);
+        resultMatrix.setElement(1, 0, 121);
+        resultMatrix.setElement(1, 1, 90);
+        resultMatrix.setElement(1, 2, 11);
+        resultMatrix.setElement(2, 0, 92);
+        resultMatrix.setElement(2, 1, 82);
+        resultMatrix.setElement(2, 2, 3);
+        assertEquals("Addition of matrices with constant values failed.",
+                resultMatrix, matGF.add(matrix1, matrix2));
 
-        try {
-            mat.add(matrix1, new Matrix(rowsCount + 1, colsCount));
-            fail("Addition of matrices with different dimensions should throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
-            //OK
+        matrix1.setElement(0, 0, 171);
+        matrix1.setElement(0, 1, 17);
+        matrix1.setElement(0, 2, 218);
+        matrix1.setElement(1, 0, 180);
+        matrix1.setElement(1, 1, 201);
+        matrix1.setElement(1, 2, 251);
+        matrix1.setElement(2, 0, 102);
+        matrix1.setElement(2, 1, 120);
+        matrix1.setElement(2, 2, 43);
+
+        matrix2.setElement(0, 0, 34);
+        matrix2.setElement(0, 1, 59);
+        matrix2.setElement(0, 2, 124);
+        matrix2.setElement(1, 0, 252);
+        matrix2.setElement(1, 1, 238);
+        matrix2.setElement(1, 2, 255);
+        matrix2.setElement(2, 0, 218);
+        matrix2.setElement(2, 1, 72);
+        matrix2.setElement(2, 2, 20);
+
+        resultMatrix.setElement(0, 0, 137);
+        resultMatrix.setElement(0, 1, 42);
+        resultMatrix.setElement(0, 2, 166);
+        resultMatrix.setElement(1, 0, 72);
+        resultMatrix.setElement(1, 1, 39);
+        resultMatrix.setElement(1, 2, 4);
+        resultMatrix.setElement(2, 0, 188);
+        resultMatrix.setElement(2, 1, 48);
+        resultMatrix.setElement(2, 2, 63);
+        assertEquals("Addition of matrices with constant values failed.",
+                resultMatrix, matGF.add(matrix1, matrix2));
+
+
+        /*
+         * Basic test.
+         */
+        gf = new GF2N(4194307l);
+        matGF = new MatrixGF2N(gf);
+
+        for (int x = 0; x < 100; x++) {
+            int rowsCount = rn.nextInt(255) + 1;
+            int colsCount = rn.nextInt(255) + 1;
+            matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
+            matrix2 = new Matrix(rowsCount, colsCount);
+
+            assertEquals("Addidion of two identical matrices must be zero matrix.",
+                    matrix2, matGF.add(matrix1, matrix1));
+            assertEquals("Matrix1 + zeroMatrix must be Matrix1.",
+                    matrix1, matGF.add(matrix1, matrix2));
+            assertEquals("zeroMatrix + zeroMatrix must be zeroMatrix.",
+                    matrix2, matGF.add(matrix2, matrix2));
+
+            try {
+                matGF.add(matrix1, new Matrix(rowsCount, colsCount + 1));
+                fail("Addition of matrices with different dimensions should throw IllegalArgumentException.");
+            } catch (IllegalArgumentException ex) {
+                //OK
+            }
+
+            try {
+                matGF.add(matrix1, new Matrix(rowsCount + 1, colsCount));
+                fail("Addition of matrices with different dimensions should throw IllegalArgumentException.");
+            } catch (IllegalArgumentException ex) {
+                //OK
+            }
         }
     }
 
     @Test
     public void testSubtract() {
-        MatrixGF2N mat = new MatrixGF2N(gf);
+        /*
+         * Test with constant values.
+         */
+        gf = new GF2N(283);
+        MatrixGF2N matGF = new MatrixGF2N(gf);
 
-        int rowsCount = rn.nextInt(255) + 1;
-        int colsCount = rn.nextInt(255) + 1;
-        Matrix matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
-        Matrix matrix2 = new Matrix(rowsCount, colsCount);
+        Matrix matrix1 = new Matrix(3, 3);
+        matrix1.setElement(0, 0, 80);
+        matrix1.setElement(0, 1, 211);
+        matrix1.setElement(0, 2, 99);
+        matrix1.setElement(1, 0, 186);
+        matrix1.setElement(1, 1, 63);
+        matrix1.setElement(1, 2, 216);
+        matrix1.setElement(2, 0, 245);
+        matrix1.setElement(2, 1, 17);
+        matrix1.setElement(2, 2, 77);
 
-        assertEquals("Subtraction of two identical matrices must be zero matrix.",
-                matrix2, mat.add(matrix1, matrix1));
-        assertEquals("Matrix1 - zeroMatrix must be Matrix1.",
-                matrix1, mat.add(matrix1, matrix2));
-        assertEquals("zeroMatrix - zeroMatrix must be zeroMatrix.",
-                matrix2, mat.add(matrix2, matrix2));
+        Matrix matrix2 = new Matrix(3, 3);
+        matrix2.setElement(0, 0, 13);
+        matrix2.setElement(0, 1, 158);
+        matrix2.setElement(0, 2, 214);
+        matrix2.setElement(1, 0, 219);
+        matrix2.setElement(1, 1, 251);
+        matrix2.setElement(1, 2, 123);
+        matrix2.setElement(2, 0, 209);
+        matrix2.setElement(2, 1, 142);
+        matrix2.setElement(2, 2, 8);
 
-        try {
-            mat.add(matrix1, new Matrix(rowsCount, colsCount + 1));
-            fail("Subtraction of matrices with different dimensions should throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
-            //OK
-        }
+        Matrix resultMatrix = new Matrix(3, 3);
+        resultMatrix.setElement(0, 0, 93);
+        resultMatrix.setElement(0, 1, 77);
+        resultMatrix.setElement(0, 2, 181);
+        resultMatrix.setElement(1, 0, 97);
+        resultMatrix.setElement(1, 1, 196);
+        resultMatrix.setElement(1, 2, 163);
+        resultMatrix.setElement(2, 0, 36);
+        resultMatrix.setElement(2, 1, 159);
+        resultMatrix.setElement(2, 2, 69);
+        assertEquals("Subtraction of matrices with constant values failed.",
+                resultMatrix, matGF.subtract(matrix1, matrix2));
 
-        try {
-            mat.add(matrix1, new Matrix(rowsCount + 1, colsCount));
-            fail("Subtraction of matrices with different dimensions should throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
-            //OK
+        matrix1.setElement(0, 0, 88);
+        matrix1.setElement(0, 1, 95);
+        matrix1.setElement(0, 2, 196);
+        matrix1.setElement(1, 0, 126);
+        matrix1.setElement(1, 1, 241);
+        matrix1.setElement(1, 2, 124);
+        matrix1.setElement(2, 0, 255);
+        matrix1.setElement(2, 1, 46);
+        matrix1.setElement(2, 2, 176);
+
+        matrix2.setElement(0, 0, 11);
+        matrix2.setElement(0, 1, 75);
+        matrix2.setElement(0, 2, 248);
+        matrix2.setElement(1, 0, 222);
+        matrix2.setElement(1, 1, 105);
+        matrix2.setElement(1, 2, 104);
+        matrix2.setElement(2, 0, 255);
+        matrix2.setElement(2, 1, 205);
+        matrix2.setElement(2, 2, 93);
+
+        resultMatrix.setElement(0, 0, 83);
+        resultMatrix.setElement(0, 1, 20);
+        resultMatrix.setElement(0, 2, 60);
+        resultMatrix.setElement(1, 0, 160);
+        resultMatrix.setElement(1, 1, 152);
+        resultMatrix.setElement(1, 2, 20);
+        resultMatrix.setElement(2, 0, 0);
+        resultMatrix.setElement(2, 1, 227);
+        resultMatrix.setElement(2, 2, 237);
+        assertEquals("Subtraction of matrices with constant values failed.",
+                resultMatrix, matGF.subtract(matrix1, matrix2));
+
+
+        /*
+         * Basic test.
+         */
+        gf = new GF2N(4194307l);
+        matGF = new MatrixGF2N(gf);
+
+        for (int x = 0; x < 100; x++) {
+
+            int rowsCount = rn.nextInt(255) + 1;
+            int colsCount = rn.nextInt(255) + 1;
+            matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
+            matrix2 = new Matrix(rowsCount, colsCount);
+
+            assertEquals("Subtraction of two identical matrices must be zero matrix.",
+                    matrix2, matGF.subtract(matrix1, matrix1));
+            assertEquals("Matrix1 - zeroMatrix must be Matrix1.",
+                    matrix1, matGF.subtract(matrix1, matrix2));
+            assertEquals("zeroMatrix - zeroMatrix must be zeroMatrix.",
+                    matrix2, matGF.subtract(matrix2, matrix2));
+
+            try {
+                matGF.subtract(matrix1, new Matrix(rowsCount, colsCount + 1));
+                fail("Subtraction of matrices with different dimensions should throw IllegalArgumentException.");
+            } catch (IllegalArgumentException ex) {
+                //OK
+            }
+
+            try {
+                matGF.subtract(matrix1, new Matrix(rowsCount + 1, colsCount));
+                fail("Subtraction of matrices with different dimensions should throw IllegalArgumentException.");
+            } catch (IllegalArgumentException ex) {
+                //OK
+            }
         }
     }
 
     @Test
     public void testMultiply() {
-        MatrixGF2N mat = new MatrixGF2N(gf);
+        /*
+         * Test with constant values.
+         */
+        gf = new GF2N(283);
+        MatrixGF2N matGF = new MatrixGF2N(gf);
 
-        for (int x = 0; x < 32; x++) {
+        Matrix matrix1 = new Matrix(3, 3);
+        matrix1.setElement(0, 0, 202);
+        matrix1.setElement(0, 1, 3);
+        matrix1.setElement(0, 2, 29);
+        matrix1.setElement(1, 0, 254);
+        matrix1.setElement(1, 1, 68);
+        matrix1.setElement(1, 2, 149);
+        matrix1.setElement(2, 0, 249);
+        matrix1.setElement(2, 1, 45);
+        matrix1.setElement(2, 2, 230);
+
+        Matrix matrix2 = new Matrix(3, 3);
+        matrix2.setElement(0, 0, 222);
+        matrix2.setElement(0, 1, 174);
+        matrix2.setElement(0, 2, 156);
+        matrix2.setElement(1, 0, 95);
+        matrix2.setElement(1, 1, 21);
+        matrix2.setElement(1, 2, 17);
+        matrix2.setElement(2, 0, 58);
+        matrix2.setElement(2, 1, 56);
+        matrix2.setElement(2, 2, 23);
+
+        Matrix resultMatrix = new Matrix(3, 3);
+        resultMatrix.setElement(0, 0, 17);
+        resultMatrix.setElement(0, 1, 153);
+        resultMatrix.setElement(0, 2, 16);
+        resultMatrix.setElement(1, 0, 246);
+        resultMatrix.setElement(1, 1, 157);
+        resultMatrix.setElement(1, 2, 197);
+        resultMatrix.setElement(2, 0, 180);
+        resultMatrix.setElement(2, 1, 192);
+        resultMatrix.setElement(2, 2, 172);
+        assertEquals("Multiplication of matrices with constant values failed.",
+                resultMatrix, matGF.multiply(matrix1, matrix2));
+
+        matrix1.setElement(0, 0, 200);
+        matrix1.setElement(0, 1, 243);
+        matrix1.setElement(0, 2, 34);
+        matrix1.setElement(1, 0, 35);
+        matrix1.setElement(1, 1, 26);
+        matrix1.setElement(1, 2, 18);
+        matrix1.setElement(2, 0, 100);
+        matrix1.setElement(2, 1, 143);
+        matrix1.setElement(2, 2, 134);
+
+        matrix2.setElement(0, 0, 231);
+        matrix2.setElement(0, 1, 115);
+        matrix2.setElement(0, 2, 103);
+        matrix2.setElement(1, 0, 0);
+        matrix2.setElement(1, 1, 93);
+        matrix2.setElement(1, 2, 19);
+        matrix2.setElement(2, 0, 246);
+        matrix2.setElement(2, 1, 229);
+        matrix2.setElement(2, 2, 215);
+
+        resultMatrix.setElement(0, 0, 83);
+        resultMatrix.setElement(0, 1, 81);
+        resultMatrix.setElement(0, 2, 65);
+        resultMatrix.setElement(1, 0, 195);
+        resultMatrix.setElement(1, 1, 183);
+        resultMatrix.setElement(1, 2, 2);
+        resultMatrix.setElement(2, 0, 32);
+        resultMatrix.setElement(2, 1, 81);
+        resultMatrix.setElement(2, 2, 191);
+        assertEquals("Multiplication of matrices with constant values failed.",
+                resultMatrix, matGF.multiply(matrix1, matrix2));
+
+
+        /*
+         * Basic test.
+         */
+        gf = new GF2N(4194307l);
+        matGF = new MatrixGF2N(gf);
+        for (int x = 0; x < 100; x++) {
 
             int size = rn.nextInt(32) + 1;
 
-            Matrix matrix1 = new Matrix(size, size, gf.getFieldSize());
+            matrix1 = new Matrix(size, size, gf.getFieldSize());
             Matrix identityMatrix = generateIdentityMatrix(size);
 
             assertEquals("Matrix after being multiplied by identity matrix cannot be changed.",
-                    matrix1, mat.multiply(matrix1, identityMatrix));
+                    matrix1, matGF.multiply(matrix1, identityMatrix));
             assertEquals("Matrix after being multiplied by identity matrix cannot be changed.",
-                    matrix1, mat.multiply(identityMatrix, matrix1));
+                    matrix1, matGF.multiply(identityMatrix, matrix1));
 
+
+
+            int rowsCount = rn.nextInt(255) + 1;
+            int colsCount = rn.nextInt(255) + 1;
+
+            try {
+                matGF.multiply(new Matrix(rowsCount, colsCount), new Matrix(colsCount, rowsCount + 1));
+                //OK
+            } catch (IllegalArgumentException ex) {
+                fail("IllegalArgumentException was thrown when two matrices of good dimensions were multiplied.");
+            }
+
+            try {
+                matGF.multiply(new Matrix(rowsCount, colsCount), new Matrix(colsCount + 1, rowsCount));
+                fail("IllegalArgumentException should be thrown when multiplying two matrices of wrong dimensions.");
+            } catch (IllegalArgumentException ex) {
+                //OK
+            }
+
+            try {
+                matGF.multiply(new Matrix(rowsCount, colsCount + 1), new Matrix(colsCount, rowsCount));
+                fail("IllegalArgumentException should be thrown when multiplying two matrices of wrong dimensions.");
+            } catch (IllegalArgumentException ex) {
+                //OK
+            }
         }
-
-        int rowsCount = rn.nextInt(255) + 1;
-        int colsCount = rn.nextInt(255) + 1;
-
-        try {
-            mat.multiply(new Matrix(rowsCount, colsCount), new Matrix(colsCount, rowsCount + 1));
-            //OK
-        } catch (IllegalArgumentException ex) {
-            fail("IllegalArgumentException was thrown when two matrices of good dimensions were multiplied.");
-        }
-
-        try {
-            mat.multiply(new Matrix(rowsCount, colsCount), new Matrix(colsCount + 1, rowsCount));
-            fail("IllegalArgumentException should be thrown when multiplying two matrices of wrong dimensions.");
-        } catch (IllegalArgumentException ex) {
-            //OK
-        }
-
-        try {
-            mat.multiply(new Matrix(rowsCount, colsCount + 1), new Matrix(colsCount, rowsCount));
-            fail("IllegalArgumentException should be thrown when multiplying two matrices of wrong dimensions.");
-        } catch (IllegalArgumentException ex) {
-            //OK
-        }
-
         //TODO test other multiplication overloaded methods
 
     }
 
     @Test
     public void testInverseMultiply() {
-        MatrixGF2N mat = new MatrixGF2N(gf);
+        /*
+         * Test with constant values.
+         */
+        gf = new GF2N(283);
+        MatrixGF2N matGF = new MatrixGF2N(gf);
 
-        for (int x = 0; x < 32; x++) {
+        Matrix matrix1 = new Matrix(3, 3);
+        matrix1.setElement(0, 0, 147);
+        matrix1.setElement(0, 1, 122);
+        matrix1.setElement(0, 2, 235);
+        matrix1.setElement(1, 0, 191);
+        matrix1.setElement(1, 1, 253);
+        matrix1.setElement(1, 2, 41);
+        matrix1.setElement(2, 0, 205);
+        matrix1.setElement(2, 1, 64);
+        matrix1.setElement(2, 2, 42);
+
+        Matrix resultMatrix = new Matrix(3, 3);
+        resultMatrix.setElement(0, 0, 169);
+        resultMatrix.setElement(0, 1, 124);
+        resultMatrix.setElement(0, 2, 37);
+        resultMatrix.setElement(1, 0, 13);
+        resultMatrix.setElement(1, 1, 227);
+        resultMatrix.setElement(1, 2, 150);
+        resultMatrix.setElement(2, 0, 177);
+        resultMatrix.setElement(2, 1, 215);
+        resultMatrix.setElement(2, 2, 77);
+        assertEquals("Inverse of matrix with constant values failed.",
+                resultMatrix, matGF.inverse(matrix1));
+
+        matrix1.setElement(0, 0, 42);
+        matrix1.setElement(0, 1, 207);
+        matrix1.setElement(0, 2, 181);
+        matrix1.setElement(1, 0, 175);
+        matrix1.setElement(1, 1, 32);
+        matrix1.setElement(1, 2, 130);
+        matrix1.setElement(2, 0, 138);
+        matrix1.setElement(2, 1, 126);
+        matrix1.setElement(2, 2, 146);
+
+        resultMatrix.setElement(0, 0, 153);
+        resultMatrix.setElement(0, 1, 113);
+        resultMatrix.setElement(0, 2, 31);
+        resultMatrix.setElement(1, 0, 64);
+        resultMatrix.setElement(1, 1, 14);
+        resultMatrix.setElement(1, 2, 94);
+        resultMatrix.setElement(2, 0, 87);
+        resultMatrix.setElement(2, 1, 202);
+        resultMatrix.setElement(2, 2, 21);
+        assertEquals("Inverse of matrix with constant values failed.",
+                resultMatrix, matGF.inverse(matrix1));
+
+
+        /*
+         * Basic test.
+         */
+        gf = new GF2N(4194307l);
+        matGF = new MatrixGF2N(gf);
+        for (int x = 0; x < 100; x++) {
 
             int size = rn.nextInt(9) + 1;
 
-            Matrix matrix1 = new Matrix(size, size, gf.getFieldSize());
+            matrix1 = new Matrix(size, size, gf.getFieldSize());
             Matrix identityMatrix = generateIdentityMatrix(size);
             try {
-                Matrix inverseMatrix = mat.inverse(matrix1);
+                Matrix inverseMatrix = matGF.inverse(matrix1);
 
                 assertEquals("Matrix after being multiplied by inverse matrix must be identity matrix.",
-                        identityMatrix, mat.multiply(matrix1, inverseMatrix));
+                        identityMatrix, matGF.multiply(matrix1, inverseMatrix));
                 assertEquals("Matrix after being multiplied by inverse matrix must be identity matrix.",
-                        identityMatrix, mat.multiply(inverseMatrix, matrix1));
+                        identityMatrix, matGF.multiply(inverseMatrix, matrix1));
             } catch (IllegalArgumentException ex) {
                 //Matrix is non-invertible, this may happen sometimes
             }
@@ -167,62 +464,167 @@ public class MatrixGF2NTest {
 
     @Test
     public void testDeterminant() {
-        //not very clever testing
+        /*
+         * Test with constant values.
+         */
+        gf = new GF2N(283);
+        MatrixGF2N matGF = new MatrixGF2N(gf);
 
-        MatrixGF2N mat = new MatrixGF2N(gf);
+        Matrix matrix1 = new Matrix(3, 3);
+        matrix1.setElement(0, 0, 104);
+        matrix1.setElement(0, 1, 240);
+        matrix1.setElement(0, 2, 155);
+        matrix1.setElement(1, 0, 43);
+        matrix1.setElement(1, 1, 81);
+        matrix1.setElement(1, 2, 193);
+        matrix1.setElement(2, 0, 111);
+        matrix1.setElement(2, 1, 248);
+        matrix1.setElement(2, 2, 82);
+        assertEquals("Determinant of matrix with constant values failed.",
+                172, matGF.determinant(matrix1));
 
-        int size = rn.nextInt(9) + 1;
-        Matrix matrix1 = new Matrix(size, size + 1, gf.getFieldSize());
-        Matrix identityMatrix = generateIdentityMatrix(size);
+        matrix1.setElement(0, 0, 187);
+        matrix1.setElement(0, 1, 235);
+        matrix1.setElement(0, 2, 45);
+        matrix1.setElement(1, 0, 50);
+        matrix1.setElement(1, 1, 191);
+        matrix1.setElement(1, 2, 123);
+        matrix1.setElement(2, 0, 21);
+        matrix1.setElement(2, 1, 0);
+        matrix1.setElement(2, 2, 2);
+        assertEquals("Determinant of matrix with constant values failed.",
+                160, matGF.determinant(matrix1));
 
-        try {
-            mat.determinant(matrix1);
-            fail("Computing determinant of nonsquare matrix should throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
-            //OK
-        }
 
-        assertEquals("Determinant of identity matrix must be equal to 1.", 1, mat.determinant(identityMatrix));
+        /*
+         * Basic test.
+         */
+        gf = new GF2N(4194307l);
+        matGF = new MatrixGF2N(gf);
 
-        matrix1 = new Matrix(size + 1, size + 1);
-        long value = rn.nextInt(4194303);
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                matrix1.setElement(x, y, value);
+        for (int z = 0; z < 100; z++) {
+            int size = rn.nextInt(7) + 1;
+            matrix1 = new Matrix(size, size + 1, gf.getFieldSize());
+            Matrix identityMatrix = generateIdentityMatrix(size);
+
+            try {
+                matGF.determinant(matrix1);
+                fail("Computing determinant of nonsquare matrix should throw IllegalArgumentException.");
+            } catch (IllegalArgumentException ex) {
+                //OK
             }
+
+            assertEquals("Determinant of identity matrix must be equal to 1.", 1, matGF.determinant(identityMatrix));
+
+            matrix1 = new Matrix(size + 1, size + 1);
+            long value = rn.nextInt(4194303);
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
+                    matrix1.setElement(x, y, value);
+                }
+            }
+
+            assertEquals("Determinant of matrix consisting of one value:" + value + " must be equal to 0.",
+                    0, matGF.determinant(matrix1));
+
+            matrix1 = new Matrix(size + 1, size + 1, gf.getFieldSize());
+            value = rn.nextInt(4194303);
+            for (int x = 0; x < 2; x++) {
+                for (int y = 0; y < size + 1; y++) {
+                    matrix1.setElement(x, y, value);
+                }
+            }
+
+            assertEquals("Determinant of matrix with linearly dependent rows must be equal to 0.",
+                    0, matGF.determinant(matrix1));
         }
-
-        assertEquals("Determinant of matrix consisting of one value:" + value + " must be equal to 0.",
-                0, mat.determinant(matrix1));
-
     }
 
     @Test
     public void testPower() {
 
-        MatrixGF2N mat = new MatrixGF2N(gf);
+        /*
+         * Test with constant values.
+         */
+        gf = new GF2N(283);
+        MatrixGF2N matGF = new MatrixGF2N(gf);
 
-        int size = rn.nextInt(9) + 1;
-        Matrix matrix1 = new Matrix(size, size + 1, gf.getFieldSize());
-        Matrix identityMatrix = generateIdentityMatrix(size);
+        Matrix matrix1 = new Matrix(3, 3);
+        matrix1.setElement(0, 0, 200);
+        matrix1.setElement(0, 1, 127);
+        matrix1.setElement(0, 2, 66);
+        matrix1.setElement(1, 0, 127);
+        matrix1.setElement(1, 1, 98);
+        matrix1.setElement(1, 2, 201);
+        matrix1.setElement(2, 0, 244);
+        matrix1.setElement(2, 1, 27);
+        matrix1.setElement(2, 2, 66);
 
-        try {
-            mat.power(matrix1, rn.nextInt(255) + 1);
-            fail("Computing power of nonsquare matrix should throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
-            //OK
-        }
+        Matrix resultMatrix = new Matrix(3, 3);
+        resultMatrix.setElement(0, 0, 16);
+        resultMatrix.setElement(0, 1, 62);
+        resultMatrix.setElement(0, 2, 148);
+        resultMatrix.setElement(1, 0, 244);
+        resultMatrix.setElement(1, 1, 124);
+        resultMatrix.setElement(1, 2, 181);
+        resultMatrix.setElement(2, 0, 131);
+        resultMatrix.setElement(2, 1, 99);
+        resultMatrix.setElement(2, 2, 49);
+        assertEquals("Power of matrix with constant values failed.",
+                resultMatrix, matGF.power(matrix1, 100));
 
-        try {
-            mat.power(matrix1, -1);
-            fail("Computing power with negative exponent should throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
-            //OK
-        }
+        matrix1.setElement(0, 0, 175);
+        matrix1.setElement(0, 1, 45);
+        matrix1.setElement(0, 2, 52);
+        matrix1.setElement(1, 0, 228);
+        matrix1.setElement(1, 1, 13);
+        matrix1.setElement(1, 2, 159);
+        matrix1.setElement(2, 0, 169);
+        matrix1.setElement(2, 1, 184);
+        matrix1.setElement(2, 2, 204);
 
-        for (int x = 1; x < 32; x++) {
-            assertEquals("IdentityMatrix powered to anything muse be IdentityMatrix.",
-                    identityMatrix, mat.power(identityMatrix, x));
+        resultMatrix.setElement(0, 0, 88);
+        resultMatrix.setElement(0, 1, 206);
+        resultMatrix.setElement(0, 2, 179);
+        resultMatrix.setElement(1, 0, 134);
+        resultMatrix.setElement(1, 1, 115);
+        resultMatrix.setElement(1, 2, 193);
+        resultMatrix.setElement(2, 0, 146);
+        resultMatrix.setElement(2, 1, 120);
+        resultMatrix.setElement(2, 2, 111);
+        assertEquals("Power of matrix with constant values failed.",
+                resultMatrix, matGF.power(matrix1, 100));
+
+
+        /*
+         * Basic test.
+         */
+        gf = new GF2N(4194307l);
+        matGF = new MatrixGF2N(gf);
+
+        for (int z = 0; z < 100; z++) {
+            int size = rn.nextInt(9) + 1;
+            matrix1 = new Matrix(size, size + 1, gf.getFieldSize());
+            Matrix identityMatrix = generateIdentityMatrix(size);
+
+            try {
+                matGF.power(matrix1, rn.nextInt(255) + 1);
+                fail("Computing power of nonsquare matrix should throw IllegalArgumentException.");
+            } catch (IllegalArgumentException ex) {
+                //OK
+            }
+
+            try {
+                matGF.power(matrix1, -1);
+                fail("Computing power with negative exponent should throw IllegalArgumentException.");
+            } catch (IllegalArgumentException ex) {
+                //OK
+            }
+
+            for (int x = 1; x < 30; x++) {
+                assertEquals("IdentityMatrix powered to anything muse be IdentityMatrix.",
+                        identityMatrix, matGF.power(identityMatrix, x));
+            }
         }
     }
 
@@ -231,7 +633,7 @@ public class MatrixGF2NTest {
 
         MatrixGF2N mat = new MatrixGF2N(gf);
 
-        for (int test = 0; test < 10; test++) {
+        for (int test = 0; test < 50; test++) {
             int rowsCount = rn.nextInt(128) + 1;
             int colsCount = rowsCount + rn.nextInt(128) + 1;
             int value = (rn.nextInt(4194303) + (rowsCount + colsCount)) % 4194303;
@@ -246,7 +648,7 @@ public class MatrixGF2NTest {
                     matrix1.getRows(), mat.rank(matrix1));
         }
 
-        for (int test = 0; test < 10; test++) {
+        for (int test = 0; test < 100; test++) {
             int colsCount = rn.nextInt(128) + 1;
             int rowsCount = colsCount + rn.nextInt(128) + 1;
             int value = (rn.nextInt(4194303) + (rowsCount + colsCount)) % 4194303;
@@ -266,42 +668,152 @@ public class MatrixGF2NTest {
 
     @Test
     public void testGauss() {
-        MatrixGF2N mat = new MatrixGF2N(gf);
+        /*
+         * Test with constant values.
+         */
+        gf = new GF2N(283);
+        MatrixGF2N matGF = new MatrixGF2N(gf);
 
-        for (int test = 0; test < 32; test++) {
+        Matrix matrix1 = new Matrix(3, 3);
+        matrix1.setElement(0, 0, 44);
+        matrix1.setElement(0, 1, 37);
+        matrix1.setElement(0, 2, 152);
+        matrix1.setElement(1, 0, 170);
+        matrix1.setElement(1, 1, 173);
+        matrix1.setElement(1, 2, 154);
+        matrix1.setElement(2, 0, 38);
+        matrix1.setElement(2, 1, 16);
+        matrix1.setElement(2, 2, 7);
+
+        Matrix resultMatrix = new Matrix(3, 3);
+        resultMatrix.setElement(0, 0, 44);
+        resultMatrix.setElement(0, 1, 37);
+        resultMatrix.setElement(0, 2, 152);
+        resultMatrix.setElement(1, 0, 0);
+        resultMatrix.setElement(1, 1, 31);
+        resultMatrix.setElement(1, 2, 203);
+        resultMatrix.setElement(2, 0, 0);
+        resultMatrix.setElement(2, 1, 0);
+        resultMatrix.setElement(2, 2, 59);
+        assertEquals("Gauss elimination in matrix with constant values failed.",
+                resultMatrix, matGF.gauss(matrix1));
+
+        matrix1.setElement(0, 0, 210);
+        matrix1.setElement(0, 1, 252);
+        matrix1.setElement(0, 2, 141);
+        matrix1.setElement(1, 0, 200);
+        matrix1.setElement(1, 1, 80);
+        matrix1.setElement(1, 2, 13);
+        matrix1.setElement(2, 0, 159);
+        matrix1.setElement(2, 1, 164);
+        matrix1.setElement(2, 2, 45);
+
+        resultMatrix.setElement(0, 0, 210);
+        resultMatrix.setElement(0, 1, 252);
+        resultMatrix.setElement(0, 2, 141);
+        resultMatrix.setElement(1, 0, 0);
+        resultMatrix.setElement(1, 1, 76);
+        resultMatrix.setElement(1, 2, 167);
+        resultMatrix.setElement(2, 0, 0);
+        resultMatrix.setElement(2, 1, 0);
+        resultMatrix.setElement(2, 2, 166);
+        assertEquals("Gauss elimination in matrix with constant values failed.",
+                resultMatrix, matGF.gauss(matrix1));
+
+
+        /*
+         * Basic test.
+         */
+        gf = new GF2N(4194307l);
+        matGF = new MatrixGF2N(gf);
+        for (int test = 0; test < 100; test++) {
             int rowsCount = rn.nextInt(128) + 1;
             int colsCount = rn.nextInt(128) + 1;
 
-            Matrix matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
+            matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
             assertTrue("Matrix should be in row echelon form after Gauss elimination.",
-                    isInRowEchelonForm(mat.gauss(matrix1)));
+                    isInRowEchelonForm(matGF.gauss(matrix1)));
         }
 
-
-        mat = new MatrixGF2N(3);
-        for (int test = 0; test < 32; test++) {
+        //tests in binary GF
+        matGF = new MatrixGF2N(3);
+        for (int test = 0; test < 100; test++) {
             int rowsCount = rn.nextInt(128) + 1;
             int colsCount = rn.nextInt(128) + 1;
 
-            Matrix matrix1 = new Matrix(rowsCount, colsCount, 1);
+            matrix1 = new Matrix(rowsCount, colsCount, 1);
 
             assertTrue("Matrix should be in row echelon form after Gauss elimination.",
-                    isInRowEchelonForm(mat.gauss(matrix1)));
+                    isInRowEchelonForm(matGF.gauss(matrix1)));
         }
     }
 
     @Test
     public void testSolveLinearEquationsSystem() {
-        MatrixGF2N mat = new MatrixGF2N(gf);
+        /*
+         * Test with constant values.
+         */
+        gf = new GF2N(283);
+        MatrixGF2N matGF = new MatrixGF2N(gf);
 
-        for (int test = 0; test < 16; test++) {
+        Matrix matrix1 = new Matrix(3, 3);
+        matrix1.setElement(0, 0, 112);
+        matrix1.setElement(0, 1, 0);
+        matrix1.setElement(0, 2, 137);
+        matrix1.setElement(1, 0, 67);
+        matrix1.setElement(1, 1, 73);
+        matrix1.setElement(1, 2, 44);
+        matrix1.setElement(2, 0, 201);
+        matrix1.setElement(2, 1, 119);
+        matrix1.setElement(2, 2, 19);
+
+        Vector resultVect = new Vector(3);
+        resultVect.setElement(0, 44);
+        resultVect.setElement(1, 78);
+        resultVect.setElement(2, 203);
+
+        Vector solutionVect = new Vector(3);
+        solutionVect.setElement(0, 15);
+        solutionVect.setElement(1, 194);
+        solutionVect.setElement(2, 232);
+        assertEquals("Linear equations system solution with constant values failed.",
+                solutionVect, matGF.solveLinearEquationsSystem(matrix1, resultVect));
+
+        matrix1.setElement(0, 0, 11);
+        matrix1.setElement(0, 1, 184);
+        matrix1.setElement(0, 2, 50);
+        matrix1.setElement(1, 0, 88);
+        matrix1.setElement(1, 1, 174);
+        matrix1.setElement(1, 2, 78);
+        matrix1.setElement(2, 0, 223);
+        matrix1.setElement(2, 1, 88);
+        matrix1.setElement(2, 2, 208);
+
+        resultVect.setElement(0, 110);
+        resultVect.setElement(1, 254);
+        resultVect.setElement(2, 89);
+
+
+        solutionVect.setElement(0, 220);
+        solutionVect.setElement(1, 62);
+        solutionVect.setElement(2, 76);
+        assertEquals("Linear equations system solution with constant values failed.",
+                solutionVect, matGF.solveLinearEquationsSystem(matrix1, resultVect));
+
+
+        /*
+         * Basic test.
+         */
+        gf = new GF2N(4194307l);
+        matGF = new MatrixGF2N(gf);
+        for (int test = 0; test < 100; test++) {
 
             int size = rn.nextInt(128) + 1;
-            Matrix matrix1 = new Matrix(size, size, gf.getFieldSize());
-            Vector resultVect = new Vector(size, gf.getFieldSize());
+            matrix1 = new Matrix(size, size, gf.getFieldSize());
+            resultVect = new Vector(size, gf.getFieldSize());
 
             try {
-                Matrix resultMat = mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, resultVect));
+                Matrix resultMat = matGF.multiply(matGF.solveLinearEquationsSystem(matrix1, resultVect), matrix1);
                 for (int y = 0; y < resultMat.getColumns(); y++) {
                     assertEquals("Linear equations system solved wrong.",
                             resultVect.getElement(y), resultMat.getElement(0, y));
@@ -315,15 +827,16 @@ public class MatrixGF2NTest {
             }
         }
 
-        mat = new MatrixGF2N(3);
-        for (int test = 0; test < 64; test++) {
+        //tests with binary values
+        matGF = new MatrixGF2N(3);
+        for (int test = 0; test < 100; test++) {
 
             int size = rn.nextInt(128) + 1;
-            Matrix matrix1 = new Matrix(size, size, 1);
-            Vector resultVect = new Vector(size, 1);
+            matrix1 = new Matrix(size, size, 1);
+            resultVect = new Vector(size, 1);
 
             try {
-                Matrix resultMat = mat.multiply(matrix1, mat.solveLinearEquationsSystem(matrix1, resultVect));
+                Matrix resultMat = matGF.multiply(matGF.solveLinearEquationsSystem(matrix1, resultVect), matrix1);
                 for (int y = 0; y < resultMat.getColumns(); y++) {
                     assertEquals("Linear equations system solved wrong.",
                             resultVect.getElement(y), resultMat.getElement(0, y));
@@ -340,33 +853,157 @@ public class MatrixGF2NTest {
 
     @Test
     public void testImage() {
-        //not very clever testing
+        /*
+         * Test with constant values.
+         */
+        gf = new GF2N(283);
+        MatrixGF2N matGF = new MatrixGF2N(gf);
 
-        MatrixGF2N mat = new MatrixGF2N(gf);
+        Matrix matrix1 = new Matrix(3, 3);
+        matrix1.setElement(0, 0, 133);
+        matrix1.setElement(0, 1, 156);
+        matrix1.setElement(0, 2, 117);
+        matrix1.setElement(1, 0, 235);
+        matrix1.setElement(1, 1, 242);
+        matrix1.setElement(1, 2, 227);
+        matrix1.setElement(2, 0, 104);
+        matrix1.setElement(2, 1, 5);
+        matrix1.setElement(2, 2, 178);
 
-        for (int test = 0; test < 16; test++) {
+        Matrix resultMatrix = new Matrix(3, 3);
+        resultMatrix.setElement(0, 0, 133);
+        resultMatrix.setElement(0, 1, 156);
+        resultMatrix.setElement(0, 2, 117);
+        resultMatrix.setElement(1, 0, 0);
+        resultMatrix.setElement(1, 1, 99);
+        resultMatrix.setElement(1, 2, 221);
+        resultMatrix.setElement(2, 0, 0);
+        resultMatrix.setElement(2, 1, 0);
+        resultMatrix.setElement(2, 2, 64);
+        assertEquals("Image of matrix with constant values failed.",
+                resultMatrix, matGF.image(matrix1));
+
+        matrix1.setElement(0, 0, 147);
+        matrix1.setElement(0, 1, 64);
+        matrix1.setElement(0, 2, 58);
+        matrix1.setElement(1, 0, 55);
+        matrix1.setElement(1, 1, 212);
+        matrix1.setElement(1, 2, 120);
+        matrix1.setElement(2, 0, 27);
+        matrix1.setElement(2, 1, 241);
+        matrix1.setElement(2, 2, 133);
+
+        resultMatrix.setElement(0, 0, 147);
+        resultMatrix.setElement(0, 1, 64);
+        resultMatrix.setElement(0, 2, 58);
+        resultMatrix.setElement(1, 0, 0);
+        resultMatrix.setElement(1, 1, 152);
+        resultMatrix.setElement(1, 2, 232);
+        resultMatrix.setElement(2, 0, 0);
+        resultMatrix.setElement(2, 1, 0);
+        resultMatrix.setElement(2, 2, 99);
+        assertEquals("Image of matrix with constant values failed.",
+                resultMatrix, matGF.image(matrix1));
+
+
+        /*
+         * Basic test.
+         */
+        gf = new GF2N(4194307l);
+        matGF = new MatrixGF2N(gf);
+        for (int test = 0; test < 100; test++) {
             int rowsCount = rn.nextInt(128) + 1;
             int colsCount = rn.nextInt(128) + 1;
 
-            Matrix matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
-            assertEquals("Number of image rows must be equal to rank of a matrix.", mat.rank(matrix1),
-                    mat.image(matrix1).getRows());
+            matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
+            assertEquals("Number of image rows must be equal to rank of a matrix.", matGF.rank(matrix1),
+                    matGF.image(matrix1).getRows());
         }
     }
 
     @Test
     public void testKernel() {
-        MatrixGF2N mat = new MatrixGF2N(gf);
+        /*
+         * Test with constant values.
+         */
+        gf = new GF2N(283);
+        MatrixGF2N matGF = new MatrixGF2N(gf);
 
+        Matrix matrix1 = new Matrix(5, 3);
+        matrix1.setElement(0, 0, 113);
+        matrix1.setElement(0, 1, 39);
+        matrix1.setElement(0, 2, 70);
+        matrix1.setElement(1, 0, 68);
+        matrix1.setElement(1, 1, 116);
+        matrix1.setElement(1, 2, 213);
+        matrix1.setElement(2, 0, 81);
+        matrix1.setElement(2, 1, 47);
+        matrix1.setElement(2, 2, 215);
+        matrix1.setElement(3, 0, 173);
+        matrix1.setElement(3, 1, 237);
+        matrix1.setElement(3, 2, 12);
+        matrix1.setElement(4, 0, 44);
+        matrix1.setElement(4, 1, 0);
+        matrix1.setElement(4, 2, 20);
+
+        Matrix resultMatrix = new Matrix(2, 5);
+        resultMatrix.setElement(0, 0, 173);
+        resultMatrix.setElement(0, 1, 45);
+        resultMatrix.setElement(0, 2, 172);
+        resultMatrix.setElement(0, 3, 0);
+        resultMatrix.setElement(0, 4, 1);
+        resultMatrix.setElement(1, 0, 233);
+        resultMatrix.setElement(1, 1, 122);
+        resultMatrix.setElement(1, 2, 159);
+        resultMatrix.setElement(1, 3, 1);
+        resultMatrix.setElement(1, 4, 0);
+        assertEquals("Kernel of matrix with constant values failed.",
+                resultMatrix, matGF.kernel(matrix1));
+
+        matrix1.setElement(0, 0, 163);
+        matrix1.setElement(0, 1, 118);
+        matrix1.setElement(0, 2, 129);
+        matrix1.setElement(1, 0, 22);
+        matrix1.setElement(1, 1, 53);
+        matrix1.setElement(1, 2, 216);
+        matrix1.setElement(2, 0, 223);
+        matrix1.setElement(2, 1, 240);
+        matrix1.setElement(2, 2, 135);
+        matrix1.setElement(3, 0, 19);
+        matrix1.setElement(3, 1, 97);
+        matrix1.setElement(3, 2, 42);
+        matrix1.setElement(4, 0, 254);
+        matrix1.setElement(4, 1, 157);
+        matrix1.setElement(4, 2, 81);
+
+        resultMatrix.setElement(0, 0, 252);
+        resultMatrix.setElement(0, 1, 187);
+        resultMatrix.setElement(0, 2, 16);
+        resultMatrix.setElement(0, 3, 0);
+        resultMatrix.setElement(0, 4, 1);
+        resultMatrix.setElement(1, 0, 104);
+        resultMatrix.setElement(1, 1, 207);
+        resultMatrix.setElement(1, 2, 123);
+        resultMatrix.setElement(1, 3, 1);
+        resultMatrix.setElement(1, 4, 0);
+        assertEquals("Kernel of matrix with constant values failed.",
+                resultMatrix, matGF.kernel(matrix1));
+
+
+        /*
+         * Basic test.
+         */
+        gf = new GF2N(4194307l);
+        matGF = new MatrixGF2N(gf);
         for (int test = 0; test < 32; test++) {
             int colsCount = rn.nextInt(64) + 1;
             int rowsCount = rn.nextInt(64) + 1 + colsCount;
-            Matrix matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
+            matrix1 = new Matrix(rowsCount, colsCount, gf.getFieldSize());
 
-            Matrix resultMat = mat.kernel(matrix1);
+            Matrix resultMat = matGF.kernel(matrix1);
 
             try {
-                resultMat = mat.multiply(resultMat, matrix1);
+                resultMat = matGF.multiply(resultMat, matrix1);
                 if (!isZeroMatrix(resultMat)) {
                     fail("Kernel of Matrix multiplied by Matrix must be zero matrix.");
                 }
@@ -380,17 +1017,18 @@ public class MatrixGF2NTest {
             }
         }
 
+        
         //Tests in binary GF
-        mat = new MatrixGF2N(3);
+        matGF = new MatrixGF2N(3);
         for (int test = 0; test < 32; test++) {
             int colsCount = rn.nextInt(64) + 1;
             int rowsCount = rn.nextInt(64) + 1 + colsCount;
-            Matrix matrix1 = new Matrix(rowsCount, colsCount, 1);
+            matrix1 = new Matrix(rowsCount, colsCount, 1);
 
-            Matrix resultMat = mat.kernel(matrix1);
+            Matrix resultMat = matGF.kernel(matrix1);
 
             try {
-                resultMat = mat.multiply(resultMat, matrix1);
+                resultMat = matGF.multiply(resultMat, matrix1);
                 if (!isZeroMatrix(resultMat)) {
                     fail("Kernel of Matrix multiplied by Matrix must be zero matrix.");
                 }
