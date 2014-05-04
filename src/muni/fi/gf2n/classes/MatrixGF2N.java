@@ -139,7 +139,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             throw new IllegalArgumentException("Cannot compute inverse of nonsquare matrix.");
         }
 
-        if (determinant(matrix) == 0) {
+        if (rank(matrix) != matrix.getRows()) {
             throw new IllegalArgumentException("Matrix is non-invertible.");
         }
 
@@ -330,12 +330,11 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             throw new IllegalArgumentException("Cannot solve linear equations system: linearly dependent rows.");
         }
 
-
         //prepare equation matrix
         Matrix eqMat = new Matrix(equationMatrix.getRows(), equationMatrix.getColumns() + 1);
         for (int x = 0; x < equationMatrix.getRows(); x++) {
             for (int y = 0; y < equationMatrix.getColumns(); y++) {
-                eqMat.setElement(x, y, equationMatrix.getElement(x, y));
+                eqMat.setElement(y, x, equationMatrix.getElement(x, y));
             }
             eqMat.setElement(x, equationMatrix.getColumns(), results.getElement(x));
         }
