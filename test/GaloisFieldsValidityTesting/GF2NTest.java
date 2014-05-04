@@ -272,10 +272,10 @@ public class GF2NTest {
         for (int x = 0; x < 1000; x++) {
             long value = gf.power(1l, rn.nextInt(1024));
             assertEquals("1^x must be 1 for positive x ", 1l, value);
-
+           
             value = gf.power(0l, rn.nextInt(1024));
             assertEquals("0 powered to anything must be 0", 0l, value);
-
+            
             value = gf.power(rn.nextInt(4194303), 0l);
             assertEquals("x^0 must be 1 for positive x", 1l, value);
         }

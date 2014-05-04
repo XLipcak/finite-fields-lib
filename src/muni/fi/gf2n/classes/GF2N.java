@@ -120,6 +120,10 @@ public class GF2N implements GaloisFieldArithmetic {
         if (exponent == 0 && element != 0) {
             return 1l;
         }
+        
+        if (exponent == 0 && element == 0) {
+            return 0l;
+        }
 
         long result = 1;
         long a = element;
