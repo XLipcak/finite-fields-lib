@@ -153,6 +153,7 @@ public class Polynomial {
     public String toStringAsPoly() {
         String result = new String();
 
+        result += "[";
         if (size > 0) {
             result += elements[0] + " + ";
         }
@@ -163,6 +164,7 @@ public class Polynomial {
                 result += elements[x] + "x^" + x + " + ";
             }
         }
+        result += "]";
         return result;
     }
 

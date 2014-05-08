@@ -10,8 +10,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Class GF2NTest is used to test computation with elements of Galois Field.
- * It includes testing with constants and testing with values generated randomly.
+ * Class GF2NTest is used to test computation with elements of Galois Field. It
+ * includes testing with constants and testing with values generated randomly.
  * Results of all tests with constant values were computed by NTL library.
  *
  * @author Jakub Lipcak, Masaryk University
@@ -272,10 +272,10 @@ public class GF2NTest {
         for (int x = 0; x < 1000; x++) {
             long value = gf.power(1l, rn.nextInt(1024));
             assertEquals("1^x must be 1 for positive x ", 1l, value);
-           
+
             value = gf.power(0l, rn.nextInt(1024));
             assertEquals("0 powered to anything must be 0", 0l, value);
-            
+
             value = gf.power(rn.nextInt(4194303), 0l);
             assertEquals("x^0 must be 1 for positive x", 1l, value);
         }
@@ -321,7 +321,7 @@ public class GF2NTest {
     @Test
     public void testMultiplyInverse() {
 
-        for (int x = 0; x < 1000; x++) {
+        for (int x = 0; x < 10000; x++) {
             long value = rn.nextInt(4194302) + 1;
             assertEquals("x * x^-1 must be 1 for positive x", 1l, gf.multiply(value, gf.invert(value)));
             assertEquals("x^-1 * x must be 1 for positive x", 1l, gf.multiply(gf.invert(value), value));
@@ -341,13 +341,15 @@ public class GF2NTest {
                             1, galoisField.multiply(galoisField.invert(y), y));
                 }
             } else {
-                long maxValue = 0;
-                for (int y = 1; y < (int) Math.pow(2, galoisField.getFieldSize()); y++) {
-                    maxValue = Math.max(galoisField.multiply(galoisField.invert(y), y), maxValue);
-                }
-                if (maxValue == 1) {
-                    fail("X * Inverse(X) is not always 1 in Galois Field with"
-                            + "reducible characteristic polynomial.");
+                try {
+                    for (int y = 1; y < (int) Math.pow(2, galoisField.getFieldSize()); y++) {
+                        galoisField.invert(y);
+                    }
+                    fail("Exception should be thrown when computing inverse for"
+                            + " some elements in GF without irreducible reducing"
+                            + " polynomial.");
+                } catch (IllegalArgumentException ex) {
+                    //OK
                 }
             }
         }

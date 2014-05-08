@@ -604,7 +604,12 @@ public final class AES {
         GF2N aesField = new GF2N(283);
         MatrixGF2N aesMat = new MatrixGF2N(aesField);
 
-        Matrix resultMatrix = aesMat.multiply(affineMatrix, decimalNumberToBinaryVector(aesField.invert(value)));
+        Matrix resultMatrix;
+        if (value != 0) {
+            resultMatrix = aesMat.multiply(affineMatrix, decimalNumberToBinaryVector(aesField.invert(value)));
+        } else {
+            resultMatrix = aesMat.multiply(affineMatrix, decimalNumberToBinaryVector(0));
+        }
 
         Matrix addMatrix = new Matrix(8, 1);//{1,1,0,0,0,1,1,0};
         addMatrix.setElement(0, 0, 1);
@@ -659,8 +664,11 @@ public final class AES {
         addMatrix.setElement(6, 0, 0);
         addMatrix.setElement(7, 0, 0);
 
-        return (int) aesField.invert(binaryMatrixToDecimalNumber(aesMat.add(resultMatrix, addMatrix)));
-
+        if (binaryMatrixToDecimalNumber(aesMat.add(resultMatrix, addMatrix)) != 0) {
+            return (int) aesField.invert(binaryMatrixToDecimalNumber(aesMat.add(resultMatrix, addMatrix)));
+        } else {
+            return 0;
+        }
     }
 
     //encrypt array of bytes in CBC mode

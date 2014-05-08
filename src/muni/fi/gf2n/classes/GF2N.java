@@ -93,18 +93,87 @@ public class GF2N implements GaloisFieldArithmetic {
     public long invert(long element) {
         isInField(element);
 
+        if (element == 1) {
+            return 1;
+        }
+
         if (element == 0) {
-            //throw new IllegalArgumentException("Cannot compute inversion of zero!"); OVERIT
-            return 0;
+            throw new IllegalArgumentException("Cannot find inverse for ZERO.");
         }
 
-        if (fieldSize == 1) {
-            if (element == 1) {
-                return 1;
+        //prepare for division
+        long remainder = element;
+        long numerator = reducingPolynomial;
+        long denumerator = element;
+
+        //prepare to find Bezout's identity
+        long temp = 0;
+        ArrayList<Long> resultList = new ArrayList<>();
+        ArrayList<Long> bezoutIdentity = new ArrayList<>();
+
+
+        //find greatest greatest common divisor, last positive remainder
+        while (remainder != 0) {
+
+            short numeratorBinarySize = countBinarySize(numerator);
+            short denumeratorBinarySize = countBinarySize(denumerator);
+            long tempNumerator = numerator;
+
+            //division of binary polynomial
+            long result = 0;
+            while (numeratorBinarySize >= denumeratorBinarySize) {
+                temp = 1;
+                temp <<= (numeratorBinarySize - denumeratorBinarySize);
+                result ^= temp;
+                tempNumerator ^= (denumerator << (numeratorBinarySize - denumeratorBinarySize));
+
+                numeratorBinarySize = countBinarySize(tempNumerator);
+                denumeratorBinarySize = countBinarySize(denumerator);
             }
+            remainder = tempNumerator;
+
+            if (remainder == 0 && denumerator != 1) {
+                throw new IllegalArgumentException("Cannot compute inverse"
+                        + " for this element.");
+            }
+
+            //resultList data neccessary to find Bezout's identity
+            resultList.add(numerator);
+            resultList.add(denumerator);
+            resultList.add(result);
+
+            numerator = denumerator;
+            denumerator = remainder;
         }
 
-        return power(element, BINARY_POWERS[fieldSize] - 2);
+        if (resultList.size() > 3) {
+            //we don't need last 3 values
+            resultList.remove(resultList.size() - 1);
+            resultList.remove(resultList.size() - 1);
+            resultList.remove(resultList.size() - 1);
+        }
+
+        bezoutIdentity.add(1l);
+        bezoutIdentity.add(resultList.get(resultList.size() - 3));
+        bezoutIdentity.add(resultList.get(resultList.size() - 2));
+        bezoutIdentity.add(resultList.get(resultList.size() - 1));
+
+
+        //find Bezout's identity from resultList data counted in Euclidean algorithm
+        while (resultList.size() != 3) {
+            resultList.remove(resultList.size() - 1);
+            resultList.remove(resultList.size() - 1);
+            resultList.remove(resultList.size() - 1);
+
+            temp = bezoutIdentity.get(0);
+            bezoutIdentity.set(0, bezoutIdentity.get(3));
+            bezoutIdentity.set(1, resultList.get(resultList.size() - 3));
+            bezoutIdentity.set(2, resultList.get(resultList.size() - 2));
+            bezoutIdentity.set(3, add(temp, multiply(bezoutIdentity.get(3), resultList.get(resultList.size() - 1))));
+        }
+
+        //inverted element
+        return bezoutIdentity.get(3);
     }
 
     //Square-and-multiply to compute power
@@ -120,7 +189,7 @@ public class GF2N implements GaloisFieldArithmetic {
         if (exponent == 0 && element != 0) {
             return 1l;
         }
-        
+
         if (exponent == 0 && element == 0) {
             return 0l;
         }
@@ -140,10 +209,17 @@ public class GF2N implements GaloisFieldArithmetic {
         return multiply(result, a);
     }
 
-    //Rabin's test of irreducibility
-    @Override
-    public boolean isIrreducible(long polynomial) {
+    /**
+     * Polynomial with binary coefficients is created from binary representation
+     * of long value taken as parameter. This method determines, whether this
+     * polynomial is irreducible or not.
+     *
+     * @param polynomial binary polynomial represented by long
+     * @return true, if polynomial is irreducible, false otherwise
+     */
+    public static boolean isIrreducible(long polynomial) {
 
+        //Rabin's test of irreducibility
         if (polynomial <= 0) {
             throw new IllegalArgumentException("Polynomial must be represented by positive number.");
         }
@@ -258,7 +334,13 @@ public class GF2N implements GaloisFieldArithmetic {
         return fieldSize;
     }
 
-    private short countBinarySize(long value) {
+    /**
+     * Compute binary size of input value.
+     *
+     * @param value value
+     * @return binary size of value
+     */
+    public static short countBinarySize(long value) {
 
         short result = -1;
 

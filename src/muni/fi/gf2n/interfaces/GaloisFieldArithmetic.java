@@ -66,13 +66,4 @@ public interface GaloisFieldArithmetic {
      */
     long power(long element, long exponent);
 
-    /**
-     * Polynomial with binary coefficients is created from binary representation
-     * of long value taken as parameter. This method determines, whether this
-     * polynomial is irreducible or not.
-     *
-     * @param polynomial binary polynomial represented by long
-     * @return true, if polynomial is irreducible, false otherwise
-     */
-    boolean isIrreducible(long polynomial);
 }
