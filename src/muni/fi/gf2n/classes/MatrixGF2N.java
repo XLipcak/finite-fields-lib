@@ -201,7 +201,6 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     @Override
     public Matrix power(Matrix matrix, long exponent) {
-
         isValid(matrix);
 
         if (matrix.getRows() != matrix.getColumns()) {
@@ -212,12 +211,23 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             throw new IllegalArgumentException("Exponent must be positive number!");
         }
 
-        Matrix result = matrix;
-        for (int x = 1; x < exponent; x++) {
-            result = multiply(matrix, result);
+        Matrix result = new Matrix(matrix.getRows(), matrix.getColumns());
+        for (int x = 0; x < matrix.getRows(); x++) {
+            result.setElement(x, x, 1);
+        }
+        
+        Matrix a = matrix;
+        long x = exponent;
+
+        while (x != 1) {
+            if ((x % 2) == 1) {
+                result = multiply(result, a);
+            }
+            x /= 2;
+            a = multiply(a, a);
         }
 
-        return result;
+        return multiply(result, a);
     }
 
     //Laplace expansion used to compute determinant

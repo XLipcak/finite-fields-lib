@@ -308,6 +308,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         return divide(result, gcd);
     }
 
+    //square and multiply algorithm is used to compute power
     @Override
     public Polynomial power(Polynomial polynomial, long exponent) {
 
@@ -319,13 +320,20 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
             return new Polynomial();
         }
 
-        Polynomial result = polynomial;
+        Polynomial result = new Polynomial(1, 1);
 
-        for (int x = 1; x < exponent; x++) {
-            result = multiply(polynomial, result);
+        Polynomial a = polynomial;
+        long x = exponent;
+
+        while (x != 1) {
+            if ((x % 2) == 1) {
+                result = multiply(result, a);
+            }
+            x /= 2;
+            a = multiply(a, a);
         }
 
-        return result;
+        return multiply(result, a);
     }
 
     //check, if polynomial is not equal to zero
