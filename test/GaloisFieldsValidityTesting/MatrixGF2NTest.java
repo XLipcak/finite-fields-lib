@@ -6,6 +6,9 @@ import muni.fi.gf2n.classes.GF2N;
 import muni.fi.gf2n.classes.Matrix;
 import muni.fi.gf2n.classes.MatrixGF2N;
 import muni.fi.gf2n.classes.Vector;
+import muni.fi.gf2n.exceptions.DimensionMismatchException;
+import muni.fi.gf2n.exceptions.MathArithmeticException;
+import muni.fi.gf2n.exceptions.MathIllegalArgumentException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -14,10 +17,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Class MatrixGF2NTest is used to test computation with matrices with
- * elements in Galois Field.
- * It includes testing with constants and testing with values generated randomly.
- * Results of all tests with constant values were computed by NTL library.
+ * Class MatrixGF2NTest is used to test computation with matrices with elements
+ * in Galois Field. It includes testing with constants and testing with values
+ * generated randomly. Results of all tests with constant values were computed
+ * by NTL library.
  *
  * @author Jakub Lipcak, Masaryk University
  */
@@ -132,15 +135,17 @@ public class MatrixGF2NTest {
 
             try {
                 matGF.add(matrix1, new Matrix(rowsCount, colsCount + 1));
-                fail("Addition of matrices with different dimensions should throw IllegalArgumentException.");
-            } catch (IllegalArgumentException ex) {
+                fail("Addition of matrices with different dimensions should "
+                        + "throw DimensionMismatchException.");
+            } catch (DimensionMismatchException ex) {
                 //OK
             }
 
             try {
                 matGF.add(matrix1, new Matrix(rowsCount + 1, colsCount));
-                fail("Addition of matrices with different dimensions should throw IllegalArgumentException.");
-            } catch (IllegalArgumentException ex) {
+                fail("Addition of matrices with different dimensions should "
+                        + "throw DimensionMismatchException.");
+            } catch (DimensionMismatchException ex) {
                 //OK
             }
         }
@@ -244,15 +249,17 @@ public class MatrixGF2NTest {
 
             try {
                 matGF.subtract(matrix1, new Matrix(rowsCount, colsCount + 1));
-                fail("Subtraction of matrices with different dimensions should throw IllegalArgumentException.");
-            } catch (IllegalArgumentException ex) {
+                fail("Subtraction of matrices with different dimensions should "
+                        + "throw DimensionMismatchException.");
+            } catch (DimensionMismatchException ex) {
                 //OK
             }
 
             try {
                 matGF.subtract(matrix1, new Matrix(rowsCount + 1, colsCount));
-                fail("Subtraction of matrices with different dimensions should throw IllegalArgumentException.");
-            } catch (IllegalArgumentException ex) {
+                fail("Subtraction of matrices with different dimensions should "
+                        + "throw DimensionMismatchException.");
+            } catch (DimensionMismatchException ex) {
                 //OK
             }
         }
@@ -359,21 +366,24 @@ public class MatrixGF2NTest {
             try {
                 matGF.multiply(new Matrix(rowsCount, colsCount), new Matrix(colsCount, rowsCount + 1));
                 //OK
-            } catch (IllegalArgumentException ex) {
-                fail("IllegalArgumentException was thrown when two matrices of good dimensions were multiplied.");
+            } catch (DimensionMismatchException ex) {
+                fail("DimensionMismatchException was thrown when two matrices "
+                        + "of good dimensions were multiplied.");
             }
 
             try {
                 matGF.multiply(new Matrix(rowsCount, colsCount), new Matrix(colsCount + 1, rowsCount));
-                fail("IllegalArgumentException should be thrown when multiplying two matrices of wrong dimensions.");
-            } catch (IllegalArgumentException ex) {
+                fail("DimensionMismatchException should be thrown when multiplying "
+                        + "two matrices of wrong dimensions.");
+            } catch (DimensionMismatchException ex) {
                 //OK
             }
 
             try {
                 matGF.multiply(new Matrix(rowsCount, colsCount + 1), new Matrix(colsCount, rowsCount));
-                fail("IllegalArgumentException should be thrown when multiplying two matrices of wrong dimensions.");
-            } catch (IllegalArgumentException ex) {
+                fail("DimensionMismatchException should be thrown when multiplying "
+                        + "two matrices of wrong dimensions.");
+            } catch (DimensionMismatchException ex) {
                 //OK
             }
         }
@@ -441,7 +451,7 @@ public class MatrixGF2NTest {
          */
         gf = new GF2N(4194307l);
         matGF = new MatrixGF2N(gf);
-        for (int x = 0; x < 100; x++) {
+        for (int x = 0; x < 1000; x++) {
 
             int size = rn.nextInt(9) + 1;
 
@@ -454,7 +464,7 @@ public class MatrixGF2NTest {
                         identityMatrix, matGF.multiply(matrix1, inverseMatrix));
                 assertEquals("Matrix after being multiplied by inverse matrix must be identity matrix.",
                         identityMatrix, matGF.multiply(inverseMatrix, matrix1));
-            } catch (IllegalArgumentException ex) {
+            } catch (MathArithmeticException ex) {
                 //Matrix is non-invertible, this may happen sometimes
             }
 
@@ -509,8 +519,8 @@ public class MatrixGF2NTest {
 
             try {
                 matGF.determinant(matrix1);
-                fail("Computing determinant of nonsquare matrix should throw IllegalArgumentException.");
-            } catch (IllegalArgumentException ex) {
+                fail("Computing determinant of nonsquare matrix should throw MathArithmeticException.");
+            } catch (MathArithmeticException ex) {
                 //OK
             }
 
@@ -609,15 +619,16 @@ public class MatrixGF2NTest {
 
             try {
                 matGF.power(matrix1, rn.nextInt(255) + 1);
-                fail("Computing power of nonsquare matrix should throw IllegalArgumentException.");
-            } catch (IllegalArgumentException ex) {
+                fail("Computing power of nonsquare matrix should throw MathArithmeticException.");
+            } catch (MathArithmeticException ex) {
                 //OK
             }
 
             try {
                 matGF.power(matrix1, -1);
-                fail("Computing power with negative exponent should throw IllegalArgumentException.");
-            } catch (IllegalArgumentException ex) {
+                fail("Computing power with negative exponent should throw "
+                        + "MathIllegalArgumentException.");
+            } catch (MathIllegalArgumentException ex) {
                 //OK
             }
 
@@ -818,12 +829,8 @@ public class MatrixGF2NTest {
                     assertEquals("Linear equations system solved wrong.",
                             resultVect.getElement(y), resultMat.getElement(0, y));
                 }
-            } catch (IllegalArgumentException ex) {
-                if (ex.getMessage().equals("Cannot solve linear equations system: linearly dependent rows.")) {
-                    //this may sometimes happen
-                } else {
-                    fail(ex.toString());
-                }
+            } catch (MathArithmeticException ex) {
+                //linearly dependent rows, this may sometimes happen
             }
         }
 
@@ -841,12 +848,8 @@ public class MatrixGF2NTest {
                     assertEquals("Linear equations system solved wrong.",
                             resultVect.getElement(y), resultMat.getElement(0, y));
                 }
-            } catch (IllegalArgumentException ex) {
-                if (ex.getMessage().equals("Cannot solve linear equations system: linearly dependent rows.")) {
-                    //this may sometimes happen
-                } else {
-                    fail(ex.toString());
-                }
+            } catch (MathArithmeticException ex) {
+                //linearly dependent rows, this may sometimes happen
             }
         }
     }
@@ -1007,17 +1010,13 @@ public class MatrixGF2NTest {
                 if (!isZeroMatrix(resultMat)) {
                     fail("Kernel of Matrix multiplied by Matrix must be zero matrix.");
                 }
-            } catch (IllegalArgumentException ex) {
-                if (ex.getMessage().contains("Matrix argument is empty")) {
-                    //OK, kernel cannot be computed for some matrices
-                    //Exception is thrown when multiplying empty kernel matrix
-                } else {
-                    throw new IllegalArgumentException(ex.getMessage());
-                }
+            } catch (MathIllegalArgumentException ex) {
+                //OK, kernel cannot be computed for some matrices
+                //Exception is thrown when multiplying empty kernel matrix
             }
         }
 
-        
+
         //Tests in binary GF
         matGF = new MatrixGF2N(3);
         for (int test = 0; test < 32; test++) {
@@ -1032,13 +1031,9 @@ public class MatrixGF2NTest {
                 if (!isZeroMatrix(resultMat)) {
                     fail("Kernel of Matrix multiplied by Matrix must be zero matrix.");
                 }
-            } catch (IllegalArgumentException ex) {
-                if (ex.getMessage().contains("Matrix argument is empty")) {
-                    //OK, kernel cannot be computed for some matrices
-                    //Exception is thrown when multiplying empty kernel matrix
-                } else {
-                    throw new IllegalArgumentException(ex.getMessage());
-                }
+            } catch (MathIllegalArgumentException ex) {
+                //OK, kernel cannot be computed for some matrices
+                //Exception is thrown when multiplying empty kernel matrix
             }
         }
     }

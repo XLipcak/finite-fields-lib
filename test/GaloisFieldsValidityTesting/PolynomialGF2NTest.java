@@ -5,6 +5,8 @@ import java.util.Random;
 import muni.fi.gf2n.classes.GF2N;
 import muni.fi.gf2n.classes.Polynomial;
 import muni.fi.gf2n.classes.PolynomialGF2N;
+import muni.fi.gf2n.exceptions.MathArithmeticException;
+import muni.fi.gf2n.exceptions.MathIllegalArgumentException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -14,9 +16,9 @@ import static org.junit.Assert.*;
 
 /**
  * Class PolynomialGF2NTest is used to test computation with polynomials with
- * elements in Galois Field.
- * It includes testing with constants and testing with values generated randomly.
- * Results of all tests with constant values were computed by NTL library.
+ * elements in Galois Field. It includes testing with constants and testing with
+ * values generated randomly. Results of all tests with constant values were
+ * computed by NTL library.
  *
  * @author Jakub Lipcak, Masaryk University
  */
@@ -357,14 +359,14 @@ public class PolynomialGF2NTest {
         try {
             polyGF.divide(new Polynomial(1), new Polynomial(1));
             fail("Division by zero should throw exception.");
-        } catch (IllegalArgumentException ex) {
+        } catch (MathArithmeticException ex) {
             //OK
         }
 
         try {
             polyGF.divide(new Polynomial(1), new Polynomial(1), new Polynomial(1));
             fail("Division by zero should throw exception.");
-        } catch (IllegalArgumentException ex) {
+        } catch (MathArithmeticException ex) {
             //OK
         }
 
@@ -522,16 +524,13 @@ public class PolynomialGF2NTest {
 
                 try {
                     polyGF.invert(polynomial2, polynomial1);
-                    fail("Exception should be thrown, when moduloPolynomial is shorter than polynomial");
-                } catch (IllegalArgumentException ex) {
+                    fail("MathArithmeticException should be thrown, "
+                            + "when moduloPolynomial is shorter than polynomial");
+                } catch (MathArithmeticException ex) {
                     //OK
                 }
-            } catch (IllegalArgumentException ex) {
-                if (ex.getMessage().equals("Cannot compute inverse for this args.")) {
-                    //OK, some polynomials cannot be inverted with some modulos
-                } else {
-                    fail(ex.getMessage());
-                }
+            } catch (MathArithmeticException ex) {
+                //OK, some polynomials cannot be inverted with some modulos
             }
 
         }
@@ -557,16 +556,13 @@ public class PolynomialGF2NTest {
 
                 try {
                     polyGF.invert(polynomial2, polynomial1);
-                    fail("Exception should be thrown, when moduloPolynomial is shorter than polynomial");
-                } catch (IllegalArgumentException ex) {
+                    fail("MathArithmeticException should be thrown, "
+                            + "when moduloPolynomial is shorter than polynomial");
+                } catch (MathArithmeticException ex) {
                     //OK
                 }
-            } catch (IllegalArgumentException ex) {
-                if (ex.getMessage().equals("Cannot compute inverse for this args.")) {
-                    //OK, some polynomials cannot be inverted with some modulos
-                } else {
-                    fail(ex.getMessage());
-                }
+            } catch (MathArithmeticException ex) {
+                //OK, some polynomials cannot be inverted with some modulos
             }
 
         }
@@ -638,8 +634,8 @@ public class PolynomialGF2NTest {
 
         try {
             polyGF.power(new Polynomial(9), -1);
-            fail("Power to negative exponent should throw exception.");
-        } catch (IllegalArgumentException ex) {
+            fail("Power to negative exponent should throw MathIllegalArgumentException.");
+        } catch (MathIllegalArgumentException ex) {
             //OK
         }
     }

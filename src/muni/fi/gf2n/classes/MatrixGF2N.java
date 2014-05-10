@@ -1,6 +1,9 @@
 package muni.fi.gf2n.classes;
 
 import java.util.HashSet;
+import muni.fi.gf2n.exceptions.DimensionMismatchException;
+import muni.fi.gf2n.exceptions.MathArithmeticException;
+import muni.fi.gf2n.exceptions.MathIllegalArgumentException;
 import muni.fi.gf2n.interfaces.GaloisFieldMatrixArithmetic;
 
 /**
@@ -67,17 +70,17 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         Matrix result = new Matrix(matrix1.getRows(), matrix2.getColumns());
 
         if (matrix1.getRows() == 0 || matrix2.getRows() == 0) {
-            throw new IllegalArgumentException("Matrix argument is empty, "
+            throw new MathIllegalArgumentException("Matrix argument is empty, "
                     + "operation cannot be performed.");
         }
 
         if (matrix1.getColumns() == 0 || matrix2.getColumns() == 0) {
-            throw new IllegalArgumentException("Argument matrix has empty row, "
+            throw new MathIllegalArgumentException("Argument matrix has empty row, "
                     + "operation cannot be performed.");
         }
 
         if (matrix1.getColumns() != matrix2.getRows()) {
-            throw new IllegalArgumentException("Argument matrices cannot be multiplied, "
+            throw new DimensionMismatchException("Argument matrices cannot be multiplied, "
                     + "their dimensions are wrong.");
         }
 
@@ -136,11 +139,11 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         isValid(matrix);
 
         if (matrix.getRows() != matrix.getColumns()) {
-            throw new IllegalArgumentException("Cannot compute inverse of nonsquare matrix.");
+            throw new MathArithmeticException("Cannot compute inverse of nonsquare matrix.");
         }
 
         if (rank(matrix) != matrix.getRows()) {
-            throw new IllegalArgumentException("Matrix is non-invertible.");
+            throw new MathArithmeticException("Matrix is non-invertible.");
         }
 
         //Prepare double-wide inverseMatrix, created from original matrix, and in the other half from identity matrix
@@ -167,18 +170,14 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
             long value;
             for (int rowsOverDiagPos = diagPos - 1; rowsOverDiagPos >= 0; rowsOverDiagPos--) {
 
-                try {
-                    //set value, it will be used to set column at diagPos to zero
-                    value = galoisField.divide(inverseMatrix.getElement(rowsOverDiagPos, diagPos), inverseMatrix.getElement(diagPos, diagPos));
+                //set value, it will be used to set column at diagPos to zero
+                value = galoisField.divide(inverseMatrix.getElement(rowsOverDiagPos, diagPos), inverseMatrix.getElement(diagPos, diagPos));
 
-                    //subtract from line, pivot will be set to zero and other values will be edited
-                    for (int colsOverDiagPos = diagPos; colsOverDiagPos < inverseMatrix.getColumns(); colsOverDiagPos++) {
-                        inverseMatrix.setElement(rowsOverDiagPos, colsOverDiagPos,
-                                galoisField.subtract(galoisField.multiply(inverseMatrix.getElement(diagPos, colsOverDiagPos), value),
-                                inverseMatrix.getElement(rowsOverDiagPos, colsOverDiagPos)));
-                    }
-                } catch (IllegalArgumentException ex) {
-                    //division by zero, column full of zeroes, special case, check it later
+                //subtract from line, pivot will be set to zero and other values will be edited
+                for (int colsOverDiagPos = diagPos; colsOverDiagPos < inverseMatrix.getColumns(); colsOverDiagPos++) {
+                    inverseMatrix.setElement(rowsOverDiagPos, colsOverDiagPos,
+                            galoisField.subtract(galoisField.multiply(inverseMatrix.getElement(diagPos, colsOverDiagPos), value),
+                            inverseMatrix.getElement(rowsOverDiagPos, colsOverDiagPos)));
                 }
             }
         }
@@ -204,18 +203,18 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         isValid(matrix);
 
         if (matrix.getRows() != matrix.getColumns()) {
-            throw new IllegalArgumentException("Cannot compute power of non-square matrix!");
+            throw new MathArithmeticException("Cannot compute power of non-square matrix!");
         }
 
         if (exponent <= 0) {
-            throw new IllegalArgumentException("Exponent must be positive number!");
+            throw new MathIllegalArgumentException("Exponent must be positive number!");
         }
 
         Matrix result = new Matrix(matrix.getRows(), matrix.getColumns());
         for (int x = 0; x < matrix.getRows(); x++) {
             result.setElement(x, x, 1);
         }
-        
+
         Matrix a = matrix;
         long x = exponent;
 
@@ -237,7 +236,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         isValid(matrix);
 
         if (matrix.getRows() != matrix.getColumns()) {
-            throw new IllegalArgumentException("Cannot compute determinant of nonsquare matrix.");
+            throw new MathArithmeticException("Cannot compute determinant of nonsquare matrix.");
         }
 
         if (matrix.getRows() == 1) {
@@ -308,12 +307,8 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
                                 galoisField.subtract(galoisField.multiply(result.getElement(diagPos - 1, colsUnderDiagPos), value),
                                 result.getElement(rowsUnderDiagPos, colsUnderDiagPos)));
                     }
-                } catch (IllegalArgumentException ex) {
+                } catch (MathArithmeticException ex) {
                     //catched division by zero, OK, thrown by columns full of zeroes
-                    if (ex.toString().contains("Values for this reducing polynomial must be in")) {
-                        //also catched, when some values are not in GF, new exception is thrown then
-                        throw new IllegalArgumentException(ex);
-                    }
                 }
             }
         }
@@ -329,15 +324,15 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
         isValid(equationMatrix);
 
         if (equationMatrix.getRows() != equationMatrix.getColumns()) {
-            throw new IllegalArgumentException("Cannot solve linear equations system for nonsquare matrix.");
+            throw new MathArithmeticException("Cannot solve linear equations system for nonsquare matrix.");
         }
 
         if (equationMatrix.getRows() != results.getSize()) {
-            throw new IllegalArgumentException("Cannot solve linear equations system: dimension mismatch.");
+            throw new DimensionMismatchException("Cannot solve linear equations system: dimension mismatch.");
         }
 
         if (rank(equationMatrix) != equationMatrix.getRows()) {
-            throw new IllegalArgumentException("Cannot solve linear equations system: linearly dependent rows.");
+            throw new MathArithmeticException("Cannot solve linear equations system: linearly dependent rows.");
         }
 
         //prepare equation matrix
@@ -446,17 +441,17 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     private void isValid(Matrix matrix1, Matrix matrix2) {
 
         if (matrix1.getRows() == 0 || matrix2.getRows() == 0) {
-            throw new IllegalArgumentException("Matrix argument is empty, "
+            throw new MathIllegalArgumentException("Matrix argument is empty, "
                     + "operation cannot be performed.");
         }
 
         if (matrix1.getColumns() == 0 || matrix2.getColumns() == 0) {
-            throw new IllegalArgumentException("Argument matrix has empty row, "
+            throw new MathIllegalArgumentException("Argument matrix has empty row, "
                     + "operation cannot be performed.");
         }
 
         if ((matrix1.getColumns() != matrix2.getColumns()) || (matrix1.getRows() != matrix2.getRows())) {
-            throw new IllegalArgumentException("Argument matrices have different dimensions, "
+            throw new DimensionMismatchException("Argument matrices have different dimensions, "
                     + "operation cannot be performed.");
         }
     }
@@ -465,12 +460,12 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
     private void isValid(Matrix matrix) {
 
         if (matrix.getRows() == 0) {
-            throw new IllegalArgumentException("Matrix argument is empty, "
+            throw new MathIllegalArgumentException("Matrix argument is empty, "
                     + "operation cannot be performed.");
         }
 
         if (matrix.getColumns() == 0) {
-            throw new IllegalArgumentException("Argument matrix has empty row, "
+            throw new MathIllegalArgumentException("Argument matrix has empty row, "
                     + "operation cannot be performed.");
         }
 

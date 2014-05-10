@@ -2,6 +2,8 @@ package muni.fi.gf2n.classes;
 
 import muni.fi.gf2n.interfaces.GaloisFieldPolynomialArithmetic;
 import java.util.ArrayList;
+import muni.fi.gf2n.exceptions.MathArithmeticException;
+import muni.fi.gf2n.exceptions.MathIllegalArgumentException;
 
 /**
  * Class PolynomialGF2N implements interface GaloisFieldPolynomialArithmetic for
@@ -97,7 +99,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
     public Polynomial divide(Polynomial polynomial1, Polynomial polynomial2) {
 
         if (isZero(polynomial2)) {
-            throw new IllegalArgumentException("Division by zero!");
+            throw new MathArithmeticException("Division by zero!");
         }
 
         Polynomial remainder = new Polynomial(Math.max(polynomial1.getSize(), polynomial2.getSize()));
@@ -108,7 +110,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
     public Polynomial divide(Polynomial polynomial1, Polynomial polynomial2, Polynomial remainder) {
 
         if (isZero(polynomial2)) {
-            throw new IllegalArgumentException("Division by zero!");
+            throw new MathArithmeticException("Division by zero!");
         }
 
         Polynomial result;
@@ -280,11 +282,11 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
     public Polynomial invert(Polynomial polynomial, Polynomial moduloPolynomial) {
 
         if (isZero(polynomial) || isZero(moduloPolynomial)) {
-            throw new IllegalArgumentException("Cannot compute inverse for zero polynomials.");
+            throw new MathIllegalArgumentException("Cannot compute inverse for zero polynomials.");
         }
 
         if ((polynomial.getSize() >= moduloPolynomial.getSize()) || (moduloPolynomial.getSize() == 1)) {
-            throw new IllegalArgumentException("Cannot compute inverse for this args.");
+            throw new MathArithmeticException("Cannot compute inverse for this args.");
         }
 
         if (polynomial.getSize() == 1) {
@@ -300,7 +302,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         gcd = xgcd(moduloPolynomial, polynomial, temp, result);
 
         if (gcd.getSize() != 1) {
-            throw new IllegalArgumentException("Cannot compute inverse for this args.");
+            throw new MathArithmeticException("Cannot compute inverse for this args.");
         }
 
         //normalize result, after this, remainder after division by moduloPolynomial will be 1
@@ -313,7 +315,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
     public Polynomial power(Polynomial polynomial, long exponent) {
 
         if (exponent <= 0) {
-            throw new IllegalArgumentException("Exponent must be positive number!");
+            throw new MathIllegalArgumentException("Exponent must be positive number!");
         }
 
         if (isZero(polynomial)) {

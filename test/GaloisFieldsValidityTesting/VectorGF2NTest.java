@@ -4,6 +4,8 @@ import java.util.Random;
 import muni.fi.gf2n.classes.GF2N;
 import muni.fi.gf2n.classes.Vector;
 import muni.fi.gf2n.classes.VectorGF2N;
+import muni.fi.gf2n.exceptions.DimensionMismatchException;
+import muni.fi.gf2n.exceptions.ElementNotInFieldException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -90,8 +92,9 @@ public class VectorGF2NTest {
                     vector2, vecGF.add(vector2, vector2));
             try {
                 vecGF.add(vector1, new Vector(size + 1));
-                fail("Addition of vectors with different dimensions should throw exception.");
-            } catch (IllegalArgumentException ex) {
+                fail("Addition of vectors with different dimensions should "
+                        + "throw DimensionMismatchException.");
+            } catch (DimensionMismatchException ex) {
                 //OK
             }
         }
@@ -154,8 +157,9 @@ public class VectorGF2NTest {
                     vector2, vecGF.add(vector2, vector2));
             try {
                 vecGF.add(vector1, new Vector(size + 1));
-                fail("Subtraction of vectors with different dimensions should throw exception.");
-            } catch (IllegalArgumentException ex) {
+                fail("Subtraction of vectors with different dimensions should "
+                        + "throw DimensionMismatchException.");
+            } catch (DimensionMismatchException ex) {
                 //OK
             }
         }
@@ -211,8 +215,8 @@ public class VectorGF2NTest {
                     vector2, vecGF.multiply(vector1, 0));
             try {
                 vecGF.multiply(vector1, -1);
-                fail("Multiplying by negative scalar value should throw exception.");
-            } catch (IllegalArgumentException ex) {
+                fail("Multiplying by negative scalar value should throw ElementNotInFieldException.");
+            } catch (ElementNotInFieldException ex) {
                 //OK
             }
         }

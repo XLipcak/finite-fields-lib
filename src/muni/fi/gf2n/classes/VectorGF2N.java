@@ -1,5 +1,6 @@
 package muni.fi.gf2n.classes;
 
+import muni.fi.gf2n.exceptions.DimensionMismatchException;
 import muni.fi.gf2n.interfaces.GaloisFieldVectorArithmetic;
 
 /**
@@ -78,18 +79,18 @@ public class VectorGF2N implements GaloisFieldVectorArithmetic {
     private void isValid(Vector vect1, Vector vect2) {
 
         if (vect1.getSize() == 0 || vect2.getSize() == 0) {
-            throw new IllegalArgumentException("Vector argument is empty.");
+            throw new DimensionMismatchException("Vector argument is empty.");
         }
 
         if (vect1.getSize() != vect2.getSize()) {
-            throw new IllegalArgumentException("Operation cannot be performed with vectors of different length.");
+            throw new DimensionMismatchException("Operation cannot be performed with vectors of different length.");
         }
     }
 
     private void isValid(Vector vect) {
 
         if (vect.getSize() == 0) {
-            throw new IllegalArgumentException("Vector argument is empty.");
+            throw new DimensionMismatchException("Vector argument is empty.");
         }
     }
 }

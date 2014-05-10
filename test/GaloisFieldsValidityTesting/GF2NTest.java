@@ -2,6 +2,9 @@ package GaloisFieldsValidityTesting;
 
 import java.util.Random;
 import muni.fi.gf2n.classes.GF2N;
+import muni.fi.gf2n.exceptions.ElementNotInFieldException;
+import muni.fi.gf2n.exceptions.MathArithmeticException;
+import muni.fi.gf2n.exceptions.MathIllegalArgumentException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -59,16 +62,16 @@ public class GF2NTest {
         try {
             gf.add(123456789l, 0l);
             fail("Addition of values greater than field size should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
 
         try {
             gf.add(-1l, 0l);
             fail("Addition of values less than zero should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
     }
@@ -104,16 +107,16 @@ public class GF2NTest {
         try {
             gf.subtract(123456789l, 0l);
             fail("Subtraction of values greater than field size should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
 
         try {
             gf.subtract(-1l, 0l);
             fail("Subtraction of values less than zero should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
 
@@ -145,16 +148,16 @@ public class GF2NTest {
         try {
             gf.multiply(1, 7654321l);
             fail("Multiplication by values greater than field size should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
 
         try {
             gf.multiply(1, -9l);
             fail("Multiplication by values less than zero should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
     }
@@ -185,23 +188,23 @@ public class GF2NTest {
         try {
             gf.divide(1, 7654321l);
             fail("Division by values greater than field size should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
 
         try {
             gf.divide(1, -9l);
             fail("Division by values less than zero should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
 
         try {
             gf.divide(1, 0l);
-            fail("Division by zero should throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+            fail("Division by zero should throw MathArithmeticException.");
+        } catch (MathArithmeticException ex) {
             //OK
         }
 
@@ -233,23 +236,23 @@ public class GF2NTest {
         try {
             gf.invert(7654321l);
             fail("Inverting values greater than field size should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
 
         try {
             gf.invert(-9l);
             fail("Inverting values less than zero should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
 
         try {
             gf.invert(0l);
-            //fail("Inverting zero should throw IllegalArgumentException."); SKONTROLOVAT ESTE podla NTL
-        } catch (IllegalArgumentException ex) {
+            fail("Inverting zero should throw MathArithmeticException."); 
+        } catch (MathArithmeticException ex) {
             //OK
         }
     }
@@ -283,24 +286,24 @@ public class GF2NTest {
         try {
             gf.power(7654321l, 1l);
             fail("Exponentiation of values greater than field size should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
 
         try {
             gf.power(-9l, 99l);
             fail("Exponentiation of values less than zero should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw ElementNotInFieldException.");
+        } catch (ElementNotInFieldException ex) {
             //OK
         }
 
         try {
             gf.power(1l, -1l);
             fail("Exponentiation to values less than zero should "
-                    + "throw IllegalArgumentException.");
-        } catch (IllegalArgumentException ex) {
+                    + "throw MathIllegalArgumentException.");
+        } catch (MathIllegalArgumentException ex) {
             //OK
         }
 
@@ -348,7 +351,7 @@ public class GF2NTest {
                     fail("Exception should be thrown when computing inverse for"
                             + " some elements in GF without irreducible reducing"
                             + " polynomial.");
-                } catch (IllegalArgumentException ex) {
+                } catch (MathArithmeticException ex) {
                     //OK
                 }
             }
