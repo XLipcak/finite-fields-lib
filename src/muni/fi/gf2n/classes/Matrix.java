@@ -85,11 +85,15 @@ public class Matrix {
      */
     public Matrix(int rows, int columns, int bitSize) {
         this(rows, columns);
+        if (bitSize < 1) {
+            return;
+        }
+        
         Random rn = new Random();
 
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < columns; y++) {
-                elements[x][y] = rn.nextInt((int) Math.pow(2, bitSize));
+                elements[x][y] = Math.abs(rn.nextLong()) & generateBitMask(bitSize);
             }
         }
     }
@@ -191,6 +195,14 @@ public class Matrix {
                 }
             }
             result += " ]" + "\n";
+        }
+        return result;
+    }
+
+    private long generateBitMask(int length) {
+        int result = 0;
+        for (int x = 0; x < length; x++) {
+            result ^= (1 << x);
         }
         return result;
     }

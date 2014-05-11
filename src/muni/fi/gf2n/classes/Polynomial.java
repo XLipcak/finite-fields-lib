@@ -72,12 +72,21 @@ public class Polynomial {
      */
     public Polynomial(int size, int bitSize) {
         this(size);
+        if (bitSize < 1) {
+            return;
+        }
+
         Random rn = new Random();
 
         for (int x = 0; x < size - 1; x++) {
-            elements[x] = rn.nextInt((int) Math.pow(2, bitSize));
+            elements[x] = Math.abs(rn.nextLong()) & generateBitMask(bitSize);
         }
-        elements[size - 1] = rn.nextInt((int) Math.pow(2, bitSize) - 1) + 1;
+
+        long value = 0;
+        do {
+            elements[size - 1] = (Math.abs(rn.nextLong()) & generateBitMask(bitSize));
+        } while (elements[size - 1] == 0);
+
     }
 
     /**
@@ -208,6 +217,14 @@ public class Polynomial {
         }
         result += " ]";
 
+        return result;
+    }
+
+    private long generateBitMask(int length) {
+        int result = 0;
+        for (int x = 0; x < length; x++) {
+            result ^= (1 << x);
+        }
         return result;
     }
 }

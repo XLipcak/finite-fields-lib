@@ -30,6 +30,7 @@ public class Vector {
      * @param size size of constructed polynomial
      */
     public Vector(int size) {
+        
         elements = new long[size];
         this.size = size;
     }
@@ -69,10 +70,14 @@ public class Vector {
      */
     public Vector(int size, int bitSize) {
         this(size);
+        if (bitSize < 1) {
+            return;
+        }
+        
         Random rn = new Random();
 
         for (int x = 0; x < size; x++) {
-            elements[x] = rn.nextInt((int) Math.pow(2, bitSize));
+            elements[x] = Math.abs(rn.nextLong()) & generateBitMask(bitSize);
         }
     }
 
@@ -145,6 +150,14 @@ public class Vector {
         }
         result += " )";
 
+        return result;
+    }
+
+    private long generateBitMask(int length) {
+        int result = 0;
+        for (int x = 0; x < length; x++) {
+            result ^= (1 << x);
+        }
         return result;
     }
 }
