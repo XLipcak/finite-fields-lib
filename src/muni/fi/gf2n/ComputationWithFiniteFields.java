@@ -1,20 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package muni.fi.gf2n;
 
 import muni.fi.gf2n.classes.GF2N;
 import muni.fi.gf2n.classes.PolynomialGF2N;
 import muni.fi.gf2n.classes.VectorGF2N;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 import muni.fi.aes.AES;
-import muni.fi.aes.BlockCipherMode;
+import muni.fi.gf2n.classes.Matrix;
 import muni.fi.gf2n.classes.MatrixGF2N;
+import muni.fi.gf2n.classes.Polynomial;
+import muni.fi.gf2n.classes.Vector;
 
 /**
+ * Main class using some basic functionality of library.
  *
  * @author Jakub Lipcak, Masaryk University
  */
@@ -25,114 +22,145 @@ public class ComputationWithFiniteFields {
      */
     public static void main(String[] args) {
 
-        GF2N gf = new GF2N(19);//...4194307l..rnd k tomu 4194303l
-        int randomMax = 16;
         Random rn = new Random();
-        
 
-        //TEST Polynomials
-        int poly1Length = 4;
-        int poly2Length = 7;
-        PolynomialGF2N poly = new PolynomialGF2N(gf);
-        long[] arrayPoly = generateRandomPoly(poly1Length, randomMax);
-        long[] arrayPoly2 = generateRandomPoly(poly2Length, randomMax);
+        /*
+         * GF2NLIB
+         */
 
-        System.out.println("Polynomials output: ");
-        System.out.println("Poly1: " + Arrays.toString(arrayPoly));
-        System.out.println("Poly2: " + Arrays.toString(arrayPoly2));
-        System.out.println("Poly1 + Poly2: " + Arrays.toString(poly.add(arrayPoly, arrayPoly2)));
-        System.out.println("Poly1 * Poly2: " + Arrays.toString(poly.multiply(arrayPoly, arrayPoly2)));
-        System.out.println("Poly1 / Poly2: " + Arrays.toString(poly.divide(arrayPoly, arrayPoly2)));
-        System.out.println("Poly2 / Poly1: " + Arrays.toString(poly.divide(arrayPoly2, arrayPoly)));
-        System.out.println("GCD(Poly1, Poly2)" + Arrays.toString(poly.gcd(arrayPoly, arrayPoly2)));
-        System.out.println("Inverse Poly1 = Poly1^{-1} % Poly2: " + Arrays.toString(poly.invert(arrayPoly, arrayPoly2)));
-        System.out.println("Poly1 * Poly1" + Arrays.toString(poly.multiply(arrayPoly, arrayPoly)));
-        System.out.println("GCD(Poly1 * Poly1, Poly1)"
-                + Arrays.toString(poly.gcd(poly.multiply(arrayPoly, arrayPoly), arrayPoly)));
-        
-        System.out.println("____________________________________________");
-        
-        //TEST vectors
-        int vec1Length = 7;
-        int vec2Length = 7;
-        long[] vect1 = generateRandomPoly(vec1Length, randomMax);
-        long[] vect2 = generateRandomPoly(vec2Length, randomMax);
-        VectorGF2N vectGF = new VectorGF2N(gf);
-        
-        System.out.println("Vectors output: ");
-        System.out.println("Vector1: ");
-        System.out.println(Arrays.toString(vect1));
-        System.out.println("Vector2: ");
-        System.out.println(Arrays.toString(vect2));
-        System.out.println("Vector1 + Vector2");
-        System.out.println(Arrays.toString(vectGF.add(vect1, vect2)));
-        System.out.println("Vector1 - Vector2");
-        System.out.println(Arrays.toString(vectGF.subtract(vect1, vect2)));
-        long scalar = rn.nextInt(randomMax);
-        System.out.println("Vector1 * " + scalar);
-        System.out.println(Arrays.toString(vectGF.multiply(vect1, scalar)));
-        System.out.println("Vector2 * " + scalar);
-        System.out.println(Arrays.toString(vectGF.multiply(vect2, scalar)));
-        System.out.println("____________________________________________");
-        
-        //TEST Matrices
-        int mat1Rows = 7;
-        int mat1Cols = 7;
-        int mat2Rows = 7;
-        int mat2Cols = 4;
-        MatrixGF2N matGF = new MatrixGF2N(gf);
-        long[][] matrix1 = generateRandomMatrix(mat1Rows, mat1Cols, randomMax);
-        long[][] matrix2 = generateRandomMatrix(mat2Rows, mat2Cols, randomMax);
-        
-        System.out.println("Matrices output: ");
-        System.out.println("Matrix1: ");
-        MatrixGF2N.printMatrix(matrix1);
-        System.out.println("Matrix2: ");
-        MatrixGF2N.printMatrix(matrix2);
-        System.out.println("Matrix1 + Matrix 1");
-        MatrixGF2N.printMatrix(matGF.add(matrix1, matrix1));
-        int scalarValue = rn.nextInt(randomMax);
-        System.out.println("Matrix1 * " + scalarValue );
-        MatrixGF2N.printMatrix(matGF.multiply(matrix1, scalarValue));
-        System.out.println("Matrix1 determinant: " + matGF.determinant(matrix1));
-        System.out.println("Matrix1 * Matrix2");
-        MatrixGF2N.printMatrix(matGF.multiply(matrix1, matrix2));
-        System.out.println("Matrix1 Gauss: ");
-        MatrixGF2N.printMatrix(matGF.gauss(matrix1));
-        System.out.println("Matrix2 Gauss: ");
-        MatrixGF2N.printMatrix(matGF.gauss(matrix2));
-        System.out.println("Matrix2 kernel: ");
-        MatrixGF2N.printMatrix(matGF.kernel(matrix2));
-        System.out.println("Matrix2 image: ");
-        MatrixGF2N.printMatrix(matGF.image(matrix2));
-        System.out.println("Matrix2 rank: " + matGF.rank(matrix2));
-        System.out.println("____________________________________________");
-        
+        /*
+         * Computation with elements
+         */
+        long irreduciblePolynomial = 1033;
+        GF2N galoisField = new GF2N(irreduciblePolynomial);
 
+        // random elements
+        long element1 = rn.nextInt(1024);
+        long element2 = rn.nextInt(1024);
+
+        System.out.println("Computation with elements: ");
+        System.out.println(element1 + " + " + element2 + " = "
+                + galoisField.add(element1, element2));
+
+        System.out.println(element1 + " / " + element2 + " = "
+                + galoisField.divide(element1, element2));
+
+        System.out.println(element1 + " * " + element2 + " = "
+                + galoisField.multiply(element1, element2) + "\n");
+
+        /*
+         * Computation with vectors
+         */
+        VectorGF2N vecGf = new VectorGF2N(galoisField);
+
+        // random vectors of size 4
+        Vector vector1 = new Vector(4, galoisField.getFieldSize());
+        Vector vector2 = new Vector(4, galoisField.getFieldSize());
+
+        System.out.println("Computation with vectors: ");
+        System.out.println(vector1 + " + " + vector2
+                + " = " + vecGf.add(vector1, vector2));
+
+        System.out.println(vector1 + " * " + element1
+                + " = " + vecGf.multiply(vector1, element1) + "\n");
+
+
+        /*
+         * Computation with polynomials
+         */
+        PolynomialGF2N polyGf = new PolynomialGF2N(galoisField);
+
+        // random polynomials
+        Polynomial polynomial1 = new Polynomial(5, galoisField.getFieldSize());
+        Polynomial polynomial2 = new Polynomial(3, galoisField.getFieldSize());
+
+        System.out.println("Computation with polynomials: ");
+        System.out.println(polynomial1 + " + " + polynomial2
+                + " = " + polyGf.add(polynomial1, polynomial2));
+
+        System.out.println("Inverse of: " + polynomial2 + " modulo " + polynomial1
+                + " = " + polyGf.invert(polynomial2, polynomial1));
+
+        System.out.println(polynomial1 + " / " + polynomial2
+                + " = " + polyGf.divide(polynomial1, polynomial2) + "\n");
+
+
+
+        /*
+         * Computation with matrices
+         */
+        MatrixGF2N matGf = new MatrixGF2N(galoisField);
+
+        // random matrices of size 3x3
+        Matrix matrix1 = new Matrix(3, 3, galoisField.getFieldSize());
+        Matrix matrix2 = new Matrix(3, 3, galoisField.getFieldSize());
+
+        System.out.println("Computation with matrices: ");
+        System.out.println(matrix1 + " + \n" + matrix2 + " = \n"
+                + matGf.add(matrix1, matrix2));
+
+        System.out.println(matrix1 + " * \n" + matrix2 + " = \n"
+                + matGf.multiply(matrix1, matrix2));
+
+        System.out.println("Inverse of Matrix: \n" + matrix1 + " = \n"
+                + matGf.inverse(matrix1));
+
+
+
+        /*
+         * AES
+         */
+        AES aes = new AES();
+
+        String plainText = "fffc000000000000000000000cf00012";
+        String key = "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
+
+        byte[] cipherText = aes.encryptECB(hexaStringToByteArray(plainText), hexaStringToByteArray(key));
+        
+        System.out.println("AES: ");
+        System.out.println("Plain text: ");
+        System.out.println(toUpperWithSpaces(plainText));
+        
+        System.out.println("Key: ");
+        System.out.println(toUpperWithSpaces(key));
+        
+        System.out.println("Cipher text: ");
+        System.out.println(byteArrayToHexaString(cipherText));
+        
+        System.out.println("Decrypted cipher text: ");
+        System.out.println(byteArrayToHexaString(aes.decryptECB(cipherText, hexaStringToByteArray(key))));
+    }
+
+    private static byte[] hexaStringToByteArray(String str) {
+        byte[] result = new byte[(str.length() / 2)];
+
+        for (int x = 0; x < result.length; x++) {
+            String hexa = str.substring(x * 2, (x * 2) + 2);
+            result[x] = (byte) Long.parseLong(hexa, 16);
+        }
+
+        return result;
+    }
+
+    private static String byteArrayToHexaString(byte[] input) {
+        String result = "";
+        StringBuilder sb = new StringBuilder();
+        for (byte b : input) {
+            sb.append(String.format("%02X ", b));
+        }
+
+        result = sb.toString();
+        return result;
     }
     
-    public static long[] generateRandomPoly(int length, int randomMax) {
-        long[] resultPoly = new long[length];
-        Random rn = new Random();
-        for (int x = 0; x < length - 1; x++) {
-            resultPoly[x] = rn.nextInt(randomMax);
+    private static String toUpperWithSpaces(String input){
+        String result = "";
+        
+        for(int x = 0; x < (input.length()/2); x++){
+            result += input.substring(x*2, (x*2) + 2).toUpperCase();
+            result += " ";
         }
-        resultPoly[length - 1] = rn.nextInt(randomMax - 1) + 1;
-
-        return resultPoly;
-    }
-    
-    public static long[][] generateRandomMatrix(int rowsCount, int colsCount, int randomMax) {
-
-        long[][] matrix = new long[rowsCount][colsCount];
-        Random rn = new Random();
-
-        for (int x = 0; x < rowsCount; x++) {
-            for (int y = 0; y < colsCount; y++) {
-                matrix[x][y] = rn.nextInt(randomMax);
-            }
-        }
-
-        return matrix;
+        
+        return result;
     }
 }

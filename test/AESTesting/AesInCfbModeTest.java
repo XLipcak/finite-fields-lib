@@ -1,14 +1,7 @@
 package AESTesting;
 
-import java.util.Random;
-import muni.fi.aes.AES;
 import muni.fi.aes.BlockCipherMode;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * AesInCfbModeTest is class used to test encryption and decryption in CFB mode

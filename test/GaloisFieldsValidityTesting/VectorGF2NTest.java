@@ -6,10 +6,7 @@ import muni.fi.gf2n.classes.Vector;
 import muni.fi.gf2n.classes.VectorGF2N;
 import muni.fi.gf2n.exceptions.DimensionMismatchException;
 import muni.fi.gf2n.exceptions.ElementNotInFieldException;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

@@ -184,7 +184,6 @@ public class GF2N implements GaloisFieldArithmetic {
     public long power(long element, long exponent) {
         isInField(element);
 
-        //overit este tie 2 podmienky ci je to good pristup
         if (exponent < 0) {
             throw new MathIllegalArgumentException("Cannot compute power with negative exponent!");
         }

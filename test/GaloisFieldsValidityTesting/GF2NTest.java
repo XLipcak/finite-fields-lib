@@ -5,10 +5,7 @@ import muni.fi.gf2n.classes.GF2N;
 import muni.fi.gf2n.exceptions.ElementNotInFieldException;
 import muni.fi.gf2n.exceptions.MathArithmeticException;
 import muni.fi.gf2n.exceptions.MathIllegalArgumentException;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

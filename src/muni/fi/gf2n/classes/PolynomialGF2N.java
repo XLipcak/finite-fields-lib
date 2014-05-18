@@ -290,7 +290,7 @@ public class PolynomialGF2N implements GaloisFieldPolynomialArithmetic {
         }
 
         if (polynomial.getSize() == 1) {
-            //special solution for special case :)
+            //special solution for special case 
             return divide(add(new Polynomial(1, 1), multiply(moduloPolynomial, polynomial)), polynomial);
         }
 

@@ -135,6 +135,7 @@ public class MatrixGF2N implements GaloisFieldMatrixArithmetic {
 
     @Override
     public Matrix inverse(Matrix matrix) {
+        //Gauss-Jordan elimination
 
         isValid(matrix);
 

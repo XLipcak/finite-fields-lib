@@ -1,6 +1,5 @@
 package GaloisFieldsValidityTesting;
 
-import java.util.Arrays;
 import java.util.Random;
 import muni.fi.gf2n.classes.GF2N;
 import muni.fi.gf2n.classes.Matrix;
@@ -9,10 +8,7 @@ import muni.fi.gf2n.classes.Vector;
 import muni.fi.gf2n.exceptions.DimensionMismatchException;
 import muni.fi.gf2n.exceptions.MathArithmeticException;
 import muni.fi.gf2n.exceptions.MathIllegalArgumentException;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -387,7 +383,6 @@ public class MatrixGF2NTest {
                 //OK
             }
         }
-        //TODO test other multiplication overloaded methods
 
     }
 
